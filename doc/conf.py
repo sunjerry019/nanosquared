@@ -65,6 +65,11 @@ latex_elements = {
 \usepackage[utf8]{inputenc}
 \usepackage{libertine}
 \renewcommand{\ttdefault}{cmtt}
+\usepackage[titles]{tocloft}
+\cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
+\setlength{\cftchapnumwidth}{0.75cm}
+\setlength{\cftsecindent}{\cftchapnumwidth}
+\setlength{\cftsecnumwidth}{1.25cm}
 '''
 }
 latex_show_urls = 'footnote'
