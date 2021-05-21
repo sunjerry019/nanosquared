@@ -29,7 +29,10 @@ author = 'Yudong Sun'
 # ones.
 extensions = [
 	'sphinx.ext.autodoc',
-	'numpydoc'
+	"sphinx.ext.autosummary",  # Create neat summary tables for modules/classes/methods etc
+    "sphinx.ext.intersphinx",  # Link to other project's documentation (see mapping below)
+    "sphinx_autodoc_typehints",  # Automatically document param types (less noise in class signature)
+    "numpydoc"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
