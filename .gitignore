@@ -2,6 +2,13 @@
 data/
 NanoScan
 
+# Sphinx
+doc/_build/*
+!doc/_build/latex
+
+doc/_build/latex/*
+!doc/_build/latex/*.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

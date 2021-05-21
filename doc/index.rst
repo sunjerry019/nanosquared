@@ -10,6 +10,8 @@ Welcome to Nanoscan M-Squared Automation's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   fitter
+
 
 
 Indices and tables
