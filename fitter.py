@@ -3,6 +3,8 @@
 import numpy as np
 import scipy.odr
 
+import fit_functions
+
 class Fitter():
     """The Fitter class fits the given data using scipy.odr
 
@@ -21,35 +23,9 @@ class Fitter():
     
     """
 
-    @staticmethod
-    def omega_z(params, z):
-        """Beam Radii Function to be fitted, according to https://docs.scipy.org/doc/scipy/reference/odr.html
+    def __init__(self, x, y, xerror, yerror, func = fit_functions.omega_z):
+        # This is because https://stackoverflow.com/a/41921291
 
-        Parameters
-        ----------
-        params : array_like
-            rank-1 array of length 4 where ``beta = array([w_0, z_0, M_sq, lmbda])``
-        z : array_like
-            rank-1 array of positions along an axis
-
-        Returns
-        -------
-        y : array_like
-            Rank-1, calculated beam-radii of a single axis based on given parameters
-
-        """
-
-        w_0, z_0, M_sq, lmbda = params
-        return np.sqrt(
-            w_0**2 * (
-                1 + ((z - z_0)**2)*((
-                    (M_sq * lmbda)/
-                    (np.pi * (w_0**2))
-                )**2)
-            )
-        )
-
-    def __init__(self, x, y, xerror, yerror, func = omega_z):
         self.model = scipy.odr.Model(func)
 
         self.data = None
@@ -112,8 +88,31 @@ class Fitter():
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before printing output")
     
 
-    # TODO actually fit some data
-
 if __name__ == "__main__":
-    # f = Fitter()
+    import pandas as pd 
+
+    data = pd.read_csv('data/oscillator/data_oscillator.txt', delimiter = '; ', engine='python', decimal=",")
+
+    print(data.columns)
+    
+    print("X-Axis")
+    x = data["position[mm]"] / np.power(10, 3)
+    y = data["diam_x[um]"]   / (np.power(10, 6) * 2)
+
+    f = Fitter(
+        x      = x, 
+        y      = y, 
+        xerror = lambda x: 0.01*x, 
+        yerror = lambda y: 0.01*y
+    )
+    
+    w_0   = 142e-6
+    z_0   = 205e-3
+    m_sq  = 1
+    lmbda = 2300e-9
+
+    f.fit(initial_params = np.array([w_0, z_0, m_sq, lmbda]))
+    f.printOutput()
+
+
     pass
