@@ -5,6 +5,7 @@ NanoScan
 # Sphinx
 doc/_build/*
 !doc/_build/latex
+!doc/_build/html
 
 doc/_build/latex/*
 !doc/_build/latex/*.pdf
