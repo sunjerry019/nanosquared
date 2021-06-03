@@ -182,7 +182,7 @@ class SerialController(Controller, abc.ABC):
 
 			except Exception as e:
 				print(e)
-				raise RuntimeError("Unable to establish serial communication. Please check port settings and change configuration file accordingly. For more help, consult the documention.\n\nConfig: {}\n\n{}: {}\n\n{}".format(cfg, type(e).__name__ , e, traceback.format_exc()))
+				raise RuntimeError("Unable to establish serial communication. Please check port settings and change configuration file accordingly. For more help, consult the documention.\n\nConfig: {}\n\n{}: {}\n\n{}".format(self.cfg, type(e).__name__ , e, traceback.format_exc()))
 				# sys.exit(0)
 		else:
 			self.dev = None
@@ -270,33 +270,35 @@ class GSC01(SerialController):
 		return out if len(out) else None
 
 	def waitClear(self):
-		# we wait until all commands are done running and the stack is empty
-		timeoutCount = 0
-		timeoutLimit = 5
-		waitTime = 0
-		waitTimeLimit = 0.3
-		while True:
-			x = self.getStatus(0, waitTime = waitTime)
-			if x is not None and x == 0:
-				# print(x, " X is not None")
-				break
+		pass
+		
+		# # we wait until all commands are done running and the stack is empty
+		# timeoutCount = 0
+		# timeoutLimit = 5
+		# waitTime = 0
+		# waitTimeLimit = 0.3
+		# while True:
+		# 	x = self.getStatus(0, waitTime = waitTime)
+		# 	if x is not None and x == 0:
+		# 		# print(x, " X is not None")
+		# 		break
 
-			if x is None:
-				timeoutCount += 1
-				if timeoutCount >= timeoutLimit:
-					timeoutCount = 0
-					waitTime += 0.1
+		# 	if x is None:
+		# 		timeoutCount += 1
+		# 		if timeoutCount >= timeoutLimit:
+		# 			timeoutCount = 0
+		# 			waitTime += 0.1
 
-				if waitTime >= waitTimeLimit:
-					raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
+		# 		if waitTime >= waitTimeLimit:
+		# 			raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
 
-				# We try again but quit if 2nd time still none
+		# 		# We try again but quit if 2nd time still none
 
-			print("Waiting for stack to clear...", end="\r")
-			time.sleep(0.1)
-		print("Waiting for stack to clear...cleared")
+		# 	print("Waiting for stack to clear...", end="\r")
+		# 	time.sleep(0.1)
+		# print("Waiting for stack to clear...cleared")
 
-		return True
+		# return True
 		
 
 if __name__ == '__main__':
