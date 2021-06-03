@@ -1,0 +1,317 @@
+#!/usr/bin/env python3
+# hashbang but it's meant to be run on windows ._.
+
+# Made 2021, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
+# Python primary Helper to interact with a controller
+# IMPT: THIS IS A HELPER FILE
+# RUNNING IT DIRECTLY YIELDS INTERACTIVE TERMINAL
+
+# Errors to be caught: RuntimeError, NotImplementedError, AssertionError
+
+import serial # pyserial
+import os,sys
+import signal
+import json
+import warnings
+import time
+
+from typing import Union, Optional
+
+import traceback
+
+import platform  	# for auto windows/linux detection
+
+import abc
+
+class Controller(abc.ABC):
+	"""Abstract Base Class for a controller"""
+
+	def __init__(self, devMode: bool = True):
+		"""[summary]
+
+		Parameters
+		----------
+		devMode : bool, optional
+			To indicate whether to run in developement mode, by default True. 
+			When development mode is turned on, no device communication will be started 
+		"""
+		self.devMode = devMode
+
+		self.startSignalHandlers()
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, e_type, e_val, traceback):
+		# self.abort()
+		self.closeDevice()
+
+	@abc.abstractmethod
+	def abort(self):
+		pass
+	
+	@abc.abstractmethod
+	def closeDevice(self):
+		pass
+	
+	def startSignalHandlers(self):
+		""" Starts appropriate signal handlers to handle e.g. keyboard interrupts. 
+		Ensures safe exit and disconnecting of controller.
+		"""
+		# https://stackoverflow.com/a/4205386/3211506
+		signal.signal(signal.SIGINT, self.KeyboardInterruptHandler)
+
+	def KeyboardInterruptHandler(self, signal, frame):
+		"""Abort and close the serial port if interrupted. 
+		Handles a SIGINT according to https://docs.python.org/3/library/signal.html#signal.signal.
+
+		Parameters
+		----------
+		signal : int
+			signal number
+		frame : signal Frame object
+			Frame objects represent execution frames. They may occur in traceback objects (see below), and are also passed to registered trace functions.
+		"""
+
+		print("^C Detected: Aborting the FIFO stack and closing port.")
+		print("Shutter will be closed as part of the aborting process.")
+		self.abort()
+		self.closeDevice()
+		print("Exiting")
+		sys.exit(1)
+		# use os._exit(1) to avoid raising any SystemExit exception
+
+class SerialController(Controller, abc.ABC):
+	"""Abstract Base Class for a serial controller"""
+
+	def __init__(self, devConfig: Union[dict,str,None] = None, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.ENTER = None
+		
+		self.loadConfig(devConfig)
+		self.initializeDevice()
+
+	def loadConfig(self, devConfig: Union[dict,str,None] = None):
+		"""Load the config for device communication from either a json file or a dictionary into self.cfg
+
+		Parameters
+		----------
+		devConfig : Union[dict,str,None], optional
+			json file or dictionary of configuation details, by default None
+
+		Raises
+		------
+		RuntimeError
+			Raised if an invalid config file is found but self.devMode = False
+		"""
+
+		cfg = {
+			"port"      : "COM1",
+			"baudrate"  : 9600,
+			"parity"    : serial.PARITY_NONE,
+			"stopbits"  : serial.STOPBITS_ONE,
+			"bytesize"  : serial.EIGHTBITS,
+			"timeout"   : 2
+		}
+
+		# https://stackoverflow.com/a/1857/3211506
+		# Windows = Windows, Linux = Linux, Mac = Darwin
+		if platform.system() == "Linux":
+			cfg["port"] = '/dev/ttyUSB0'
+
+
+		# We try to load device configuration if provided
+		if devConfig:
+			if type(devConfig) is str:
+				with open(devConfig, 'r') as f:
+					devConfig = json.load(f)
+
+			if isinstance(devConfig, dict):
+				cfg.update(devConfig)
+			else:
+				warnings.warn("Non-dictionary devConfig. Skipped: {}".format(devConfig))
+		else:
+			# We attempt to load the config from a default "config.local.json" if it exists
+			base_dir = os.path.dirname(os.path.realpath(__file__))
+			local_conf = os.path.join(base_dir, "config.local.json")
+
+			if os.path.isfile(local_conf):
+				try:
+					with open(local_conf, 'r') as f:
+						devConfig = json.load(f)
+				except json.decoder.JSONDecodeError as e:
+					if self.devMode:
+						warnings.warn("Invalid local config file, not loaded!\n\nError: {}\n\n".format(e))
+					else:
+						raise RuntimeError("Invalid config.local.json found! Delete or correct errors!\n\nError: {}".format(e))
+				else:
+					# We are guaranteed its a dict
+					cfg.update(devConfig)
+
+		self.cfg = cfg
+
+	def initializeDevice(self):
+		"""Initializes the serial devices and saves it into self.dev
+
+		Raises
+		------
+		RuntimeError
+			Raised if unable to establish serial communication
+		"""
+		if not self.devMode:
+			try:
+				# BEGIN SERIAL SETUP
+				self.dev = serial.Serial(
+						port 		= self.cfg['port'],
+						baudrate 	= self.cfg['baudrate'],
+						parity 		= self.cfg['parity'],
+						stopbits    = self.cfg['stopbits'],
+						bytesize    = self.cfg['bytesize'],
+						timeout     = self.cfg['timeout']
+					)
+				if self.dev.isOpen():
+					self.dev.close()
+					self.dev.open()
+
+				time.sleep(2)
+				print("Initalised serial communication")
+				# END SERIAL SETUP
+
+			except Exception as e:
+				print(e)
+				raise RuntimeError("Unable to establish serial communication. Please check port settings and change configuration file accordingly. For more help, consult the documention.\n\nConfig: {}\n\n{}: {}\n\n{}".format(cfg, type(e).__name__ , e, traceback.format_exc()))
+				# sys.exit(0)
+		else:
+			self.dev = None
+			warnings.warn("devmode -- No serial device will be used")
+
+	def closeDevice(self):
+		"""Closes the serial device connection"""
+		if not self.devMode and self.dev.isOpen():
+			self.dev.close()
+
+	@abc.abstractmethod
+	def send(self):
+		pass
+	@abc.abstractmethod
+	def read(self):
+		pass
+	
+class GSC01(SerialController):
+	"""Class for the GSC-01 Controller
+	Microcontroller Model: OptoSigma GSC-01
+	
+	Currently the device is to CENTRAL HOME, i.e. the origin is the center of the stage.
+	""" 
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.ENTER = b'\x0D\x0A' # CRLF
+
+	def abort(self):
+		pass
+	
+	def closeDevice(self):
+		if self.dev.isOpen():
+			self.dev.close()
+	
+	def send(self, cmd: Union[bytearray, str], waitClear: bool = False, raw: bool = False, waitTime: float = 0):
+		"""Sends a command to the GSC-01 Controller
+
+		Parameters
+		----------
+		cmd : Union[bytearray, str]
+			If ```raw = True``` then cmd is a ```bytearray``` that is directly sent to the controller.
+			Otherwise, cmd is a string command that is encoded into ASCII before being sent to the controller.
+			
+		waitClear : bool, optional
+			[description], by default False
+		raw : bool, optional
+			Flag for whether the input command is a bytearray or string, by default False
+		waitTime : float, optional
+			Waiting time in seconds before writing to the device, by default 0.
+			Can be used to cool down.
+
+		Returns
+		-------
+		output : Union[bytearray,int]
+			Returns 0 if ```self.devMode = True``` else returns the results from ```self.read()```
+		"""
+		if self.devMode:
+			return 0
+
+		# Writes cmd to the serial channel, returns the data as a list
+		cmd = cmd.encode("ascii") + self.ENTER if not raw else cmd
+
+		time.sleep(waitTime)
+
+		if waitClear:
+			self.waitClear()
+
+		self.dev.write(cmd)
+
+		return self.read()
+
+	def read(self):
+		time.sleep(0.05)
+
+		out = b''
+		while self.dev.inWaiting() > 0:
+			out += self.dev.read(1)
+
+		out = out.strip().split() if len(out) else ''
+
+		out = out[0] if len(out) else [x.strip() for x in out]
+
+		return out if len(out) else None
+
+	def waitClear(self):
+		# we wait until all commands are done running and the stack is empty
+		timeoutCount = 0
+		timeoutLimit = 5
+		waitTime = 0
+		waitTimeLimit = 0.3
+		while True:
+			x = self.getStatus(0, waitTime = waitTime)
+			if x is not None and x == 0:
+				# print(x, " X is not None")
+				break
+
+			if x is None:
+				timeoutCount += 1
+				if timeoutCount >= timeoutLimit:
+					timeoutCount = 0
+					waitTime += 0.1
+
+				if waitTime >= waitTimeLimit:
+					raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
+
+				# We try again but quit if 2nd time still none
+
+			print("Waiting for stack to clear...", end="\r")
+			time.sleep(0.1)
+		print("Waiting for stack to clear...cleared")
+
+		return True
+		
+
+if __name__ == '__main__':
+	with GSC01(devMode = False) as m:
+		import code; code.interact(local=locals())
+
+	# exit
+	# import argparse
+
+	# parser = argparse.ArgumentParser()
+	# parser.add_argument('-H', '--noHome', help="Do not home the stage", action='store_true')
+	# parser.add_argument('-A', '--shutterAbsolute', help="Shutter uses absolute servo", action='store_true')
+	# args = parser.parse_args()
+
+	# with Micos(noHome = args.noHome, shutterAbsolute = args.shutterAbsolute) as m:
+	# 	print("\n\nm = Micos()\n\n")
+	# 	# import pdb; pdb.set_trace()
+	# 	import code; code.interact(local=locals())
