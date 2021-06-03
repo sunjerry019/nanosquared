@@ -1,0 +1,2 @@
+.. automodule:: stage.controller
+   :members:

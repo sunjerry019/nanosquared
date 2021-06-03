@@ -11,6 +11,7 @@ Welcome to Nanoscan M-Squared Automation's documentation!
    :caption: Contents:
 
    fitter
+   stage
 
 
 
