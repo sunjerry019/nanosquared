@@ -213,7 +213,7 @@ class GSC01(SerialController):
 		self.ENTER = b'\x0D\x0A' # CRLF
 
 	def abort(self):
-		pass
+		raise NotImplementedError()
 	
 	def closeDevice(self):
 		if self.dev.isOpen():
