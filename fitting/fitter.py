@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+import sys, os
+base_dir = os.path.dirname(os.path.realpath(__file__))
+root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+sys.path.insert(0, root_dir)
+
 import numpy as np
 import scipy.odr
 
-import fit_functions
+import fitting.fit_functions as fit_functions
 
 class ODRFitter():
     """The Fitter class fits the given data using scipy.odr
