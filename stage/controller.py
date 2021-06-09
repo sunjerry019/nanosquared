@@ -303,6 +303,7 @@ class GSC01(SerialController):
 
 if __name__ == '__main__':
 	with GSC01(devMode = False) as m:
+		print("with GSC01 as m")
 		import code; code.interact(local=locals())
 
 	# exit
