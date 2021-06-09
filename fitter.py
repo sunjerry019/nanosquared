@@ -111,8 +111,8 @@ if __name__ == "__main__":
     m_sq  = 1
     lmbda = 2300e-9
 
-    f.fit(initial_params = np.array([w_0, z_0, m_sq, lmbda]))
+    m_sq_lmbda = m_sq * lmbda
+
+    f.fit(initial_params = np.array([w_0, z_0, m_sq_lmbda]))
     f.printOutput()
-
-
-    pass
+    

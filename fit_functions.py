@@ -8,7 +8,7 @@ def omega_z(params, z):
 	Parameters
 	----------
 	params : array_like
-		rank-1 array of length 4 where ``beta = array([w_0, z_0, M_sq, lmbda])``
+		rank-1 array of length 3 where ``beta = array([w_0, z_0, M_sq_lmbda])``
 	z : array_like
 		rank-1 array of positions along an axis
 
@@ -19,11 +19,11 @@ def omega_z(params, z):
 
 	"""
 
-	w_0, z_0, M_sq, lmbda = params
+	w_0, z_0, M_sq_lmbda = params
 	return np.sqrt(
 		w_0**2 * (
 			1 + ((z - z_0)**2)*((
-				(M_sq * lmbda)/
+				(M_sq_lmbda)/
 				(np.pi * (w_0**2))
 			)**2)
 		)
