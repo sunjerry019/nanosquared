@@ -5,3 +5,8 @@ git remote add physik git@gitlab.physik.uni-muenchen.de:Yudong.Sun/nanosquared.g
 
 git remote set-url --add --push origin git@github.com:sunjerry019/nanosquared.git
 git remote set-url --add --push origin git@gitlab.physik.uni-muenchen.de:Yudong.Sun/nanosquared.git 
+
+
+# To Merge for example
+git fetch --all
+git merge github/master
