@@ -20,6 +20,13 @@ class ODRFitter():
         Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
     func : function
         fcn(beta, x) --> y
+
+    Attributes
+    ----------
+    model : scipy.odr.Model Instance
+    data : scipy.odr.RealData Instance
+    odr : scipy.odr.ODR Instance
+    output : scipy.odr.Output instance
     
     """
 
@@ -62,7 +69,7 @@ class ODRFitter():
         
         Returns
         -------
-        self.output : Output instance
+        self.output : scipy.odr.Output instance
             This object is also assigned to the attribute .output of Fitter
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.odr.Output.html
 
@@ -109,6 +116,19 @@ class MsqFitter(ODRFitter):
     wavelength : float_like
         Wavelength of the laser, to be given manually for fitting
 
+    Attributes
+    ----------
+    model : scipy.odr.Model Instance
+    data : scipy.odr.RealData Instance
+    odr : scipy.odr.ODR Instance
+    output : scipy.odr.Output instance
+    wavelength : float_like
+        wavelength of the data
+    initial_guesses : array_like
+        initial_guesses for the fit
+    m_squared : array_like
+        ``np.array([m_squared, m_squared_err])`` of floats; calculated m_squared based on self.wavelength and the fit
+
     """
     def __init__(self, x, y, xerror, yerror, wavelength):        
         # NOTE: To use ``fit_functions.omega_z`` as a default value in a function: https://stackoverflow.com/a/41921291
@@ -117,7 +137,44 @@ class MsqFitter(ODRFitter):
         self.initial_guesses = np.array([1  , 1  , wavelength], dtype = np.float64)
         #                                w_0, z_0, M_sq_lmbda
 
+        self._m_squared_calculated = False
+        self._m_squared            = None
+
         super().__init__(x, y, xerror, yerror, fit_functions.omega_z)
+
+    @property
+    def m_squared(self):
+        """Getter for the m_squared value
+
+        Returns
+        -------
+        m_squared : array_like of length 2
+            np.array([m_squared, m_squared_err]) of floats
+            Value of the fitted m_squared and its corresponding error
+
+        Raises
+        ------
+        RuntimeWarning
+            Raised if .fit() has not been run.
+
+        """
+
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before getting m_squared")
+    
+        if not self._m_squared_calculated:
+            # m_squared has not been calculated for the current fit
+
+            m_sq = self.output.beta[2] / self.wavelength
+            m_sq_error = 1
+
+            # TODO: implement the error propagation
+
+            self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
+            raise NotImplementedError()
+
+        return self._m_squared
+            
 
     def estimateInitialGuesses(self):
         """Estimates the initial parameters w_0, z_0 from the data given using the minimum y-value and save it into self.initial_guesses.
@@ -139,7 +196,20 @@ class MsqFitter(ODRFitter):
             See ODRFitter.fit() for more information
 
         """
+        self._m_squared_calculated = False
         return super().fit(initial_params = self.initial_guesses)
+
+    def estimateAndFit(self):
+        """Equivalent to running ``estimateInitialGuesses()`` then ``fit()``
+
+        Returns
+        -------
+        self.output : Output instance
+            See ODRFitter.fit() for more information
+
+        """
+        self.estimateInitialGuesses()
+        return self.fit()
 
 if __name__ == "__main__":
     import code; code.interact(local=locals())
