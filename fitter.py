@@ -66,7 +66,7 @@ class Fitter():
         -------
         self.output : Output instance
             This object is also assigned to the attribute .output of Fitter
-        
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.odr.Output.html
         """
 
         self.odr = scipy.odr.ODR(self.data, self.model, beta0 = initial_params)
@@ -89,30 +89,4 @@ class Fitter():
     
 
 if __name__ == "__main__":
-    import pandas as pd 
-
-    data = pd.read_csv('data/oscillator/data_oscillator.txt', delimiter = '; ', engine='python', decimal=",")
-
-    print(data.columns)
-    
-    print("X-Axis")
-    x = data["position[mm]"] / np.power(10, 3)
-    y = data["diam_x[um]"]   / (np.power(10, 6) * 2)
-
-    f = Fitter(
-        x      = x, 
-        y      = y, 
-        xerror = lambda x: 0.01*x, 
-        yerror = lambda y: 0.01*y
-    )
-    
-    w_0   = 142e-6
-    z_0   = 205e-3
-    m_sq  = 1
-    lmbda = 2300e-9
-
-    m_sq_lmbda = m_sq * lmbda
-
-    f.fit(initial_params = np.array([w_0, z_0, m_sq_lmbda]))
-    f.printOutput()
-    
+    import code; code.interact(local=locals())
