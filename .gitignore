@@ -1,6 +1,7 @@
 # Custom
 data/
 NanoScan
+.vscode
 
 # Sphinx
 doc/_build/*
