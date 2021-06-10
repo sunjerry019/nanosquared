@@ -7,6 +7,7 @@ sys.path.insert(0, root_dir)
 
 import numpy as np
 import scipy.odr
+import warnings
 
 import fitting.fit_functions as fit_functions
 
@@ -35,7 +36,7 @@ class ODRFitter():
     odr : scipy.odr.ODR Instance
 
     output : scipy.odr.Output instance
-    
+
     
     """
 
@@ -86,6 +87,7 @@ class ODRFitter():
                 self.output.res_var = chi_sq_red // https://arxiv.org/abs/1012.3754
                 self.output.beta    = Estimated parameter values
                 self.output.sd_beta = Standard deviations of the estimated parameters
+                self.output.info    = Reason for returning, as output by ODRPACK (cf. ODRPACK UG p. 38).
         """
 
         self.odr = scipy.odr.ODR(self.data, self.model, beta0 = initial_params)
@@ -198,6 +200,16 @@ class MsqFitter(ODRFitter):
 
             self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
             self._m_squared_calculated = True
+
+        # Check for stopping reason
+        #    1 : sum of squares convergence
+        #    2 : parameter convergence
+        #    3 : both of sum of squares and parameter convergence
+        #    4 : iteration limit reached
+        # >= 5 : questionable results or fatal errors detected
+
+        if (self.output.info >= 4):
+            warnings.warn("Fit is dubious. Reasons for convergence:\n\t{}".format('\n\t'.join(self.output.stopreason)))
         
         return self._m_squared
             
