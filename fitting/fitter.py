@@ -212,7 +212,20 @@ class MsqFitter(ODRFitter):
             warnings.warn("Fit is dubious. Reasons for convergence:\n\t{}".format('\n\t'.join(self.output.stopreason)))
         
         return self._m_squared
+    
+    def setInitialGuesses(self, w_0 : float = 1, z_0 : float = 1):
+        """Sets the initial guesses
+
+        Parameters
+        ----------
+        w_0 : float, optional
+            Guess for beam waist radius, by default 1
+        z_0 : float, optional
+            Guess for focal point position, by default 1
             
+        """
+
+        self.initial_guesses[0:2] = [w_0, z_0]
 
     def estimateInitialGuesses(self):
         """Estimates the initial parameters w_0, z_0 from the data given using the minimum y-value and save it into self.initial_guesses.
@@ -223,7 +236,7 @@ class MsqFitter(ODRFitter):
         z_0 = self.data.x[min_w]
         w_0 = self.data.y[min_w]
 
-        self.initial_guesses[0:2] = [w_0, z_0]
+        self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
     
     def fit(self):
         """Fits using self.initial_guesses and ODRFitter.fit()
