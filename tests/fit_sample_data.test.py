@@ -18,13 +18,14 @@ x = data["position[mm]"] / np.power(10, 3)
 y = data["diam_x[um]"]   / (np.power(10, 6) * 2)
 
 f = fitting.fitter.MsqFitter(
-	x          = x, 
-	y          = y, 
-	xerror     = lambda x: 0.01*x, 
-	yerror     = lambda y: 0.01*y,
-	wavelength = 2300e-9
+	x              = x, 
+	y              = y, 
+	xerror         = lambda x: 0.01*x, 
+	yerror         = lambda y: 0.01*y,
+	wavelength     = 2300e-9,
+	wavelength_err = 1e-9
 )
 
-f.estimateInitialGuesses()
-f.fit()
+f.estimateAndFit()
 f.printOutput()
+print(f.m_squared)

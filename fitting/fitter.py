@@ -120,6 +120,9 @@ class MsqFitter(ODRFitter):
         Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
     wavelength : float_like
         Wavelength of the laser, to be given manually for fitting
+    wavelength_err : float_like, optional
+        Error of the wavelength of the laser, to be used in error propagation to find the m_squared
+        By default: 0
 
     Attributes
     ----------
@@ -127,18 +130,18 @@ class MsqFitter(ODRFitter):
     data : scipy.odr.RealData Instance
     odr : scipy.odr.ODR Instance
     output : scipy.odr.Output instance
-    wavelength : float_like
-        wavelength of the data
+    wavelength : array_like of rank 2
+        [wv, wv_err] - wavelength of the data and its corresponding error
     initial_guesses : array_like
         initial_guesses for the fit
     m_squared : array_like
         ``np.array([m_squared, m_squared_err])`` of floats; calculated m_squared based on self.wavelength and the fit
 
     """
-    def __init__(self, x, y, xerror, yerror, wavelength):        
+    def __init__(self, x, y, xerror, yerror, wavelength: float, wavelength_err: float = 0):        
         # NOTE: To use ``fit_functions.omega_z`` as a default value in a function: https://stackoverflow.com/a/41921291
 
-        self.wavelength      = wavelength
+        self.wavelength      = np.array([wavelength, wavelength_err], dtype= np.float64)
         self.initial_guesses = np.array([1  , 1  , wavelength], dtype = np.float64)
         #                                w_0, z_0, M_sq_lmbda
 
@@ -170,15 +173,17 @@ class MsqFitter(ODRFitter):
         if not self._m_squared_calculated:
             # m_squared has not been calculated for the current fit
 
-            m_sq = self.output.beta[2] / self.wavelength
-            m_sq_error = 1
+            m_sq = self.output.beta[2] / self.wavelength[0]
+            m_sq_error = m_sq * np.sqrt(
+                    (self.output.sd_beta[2]/self.output.beta[2]) ** 2 +
+                    (self.wavelength[1]    /self.wavelength[0] ) ** 2 
+                )
 
-            # TODO: implement the error propagation
+            # Error propagation with gauss method
+            # delta M / M = sqrt((delta b/b)^2 + (delta l/l)^2)
 
             self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
             self._m_squared_calculated = True
-
-            raise NotImplementedError()
         
         return self._m_squared
             
