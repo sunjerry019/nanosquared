@@ -8,6 +8,7 @@ sys.path.insert(0, root_dir)
 import numpy as np
 import scipy.odr
 import warnings
+# from overrides import overrides, EnforceOverrides # https://github.com/mkorpela/overrides
 
 import fitting.fit_functions as fit_functions
 
@@ -222,7 +223,7 @@ class MsqFitter(ODRFitter):
             Guess for beam waist radius, by default 1
         z_0 : float, optional
             Guess for focal point position, by default 1
-            
+
         """
 
         self.initial_guesses[0:2] = [w_0, z_0]
@@ -248,6 +249,7 @@ class MsqFitter(ODRFitter):
 
         """
         self._m_squared_calculated = False
+
         return super().fit(initial_params = self.initial_guesses)
 
     def estimateAndFit(self):
