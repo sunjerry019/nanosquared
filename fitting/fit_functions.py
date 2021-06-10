@@ -20,11 +20,9 @@ def omega_z(params, z):
 	"""
 
 	w_0, z_0, M_sq_lmbda = params
-	return np.sqrt(
-		w_0**2 * (
-			1 + ((z - z_0)**2)*((
-				(M_sq_lmbda)/
-				(np.pi * (w_0**2))
-			)**2)
-		)
+	return w_0 * np.sqrt(
+		1 + ((z - z_0)**2)*((
+			(M_sq_lmbda)/
+			(np.pi * (w_0**2))
+		)**2)
 	)
