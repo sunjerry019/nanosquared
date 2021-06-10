@@ -176,8 +176,10 @@ class MsqFitter(ODRFitter):
             # TODO: implement the error propagation
 
             self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
-            raise NotImplementedError()
+            self._m_squared_calculated = True
 
+            raise NotImplementedError()
+        
         return self._m_squared
             
 
