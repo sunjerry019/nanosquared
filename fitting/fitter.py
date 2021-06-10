@@ -11,7 +11,7 @@ import scipy.odr
 import fitting.fit_functions as fit_functions
 
 class ODRFitter():
-    """The Fitter class fits the given data using scipy.odr
+    """The ODRFitter class fits the given data using scipy.odr
 
     Parameters
     ----------
@@ -103,7 +103,7 @@ class ODRFitter():
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before printing output")
 
 class MsqFitter(ODRFitter):
-    """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function),
+    """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
 
     By default, initial guesses for w_0 and z_0 are 1.
     Use self.estimateInitialGuesses() to estimate w_0, z_0
