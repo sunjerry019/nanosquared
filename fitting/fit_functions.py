@@ -5,6 +5,10 @@ import numpy as np
 def omega_z(params, z):
 	"""Beam Radii Function to be fitted, according to https://docs.scipy.org/doc/scipy/reference/odr.html
 
+	Note that this function is normalized if:
+	- Everything is in SI-Units, or
+	- w, w_0: [um], z, z_0: [mm], lmbda: [nm]
+
 	Parameters
 	----------
 	params : array_like
@@ -20,11 +24,9 @@ def omega_z(params, z):
 	"""
 
 	w_0, z_0, M_sq_lmbda = params
-	return np.sqrt(
-		w_0**2 * (
-			1 + ((z - z_0)**2)*((
-				(M_sq_lmbda)/
-				(np.pi * (w_0**2))
-			)**2)
-		)
+	return w_0 * np.sqrt(
+		1 + ((z - z_0)**2)*((
+			(M_sq_lmbda)/
+			(np.pi * (w_0**2))
+		)**2)
 	)
