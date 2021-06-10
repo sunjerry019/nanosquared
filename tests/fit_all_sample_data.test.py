@@ -16,22 +16,22 @@ diode_data_slow = pd.read_csv('../data/diode/slow_axis.txt', delimiter = '; ', e
 # Prepare pairs to fit
 labels = ["Oscillator X-Axis", "Oscillator Y-Axis", "Diode Slow Axis", "Diode Fast Axis"]
 xs     = [
-		oscillator_data["position[mm]"] / np.power(10, 3),
-		oscillator_data["position[mm]"] / np.power(10, 3),
-		diode_data_fast["position[mm]"] / np.power(10, 3),
-		diode_data_slow["position[cm]"] / np.power(10, 2),
+		oscillator_data["position[mm]"],
+		oscillator_data["position[mm]"],
+		diode_data_fast["position[mm]"],
+		diode_data_slow["position[cm]"] * 10,
 	]
 ys     = [
-		oscillator_data["diam_x[um]"]   / (np.power(10, 6) * 2),
-		oscillator_data["diam_y[um]"]   / (np.power(10, 6) * 2),
-		diode_data_fast["diam_y[um]"]   / (np.power(10, 6) * 2),
-		diode_data_slow["diam_x[um]"]   / (np.power(10, 6) * 2),
+		oscillator_data["diam_x[um]"] / 2,
+		oscillator_data["diam_y[um]"] / 2,
+		diode_data_fast["diam_y[um]"] / 2,
+		diode_data_slow["diam_x[um]"] / 2,
 	]
-wvs     = np.array([2300e-9, 2300e-9, 1650e-9, 1650e-9], dtype = np.float64)
+wvs     = np.array([2300, 2300, 1650, 1650], dtype = np.float64)
 wvs_err = np.zeros(4)
 
-xs_e    = [0.5e-3] * 4
-ys_e    = [0.25e-6, 0.25e-6, 1e-6, 1e-6]
+xs_e    = [0.5] * 4
+ys_e    = [0.25, 0.25, 1, 1]
 
 for i in range(len(labels)):
 	f = fitting.fitter.MsqFitter(

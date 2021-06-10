@@ -108,6 +108,12 @@ class MsqFitter(ODRFitter):
     By default, initial guesses for w_0 and z_0 are 1.
     Use self.estimateInitialGuesses() to estimate w_0, z_0
 
+    Note that the fit function is normalized if:
+	- Everything is in SI-Units, or
+	- w, w_0: [um], z, z_0: [mm], lmbda: [nm]
+
+    Using the second case seem to be more numerically stable.
+
     Parameters
     ----------
     x : array_like
