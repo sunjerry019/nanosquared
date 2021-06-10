@@ -29,9 +29,13 @@ class ODRFitter():
     Attributes
     ----------
     model : scipy.odr.Model Instance
+
     data : scipy.odr.RealData Instance
+
     odr : scipy.odr.ODR Instance
+
     output : scipy.odr.Output instance
+    
     
     """
 
@@ -133,9 +137,13 @@ class MsqFitter(ODRFitter):
     Attributes
     ----------
     model : scipy.odr.Model Instance
+
     data : scipy.odr.RealData Instance
+
     odr : scipy.odr.ODR Instance
+
     output : scipy.odr.Output instance
+    
     wavelength : array_like of rank 2
         [wv, wv_err] - wavelength of the data and its corresponding error
     initial_guesses : array_like
