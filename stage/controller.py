@@ -235,7 +235,8 @@ class GSC01(SerialController):
     def homeStage(self):
         """Home the stage"""
         ret = self.safesend(f"H:{self.axis}")
-        self.stage.position = 0                   # I avoid resetPositionToZero as it may cause a race condition
+        self.waitClear()
+        self.resetPositionToZero()
         
         return ret
 
@@ -313,7 +314,7 @@ class GSC01(SerialController):
         return int(self.getStatus1()[0])
     
     @stage.errors.FailWithWarning
-    def getStatus1(self):
+    def getStatus1(self, *args, **kwargs):
         """Checks Status1
 
         Returns
@@ -327,7 +328,27 @@ class GSC01(SerialController):
             ACK3: B = Busy Status, R = Ready Status
         """
 
-        return self.safesend("Q:").split(b",")
+        return self.safesend("Q:", *args, **kwargs).split(b",")
+
+    @stage.errors.FailWithWarning
+    def isBusy(self, *args, **kwargs):
+        """Gets operating status, labelled as status2 (B = Busy Status, R = Ready Status)
+
+        Returns
+        -------
+        ret: bool
+            True if Busy, False if Ready, None if output is self.read returns None
+        """
+
+        ret = self.safesend("!:", *args, **kwargs)
+        if ret == b'R':
+            return False
+        if ret == b'B':
+            return True
+        if ret is None:
+            return None
+        
+        raise stage.errors.ControllerError(f"Unknown Controller Error, received {ret}")
 
     # Primal Functions Below
 
@@ -412,36 +433,33 @@ class GSC01(SerialController):
 
         return out if len(out) else None
 
-    def waitClear(self):
-        pass
-        
-        # # we wait until all commands are done running and the stack is empty
-        # timeoutCount = 0
-        # timeoutLimit = 5
-        # waitTime = 0
-        # waitTimeLimit = 0.3
-        # while True:
-        # 	x = self.getStatus(0, waitTime = waitTime)
-        # 	if x is not None and x == 0:
-        # 		# print(x, " X is not None")
-        # 		break
+    def waitClear(self):        
+        # we wait until all commands are done running and the controller is ready
+        timeoutCount = 0
+        timeoutLimit = 5
+        waitTime = 0
+        waitTimeLimit = 0.3
+        while True:
+        	x = self.isBusy(waitTime = waitTime)
+        	if x is not None and not x:
+        		break
 
-        # 	if x is None:
-        # 		timeoutCount += 1
-        # 		if timeoutCount >= timeoutLimit:
-        # 			timeoutCount = 0
-        # 			waitTime += 0.1
+        	if x is None:
+        		timeoutCount += 1
+        		if timeoutCount >= timeoutLimit:
+        			timeoutCount = 0
+        			waitTime += 0.1
 
-        # 		if waitTime >= waitTimeLimit:
-        # 			raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
+        		if waitTime >= waitTimeLimit:
+        			raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
 
-        # 		# We try again but quit if 2nd time still none
+        		# We try again but quit if 2nd time still none
 
-        # 	print("Waiting for stack to clear...", end="\r")
-        # 	time.sleep(0.1)
+        	# print("Waiting for stack to clear...", end="\r")
+        	time.sleep(0.1)
         # print("Waiting for stack to clear...cleared")
 
-        # return True
+        return True
         
 
 if __name__ == '__main__':
