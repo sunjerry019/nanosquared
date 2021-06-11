@@ -235,7 +235,8 @@ class GSC01(SerialController):
     def homeStage(self):
         """Home the stage"""
         ret = self.safesend(f"H:{self.axis}")
-        self.resetPositionToZero()
+        self.stage.position = 0                   # I avoid resetPositionToZero as it may cause a race condition
+        
         return ret
 
     def resetPositionToZero(self):
@@ -267,7 +268,7 @@ class GSC01(SerialController):
         # Sanity Check, may raise error
         self.stage.position += delta
 
-        self.safesend(f"M:{self.axis}{direction}P{delta}")
+        self.safesend(f"M:{self.axis}{direction}P{abs(delta)}")
         return self.safesend("G:")
     
     @stage.errors.FailWithWarning
@@ -298,7 +299,7 @@ class GSC01(SerialController):
             ACK3: B = Busy Status, R = Ready Status
         """
 
-        return self.safesend("Q:")
+        return self.safesend("Q:").split(b",")
 
     # Primal Functions Below
 
