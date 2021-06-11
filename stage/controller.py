@@ -220,20 +220,27 @@ class GSC01(SerialController):
     # - Run Current: 350 mA
     # - Stop Current 175 mA
 
+    # We always use the axis 1 instead of W
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
         self.stage = Stg(pos = self.getPositionReadOut())
+        self.axis  = "1"                                    # can take value 1 or W
     
     # Implementation Functions here
      
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
         """Home the stage"""
-        ret = self.safesend("H:1")
-        self.stage.position = 0
+        ret = self.safesend(f"H:{self.axis}")
+        self.resetPositionToZero()
         return ret
+
+    def resetPositionToZero(self):
+        self.stage.position = 0
+        return self.safesend(f"R:{self.axis}")
 
     @stage.errors.FailWithWarning
     def rmove(self, delta: int):
@@ -260,7 +267,7 @@ class GSC01(SerialController):
         # Sanity Check, may raise error
         self.stage.position += delta
 
-        self.safesend(f"M:1{direction}P{delta}")
+        self.safesend(f"M:{self.axis}{direction}P{delta}")
         return self.safesend("G:")
     
     @stage.errors.FailWithWarning
@@ -312,7 +319,7 @@ class GSC01(SerialController):
         if emergency:
             return self.safesend("L:E")
 
-        return self.safesend("L")
+        return self.safesend(f"L:{self.axis}")
 
     def closeDevice(self):
         if self.dev.isOpen():
