@@ -226,6 +226,9 @@ class GSC01(SerialController):
         super().__init__(*args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
+        
+        self.waitClear() # To make sure controller is on
+
         self.stage = Stg(pos = self.getPositionReadOut())
         self.axis  = "1"                                    # can take value 1 or W
     
