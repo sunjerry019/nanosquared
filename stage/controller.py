@@ -244,6 +244,34 @@ class GSC01(SerialController):
         return self.safesend(f"R:{self.axis}")
 
     @stage.errors.FailWithWarning
+    def move(self, pos: int):
+        """Absolution move to coordinate `pos``
+
+        Parameters
+        ----------
+        pos : int
+            Absolute coordinate to move to (in units of pulses). Positive for moving in the positive direction, and viceversa.
+
+        Returns
+        -------
+        ret : Status
+            See GSC01.safesend()
+
+        Raises
+        ------
+        stage.errors.PositionOutOfBoundsError
+            If proposed move moves stage out of range
+
+        """
+        direction = "+" if pos >= 0 else "-"
+        
+        # Sanity Check, may raise error
+        self.stage.position = pos
+
+        self.safesend(f"A:{self.axis}{direction}P{abs(pos)}")
+        return self.safesend("G:")
+
+    @stage.errors.FailWithWarning
     def rmove(self, delta: int):
         """Relative move by `delta` pulses
 
