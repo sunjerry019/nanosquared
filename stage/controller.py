@@ -436,7 +436,19 @@ class GSC01(SerialController):
 
         return out if len(out) else None
 
-    def waitClear(self):        
+    def waitClear(self):
+        """Waits for the device to be ready.
+
+        Returns
+        -------
+        True
+            Returns True once the controller is ready
+
+        Raises
+        ------
+        RuntimeError
+            If the controller does not respond
+        """
         # we wait until all commands are done running and the controller is ready
         timeoutCount = 0
         timeoutLimit = 5
