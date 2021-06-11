@@ -7,8 +7,10 @@ from functools import wraps
 # https://stackoverflow.com/a/11731208
 
 class ControllerError(Exception):
-    """Raised when there is an error when sending commands to the controller
-    """
+    """Raised when there is an error when sending commands to the controller"""
+
+class PositionOutOfBounds(Exception):
+    """Raised when the position given is out of bounds of what the controller supports"""
 
 def FailSilently(method):
     @wraps(method)

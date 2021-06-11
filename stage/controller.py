@@ -27,6 +27,7 @@ import platform  	# for auto windows/linux detection
 import abc
 
 import stage.errors
+from stage._stage import Stage as Stg
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
@@ -223,7 +224,46 @@ class GSC01(SerialController):
         super().__init__(*args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
+        self.stage = Stg(pos = self.getPositionReadOut())
     
+    # Implementation Functions here
+     
+    @stage.errors.FailSilently # To be deleted with GUI
+    def homeStage(self):
+        """Home the stage"""
+
+        return self.safesend("H:1")
+    
+    @stage.errors.FailWithWarning
+    def getPositionReadOut(self):
+        """Gets the position from the controller. 
+        Only for the first run, defer others to using self.stage.position
+
+        Returns
+        -------
+        position: integer
+            Position in integer
+
+        """
+        return int(self.getStatus1()[0])
+    
+    @stage.errors.FailWithWarning
+    def getStatus1(self):
+        """Checks Status1
+
+        Returns
+        -------
+        ret: array of strings
+            Coordinate, ACK1, ACK2, ACK3
+            Coordinate: Fixed Length of 10 digits including symbols. Symbols are left-aligned, coord are right aligned
+            ACK1: X = Command Error, K = Command Accepted normally
+            ACK2: L = LS Stop, K = Normal Stop
+            ACK3: B = Busy Status, R = Ready Status
+        """
+        return self.safesend("Q:").split(b",")
+
+    # Primal Functions Below
+
     def abort(self):
         """Implementation of abort as specified in the parent class"""
         return self.stop(emergency = True)
@@ -240,18 +280,12 @@ class GSC01(SerialController):
         """
         if emergency:
             return self.safesend("L:E")
-            
+
         return self.safesend("L")
 
     def closeDevice(self):
         if self.dev.isOpen():
             self.dev.close()
-    
-    @stage.errors.FailSilently # To be deleted with GUI
-    def homeStage(self):
-        """Home the stage"""
-
-        return self.safesend("H:1")
 
     def safesend(self, *args, **kwargs):
         ret = self.send(*args, **kwargs)
