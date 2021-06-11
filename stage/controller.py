@@ -10,20 +10,23 @@
 
 # Errors to be caught: RuntimeError, NotImplementedError, AssertionError
 
-import serial # pyserial
 import os,sys
+base_dir = os.path.dirname(os.path.realpath(__file__))
+root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+sys.path.insert(0, root_dir)
+
+import serial # pyserial
 import signal
 import json
 import warnings
 import time
 
 from typing import Union, Optional
-
 import traceback
-
 import platform  	# for auto windows/linux detection
-
 import abc
+
+import stage.errors
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
@@ -227,6 +230,18 @@ class GSC01(SerialController):
     def closeDevice(self):
         if self.dev.isOpen():
             self.dev.close()
+    
+    @stage.errors.FailSilently
+    def homeStage(self):
+        self.safesend("H:1")
+
+    def safesend(self, *args, **kwargs):
+        ret = self.send(*args, **kwargs)
+
+        if ret == b'NG':
+            raise stage.errors.ControllerError("Controller returned an error")
+
+        return ret
     
     def send(self, cmd: Union[bytearray, str], waitClear: bool = False, raw: bool = False, waitTime: float = 0):
         """Sends a command to the GSC-01 Controller
