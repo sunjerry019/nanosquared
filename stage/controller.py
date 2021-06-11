@@ -78,7 +78,7 @@ class Controller(abc.ABC):
             Frame objects represent execution frames. They may occur in traceback objects (see below), and are also passed to registered trace functions.
         """
 
-        print("^C Detected: Aborting the FIFO stack and closing port.")
+        print("^C Detected: Emergency stop and closing port.")
         print("Shutter will be closed as part of the aborting process.")
         self.abort()
         self.closeDevice()
@@ -223,17 +223,35 @@ class GSC01(SerialController):
         super().__init__(*args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
-
-    def abort(self):
-        raise NotImplementedError()
     
+    def abort(self):
+        """Implementation of abort as specified in the parent class"""
+        return self.stop(emergency = True)
+    
+    @stage.errors.FailWithWarning
+    def stop(self, emergency: bool = False):
+        """Decelerates the stage and stops it
+
+        Parameters
+        ----------
+        emergency : bool, optional
+            Set to True to use immediate stop instead of decelerate and stop, by default False
+
+        """
+        if emergency:
+            return self.safesend("L:E")
+            
+        return self.safesend("L")
+
     def closeDevice(self):
         if self.dev.isOpen():
             self.dev.close()
     
-    @stage.errors.FailSilently
+    @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
-        self.safesend("H:1")
+        """Home the stage"""
+
+        return self.safesend("H:1")
 
     def safesend(self, *args, **kwargs):
         ret = self.send(*args, **kwargs)
