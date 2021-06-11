@@ -9,7 +9,7 @@ from functools import wraps
 class ControllerError(Exception):
     """Raised when there is an error when sending commands to the controller"""
 
-class PositionOutOfBounds(Exception):
+class PositionOutOfBoundsError(Exception):
     """Raised when the position given is out of bounds of what the controller supports"""
 
 def FailSilently(method):

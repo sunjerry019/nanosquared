@@ -30,7 +30,7 @@ class Stage():
         Parameters
         ----------
         x : int
-            Position; Position must be an integer between 0 and 16,777,215
+            Position; Position must be an integer between -16,777,215 and 16,777,215
 
         Raises
         ------
@@ -38,7 +38,7 @@ class Stage():
             Raised when the given x is not within the bounds set by the controller
 
         """
-        if (0 <= x <= 16777215):
+        if (-16777215 <= x <= 16777215):
             self._position = x
         else:
-            raise stage.errors.PositionOutOfBoundsError("Position must be between 0 and 16,777,215")
+            raise stage.errors.PositionOutOfBoundsError("Position must be between -16,777,215 and 16,777,215")

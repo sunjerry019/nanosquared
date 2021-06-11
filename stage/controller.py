@@ -231,8 +231,37 @@ class GSC01(SerialController):
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
         """Home the stage"""
+        ret = self.safesend("H:1")
+        self.stage.position = 0
+        return ret
 
-        return self.safesend("H:1")
+    @stage.errors.FailWithWarning
+    def rmove(self, delta: int):
+        """Relative move by `delta` pulses
+
+        Parameters
+        ----------
+        delta : int
+            Number of pulses to move. Positive for moving in the positive direction, and viceversa.
+
+        Returns
+        -------
+        ret : Status
+            See GSC01.safesend()
+
+        Raises
+        ------
+        stage.errors.PositionOutOfBoundsError
+            If proposed relative move moves stage out of range
+
+        """
+        direction = "+" if delta >= 0 else "-"
+        
+        # Sanity Check, may raise error
+        self.stage.position += delta
+
+        self.safesend(f"M:1{direction}P{delta}")
+        return self.safesend("G:")
     
     @stage.errors.FailWithWarning
     def getPositionReadOut(self):
@@ -256,11 +285,13 @@ class GSC01(SerialController):
         ret: array of strings
             Coordinate, ACK1, ACK2, ACK3
             Coordinate: Fixed Length of 10 digits including symbols. Symbols are left-aligned, coord are right aligned
+                -> The extra spaces are removed by read
             ACK1: X = Command Error, K = Command Accepted normally
             ACK2: L = LS Stop, K = Normal Stop
             ACK3: B = Busy Status, R = Ready Status
         """
-        return self.safesend("Q:").split(b",")
+
+        return self.safesend("Q:")
 
     # Primal Functions Below
 
@@ -341,7 +372,7 @@ class GSC01(SerialController):
 
         out = out.strip().split() if len(out) else ''
 
-        out = out[0] if len(out) else [x.strip() for x in out]
+        out = out[0] if len(out) == 1 else b''.join([x.strip() for x in out])
 
         return out if len(out) else None
 
