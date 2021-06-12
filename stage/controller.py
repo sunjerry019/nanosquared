@@ -27,7 +27,7 @@ import platform  	# for auto windows/linux detection
 import abc
 
 import stage.errors
-from stage._stage import Stage as Stg
+import stage._stage as Stg
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
@@ -229,7 +229,7 @@ class GSC01(SerialController):
         
         self.waitClear() # To make sure controller is on
 
-        self.stage = Stg(pos = self.getPositionReadOut())
+        self.stage = Stg.GSC01_Stage(pos = self.getPositionReadOut())
         self.axis  = "1"                                    # can take value 1 or W
     
     # Implementation Functions here
