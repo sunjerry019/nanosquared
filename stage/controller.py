@@ -27,12 +27,12 @@ import platform  	# for auto windows/linux detection
 import abc
 
 import stage.errors
-from stage._stage import Stage as Stg
+import stage._stage as Stg
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
 
-    def __init__(self, devMode: bool = True):
+    def __init__(self, devMode: bool = True, implementation: bool = False):
         """[summary]
 
         Parameters
@@ -40,10 +40,39 @@ class Controller(abc.ABC):
         devMode : bool, optional
             To indicate whether to run in developement mode, by default True. 
             When development mode is turned on, no device communication will be started 
+        subclass : bool, optional
+            To indicate if calling from subclass
         """
         self.devMode = devMode
 
+        if not implementation:
+            self.stage = Stg.Stage() # which should throw an error
+
         self.startSignalHandlers()
+    
+    @abc.abstractmethod
+    def move(self, pos):
+        """Relative Move, to be implemented
+
+        Parameters
+        ----------
+        pos : number
+            Position to move to
+        """
+        self.stage.position = pos
+        pass
+    
+    @abc.abstractmethod
+    def rmove(self, delta):
+        """Relative Move, to be implemented
+
+        Parameters
+        ----------
+        delta : number
+            Number of steps to move
+        """
+        self.stage.position += delta
+        pass
 
     def __enter__(self):
         return self
@@ -223,13 +252,13 @@ class GSC01(SerialController):
     # We always use the axis 1 instead of W
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(implementation = True, *args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
         
         self.waitClear() # To make sure controller is on
 
-        self.stage = Stg(pos = self.getPositionReadOut())
+        self.stage = Stg.GSC01_Stage(pos = self.getPositionReadOut())
         self.axis  = "1"                                    # can take value 1 or W
     
     # Implementation Functions here
