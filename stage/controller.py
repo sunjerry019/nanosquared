@@ -32,7 +32,7 @@ import stage._stage as Stg
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
 
-    def __init__(self, devMode: bool = True, subclass: bool = False):
+    def __init__(self, devMode: bool = True, implementation: bool = False):
         """[summary]
 
         Parameters
@@ -45,7 +45,7 @@ class Controller(abc.ABC):
         """
         self.devMode = devMode
 
-        if not subclass:
+        if not implementation:
             self.stage = Stg.Stage() # which should throw an error
 
         self.startSignalHandlers()
@@ -120,7 +120,7 @@ class SerialController(Controller, abc.ABC):
     """Abstract Base Class for a serial controller"""
 
     def __init__(self, devConfig: Union[dict,str,None] = None, *args, **kwargs):
-        super().__init__(subclass = True, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.ENTER = None
         
@@ -252,7 +252,7 @@ class GSC01(SerialController):
     # We always use the axis 1 instead of W
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(implementation = True, *args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
         
