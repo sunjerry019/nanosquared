@@ -1,0 +1,3 @@
+git config commit.gpgsign true
+git config user.signingkey DD07EDA98AC1CA9E
+git config gpg.program "C:\Users\Yudong.Sun\AppData\Local\GnuPG\bin\gpg.exe"
