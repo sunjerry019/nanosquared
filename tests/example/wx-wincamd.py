@@ -11,7 +11,7 @@ class MyApp(wx.App):
         self.frame = wx.Frame(parent = None, id = wx.ID_ANY, size = (500, 500), title = 'Python Interface to Dataray')
         
         # Panel
-        p = wx.Panel(self.frame, self.ID_ANY)
+        p = wx.Panel(self.frame, wx.ID_ANY)
 
         # Get Data
         self.gd = wx.lib.activex.ActiveXCtrl(p, 'DATARAYOCX.GetDataCtrl.1')
