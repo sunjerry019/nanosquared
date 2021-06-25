@@ -9,4 +9,4 @@ dependencies:
     - pyserial>=3.5
     - pandas>=1.2.4
     - wxpython>=4.1.1
-    - comtypes>=1.1.10
+    - comtypes>=1.1.8
