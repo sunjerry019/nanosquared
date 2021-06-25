@@ -3,6 +3,8 @@
 import wx
 import wx.lib.activex
 
+# wxpython from conda-forge: conda install -c conda-forge wxpython
+
 class MyApp(wx.App):
     def __init__(self, redirect = False, filename = None, *args, **kwargs):
         super().__init__(redirect=redirect, filename=filename, *args, **kwargs)
