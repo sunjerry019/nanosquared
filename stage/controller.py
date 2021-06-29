@@ -275,7 +275,45 @@ class GSC01(SerialController):
     def resetPositionToZero(self):
         self.stage.position = 0
         return self.safesend(f"R:{self.axis}")
+    
+    @stage.errors.FailWithWarning
+    def jog(self, positive: bool = True, secs: Optional[float] = None):
+        """Starts the stage jogging. 
 
+        The stage moves continousely at a preset jog speed without acceleration/deceleration until stopped
+        Use `self.setspeed(speed, jog = True)` to set the speed. 
+        Use `self.stop(emergency = False)` to stop. 
+
+        Parameters
+        ----------
+        positive : bool, optional
+            Whether to move in the positive direction, by default True
+        secs : float, optional
+            If given, the amount of time in seconds to jog, by default None
+            Uses the system time, so not very accurate, use at own risk. 
+
+        Returns
+        -------
+        ret : Status
+            See GSC01.safesend()
+
+        """
+
+        direction = "+" if positive else "-"
+
+        self.safesend(f"J:{self.axis}{direction}")
+
+        ret = self.safesend("G:")
+        self.stage.dirty = True
+
+        if secs is not None and secs >= 0:
+            time.sleep(secs)
+            return self.stop()
+        elif secs is not None and secs < 0:
+            raise ValueError(f"Jog Time cannot be negative, got {secs}.")
+        
+        return ret
+    
     @stage.errors.FailWithWarning
     def move(self, pos: int):
         """Absolution move to coordinate `pos``
@@ -332,6 +370,25 @@ class GSC01(SerialController):
         self.safesend(f"M:{self.axis}{direction}P{abs(delta)}")
         return self.safesend("G:")
     
+    @stage.errors.FailWithWarning
+    def syncPosition(self):
+        """Gets the position from the controller and syncs it to `stage.position`.
+        To calibrate in the other direction (using the software as the source), use `self.move`.
+
+        Returns
+        -------
+        pos: int
+            Current Position of the stage
+
+        """
+
+        pos = self.getPositionReadOut()
+        self.stage.position = pos  # Should not raise any error
+
+        self.stage.dirty = False
+
+        return pos
+
     @stage.errors.FailWithWarning
     def getPositionReadOut(self):
         """Gets the position from the controller. 
@@ -400,6 +457,9 @@ class GSC01(SerialController):
         """
         if emergency:
             return self.safesend("L:E")
+
+        if self.stage.dirty:
+            self.syncPosition()
 
         return self.safesend(f"L:{self.axis}")
 

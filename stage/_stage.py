@@ -46,10 +46,16 @@ class Stage(abc.ABC):
         
         self.LIMIT_LOWER = lower
         self.LIMIT_upper = upper
+
+        # Sets whether or not the position data in the stage object is dirty (i.e not reliable)
+        self.dirty = False
     
     @property
     def position(self):
-        return self._position
+        if not self.dirty:
+            return self._position
+        else:
+            raise stage.errors.PositionDirtyError("Please sync stage position.")
     
     @position.setter
     def position(self, x):
@@ -89,7 +95,7 @@ class GSC01_Stage(Stage):
             Initial position of the stage, by default 0
         """
 
-        super().__init__(pos = pos)
+        super().__init__(pos = pos) 
 
     def setLimits(self, upper: int, lower: int):
         """We should not need this method, but I implement it just so that this will instantiate
