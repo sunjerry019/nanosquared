@@ -99,8 +99,6 @@ class Stage(abc.ABC):
         ------
         stage.errors.PositionOutOfBoundsError
             Raised when the given x is not within the bounds set by the controller
-        stage.erors.PositionDirtyError
-            Raised when the stage position is dirty
 
         """
         
