@@ -258,16 +258,58 @@ class GSC01(SerialController):
         
         self.waitClear() # To make sure controller is on
 
-        self.stage = Stg.GSC01_Stage(pos = self.getPositionReadOut())
-        self.axis  = "1"                                    # can take value 1 or W
+        self.stage   = Stg.GSC01_Stage(pos = self.getPositionReadOut())
+        self.axis    = "1"                                    # can take value 1 or W
+        
+        self._powered = False # Internal management
+        self.powered  = True
+
+        # Check dirtiness
+        self.checkDirtiness()
+    
+    # Init Funcs here
+    def checkDirtiness(self):
+        try:
+            self.safesend(f"M:{self.axis}+P1")
+        except stage.errors.ControllerError:
+            self.stage.permDirty = True
+
+    # Property functions here
+    @property
+    def powered(self):
+        return self._powered
+
+    @powered.setter
+    def powered(self, state: bool):
+        """Sets whether the motor is powered or free spinning.
+
+        Parameters
+        ----------
+        state : bool
+            True for powered, False for not powered
+
+        """
+
+        on = 1 if state else 0
+
+        self.safesend(f"C:{self.axis}{on}")
+
+        if self._powered and not state:
+            self.stage.permDirty = True
+
+        self._powered = state
     
     # Implementation Functions here
-     
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
         """Home the stage"""
         ret = self.safesend(f"H:{self.axis}")
         self.waitClear()
+
+        # We reset dirtiness
+        self.stage._permDirty = False 
+        self.stage.dirty      = False
+
         self.resetPositionToZero()
         
         return ret
@@ -371,9 +413,19 @@ class GSC01(SerialController):
         return self.safesend("G:")
     
     @stage.errors.FailWithWarning
+    def releaseMotor(self):
+        self.powered = False
+    
+    @stage.errors.FailWithWarning
+    def powerMotor(self):
+        self.powered = True
+
+    @stage.errors.FailWithWarning
     def syncPosition(self):
         """Gets the position from the controller and syncs it to `stage.position`.
         To calibrate in the other direction (using the software as the source), use `self.move`.
+
+        If the stage is powered, also clears the dirty state of the stage. 
 
         Returns
         -------
@@ -385,7 +437,8 @@ class GSC01(SerialController):
         pos = self.getPositionReadOut()
         self.stage.position = pos  # Should not raise any error
 
-        self.stage.dirty = False
+        if self.powered:
+            self.stage.dirty = False
 
         return pos
 

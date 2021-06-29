@@ -23,6 +23,10 @@ class Stage(abc.ABC):
         self._position = 0
         self.position = pos
 
+        # Sets whether or not the position data in the stage object is dirty (i.e not reliable)
+        self._dirty     = False
+        self._permDirty = False
+
     @abc.abstractmethod
     def setLimits(self, upper, lower):
         """Sets the lower and upper limit. Also here just so that this class may not be instantiated.
@@ -47,8 +51,27 @@ class Stage(abc.ABC):
         self.LIMIT_LOWER = lower
         self.LIMIT_upper = upper
 
-        # Sets whether or not the position data in the stage object is dirty (i.e not reliable)
-        self.dirty = False
+    @property
+    def permDirty(self):
+        return self._permDirty
+
+    @permDirty.setter
+    def permDirty(self, isPermDirty: bool):
+        """Once PermDirty, always PermDirty unless homed
+        """
+        self.dirty = True
+        self._permDirty = True
+
+    @property
+    def dirty(self):
+        return self._dirty
+    
+    @dirty.setter
+    def dirty(self, isDirty: bool):
+        if not self.permDirty:
+            self._dirty = isDirty
+        elif isDirty:
+            raise stage.errors.PositionDirtyError("PermDirty, rehome stage.")
     
     @property
     def position(self):
@@ -65,6 +88,8 @@ class Stage(abc.ABC):
         """Checks if the position to be set is within range and sets it,
         Should be run before executing any moves
 
+        !Unsafe state: if position is dirty but the dirty flag is not set/unset.
+
         Parameters
         ----------
         x : number
@@ -74,6 +99,8 @@ class Stage(abc.ABC):
         ------
         stage.errors.PositionOutOfBoundsError
             Raised when the given x is not within the bounds set by the controller
+        stage.erors.PositionDirtyError
+            Raised when the stage position is dirty
 
         """
         
