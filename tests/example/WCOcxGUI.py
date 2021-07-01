@@ -80,17 +80,17 @@ class MyApp( wx.App ):
         self.py = wx.lib.activex.ActiveXCtrl(parent=self.frame,size=(300,200),axID='DATARAYOCX.ProfilesCtrl.1')
         self.py.ctrl.ProfileID = 23
         #Formatting 
-        row1 = wx.BoxSizer(wx.HORIZONTAL)
-        row1.Add(item=bp,flag=wx.RIGHT, border=10)
-        row1.Add(pic)
-        row1.Add(item=tpic, flag=wx.LEFT, border=10)
-        row2 = wx.BoxSizer(wx.HORIZONTAL)
-        row2.Add(self.px, 0, wx.RIGHT, 100)# Arguments: item, proportion, flags, border
-        row2.Add(self.py)
-        col1 = wx.BoxSizer(wx.VERTICAL)
-        col1.Add(item=row1, flag=wx.BOTTOM, border=10)
-        col1.Add(item=row2, flag=wx.ALIGN_CENTER_HORIZONTAL)
-        self.frame.SetSizer(col1)
+        # row1 = wx.BoxSizer(wx.HORIZONTAL)
+        # row1.Add(item=bp,flag=wx.RIGHT, border=10)
+        # row1.Add(pic)
+        # row1.Add(item=tpic, flag=wx.LEFT, border=10)
+        # row2 = wx.BoxSizer(wx.HORIZONTAL)
+        # row2.Add(self.px, 0, wx.RIGHT, 100)# Arguments: item, proportion, flags, border
+        # row2.Add(self.py)
+        # col1 = wx.BoxSizer(wx.VERTICAL)
+        # col1.Add(item=row1, flag=wx.BOTTOM, border=10)
+        # col1.Add(item=row2, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        # self.frame.SetSizer(col1)
         self.frame.Show()
 
 if __name__ == "__main__":
