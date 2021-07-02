@@ -137,6 +137,18 @@ class GSC01_Stage(Stage):
 
         super().__init__(pos = pos) 
 
+        speed = {
+            "jog": 0,
+            "min": 0,
+            "max": 0
+        } 
+        # In PulsePerSecond
+        # Set speed in units of 100 PPS. Values less than 100 PPS are rounded down
+        # For additional documentation see GSC01.setSpeed()
+
+        self.speed    = namedtuple("StageSpeed", speed.keys())(*speed.values())
+        self.acdcTime = 0 # in milisecond
+
     def setLimits(self, upper: int, lower: int):
         """We should not need this method, but I implement it just so that this will instantiate
 

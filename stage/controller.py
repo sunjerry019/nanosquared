@@ -29,6 +29,8 @@ import abc
 import stage.errors
 import stage._stage as Stg
 
+import common.helpers as h
+
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
 
@@ -247,7 +249,8 @@ class GSC01(SerialController):
     # 					    Acceleration: 200 ms
     # - Jog Speed: 500 pps
     # - Run Current: 350 mA
-    # - Stop Current 175 mA
+    # - Stop Current 175 mA\
+    # Set using the GSC-01 Configuration App
 
     # We always use the axis 1 instead of W
 
@@ -300,6 +303,76 @@ class GSC01(SerialController):
         self._powered = state
     
     # Implementation Functions here
+
+    @stage.errors.FailWithWarning
+    def setSpeed(self, jogSpeed: Optional[int] = None, \
+                       minSpeed: Optional[int] = None, \
+                       maxSpeed: Optional[int] = None, \
+                       acdcTime: Optional[int] = None):
+        """Sets the driving speed of the stage.
+
+        Set speed in units of 100 PPS. Values less than 100 PPS are rounded down.
+        If negative values are given, the absolute values will be taken.
+
+        Parameters
+        ----------
+        jogSpeed : Optional[int], optional
+            The jogging speed of the stage in Pulse Per Seconds, by default None
+
+            If set to None, current speed is used. 
+        minSpeed : Optional[int], optional
+            The minimum speed of the stage in Pulse Per Seconds, by default None
+
+            If set to None, current speed is used. 
+        maxSpeed : Optional[int], optional
+            The maximum speed of the stage in Pulse Per Seconds, by default None
+
+            If set to None, current speed is used. 
+        acdcTime : Optional[int], optional
+            The acceleration and deceleration time of the stage in milliseconds, by default None
+
+            If set to None, current acceleration and deceleration time is used. 
+
+        Returns
+        -------
+        (retSpeed, retJog) : Statuses
+            See GSC01.safesend()
+
+        Raises
+        ------
+        AssertionError
+            If `minSpeed` is more than `maxSpeed`, or if `maxSpeed` is 0
+        TypeError
+            If any of the values are not integers.
+
+        """
+        
+        newvals  = [jogSpeed, minSpeed, maxSpeed, acdcTime]
+        original = [self.stage.speed.jog, self.stage.speed.min, self.stage.speed.max, self.stage.acdcTime]
+
+        combine  = [abs(h.ensureInt(x)) if x is not None else original[i] for i, x in enumerate(newvals)]
+
+        assert combine[1] <= combine[2], "minSpeed should be <= maxSpeed"
+
+        for i in range(3):
+            # Check if values are multiples of 100
+            if (combine[i] % 100):
+                new = (combine[i] // 100) * 100
+                warnings.warn(f"Got {combine[i]}, using {new}")
+                combine[i] = new
+            
+        # TODO: Boundary Checks within self.stage        
+        self.stage.speed.jog = combine[0]
+        self.stage.speed.min = combine[1]
+        self.stage.speed.max = combine[2]
+        self.stage.acdcTime  = combine[3]
+
+        a = self.safesend(f"D:{self.axis}S{self.stage.speed.min}F{self.stage.speed.max}R{self.stage.acdcTime}")
+        b = self.safesend(f"S:J{self.stage.speed.jog}")
+
+        return a, b
+        
+    
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
         """Home the stage"""
