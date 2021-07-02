@@ -25,6 +25,8 @@ class MyApp(wx.App):
         wx.lib.activex.ActiveXCtrl(parent = p, size = (250, 250), axID = 'DATARAYOCX.CCDimageCtrl.1')
         wx.lib.activex.ActiveXCtrl(parent = self.frame, size = (10, 250), axID = 'DATARAYOCX.PaletteBarCtrl.1')
 
+        self.frame.Show()
+
 
 if __name__ == "__main__":
     app = MyApp()
