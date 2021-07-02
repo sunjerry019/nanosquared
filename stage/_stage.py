@@ -5,6 +5,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import stage.errors
+import common.helpers as h
 
 import abc
 from collections import namedtuple
@@ -169,14 +170,4 @@ class GSC01_Stage(Stage):
 
         """
 
-        # Check if integer: https://stackoverflow.com/a/48940855
-        error = True
-        try:
-            if (int(x) == x):
-                error = False
-                return super().positionSetter(x = int(x))
-        except (TypeError, ValueError):
-            pass
-        
-        if error:
-            raise TypeError(f"Position must be an integer, got: {x}")
+        super().positionSetter(x = h.ensureInt(x))
