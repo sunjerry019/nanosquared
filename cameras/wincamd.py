@@ -2,30 +2,26 @@
 
 import os,sys
 
-import comtypes
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
 
-import comtypes
-import comtypes.client as cc
-
 import logging
-import gc
+from PyQt5 import QtWidgets, QAxContainer
+
+import sys
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class WinCamD(cam.Camera):
 	def __init__(self):
-		self.dataControl = cc.CreateObject("DATARAYOCX.GetDataCtrl.1")
-		self.dataControl.StartDriver()
+		self.dummyapp = QtWidgets.QApplication([''])
+		self.wrapper  = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
 	
 	def __exit__(self, e_type, e_val, traceback):
-		del self.dataControl
-		gc.collect()
 		return super().__exit__(e_type, e_val, traceback)
 
 if __name__ == '__main__':
