@@ -7,6 +7,7 @@ sys.path.insert(0, root_dir)
 import stage.errors
 
 import abc
+from collections import namedtuple
 
 class Stage(abc.ABC):
     LIMIT_UPPER = 0
@@ -57,7 +58,12 @@ class Stage(abc.ABC):
 
     @permDirty.setter
     def permDirty(self, isPermDirty: bool):
-        """Once PermDirty, always PermDirty unless homed
+        """Provides the permDirty flag.
+        
+        Once PermDirty, always PermDirty unless homed. 
+
+        Stage position becomes permanently dirty, when the controller itself is no longer
+        tracking it, e.g. after the motor has been freed.
         """
         self.dirty = True
         self._permDirty = True
@@ -68,6 +74,14 @@ class Stage(abc.ABC):
     
     @dirty.setter
     def dirty(self, isDirty: bool):
+        """Provides the dirty flag.
+        
+        Stage position is dirty when the jog command it used, as we cannot keep track of 
+        how many pulses the stage has moved during the jog. 
+
+        The position can be cleaned again by syncing with the controller. See `GSC01.syncPosition()` 
+        for an example
+        """
         if not self.permDirty:
             self._dirty = isDirty
         elif isDirty:
