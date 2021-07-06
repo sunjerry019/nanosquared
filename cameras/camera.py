@@ -4,7 +4,7 @@
 
 class Camera():
     def __init__(self):
-        pass
+        self.apertureOpen = False
     
     def __enter__(self):
         return self

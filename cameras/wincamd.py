@@ -11,19 +11,17 @@ import cameras.camera as cam
 import logging
 from PyQt5 import QtWidgets, QAxContainer
 
-import sys
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class WinCamD(cam.Camera):
-	def __init__(self):
+	def __init__(self, *args, **kwargs):
 		self.dummyapp = QtWidgets.QApplication([''])
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
 				
 		assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
 
-		self.deviceOn = False
+		super().__init__(*args, **kwargs)
 
 	def startDevice(self):
 		"""Starts the Camera capturing
@@ -35,7 +33,7 @@ class WinCamD(cam.Camera):
 
 		"""
 		ret = self.dataCtrl.dynamicCall("StartDevice")
-		self.deviceOn = ret
+		self.apertureOpen = ret
 		
 		return ret
 	
@@ -51,7 +49,7 @@ class WinCamD(cam.Camera):
 
 		ret = self.dataCtrl.dynamicCall("StopDevice")
 		if ret:
-			self.deviceOn = False
+			self.apertureOpen = False
 		
 		return ret
 	
