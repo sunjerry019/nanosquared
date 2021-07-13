@@ -7,6 +7,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
+from cameras.constants import WCD_Profiles
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
@@ -31,8 +32,10 @@ class WinCamD(cam.Camera):
 			"y" : QAxContainer.QAxWidget("DATARAYOCX.ProfilesCtrl.1")
 		}
 		self.axis = namedtuple("Axis", axis.keys())(*axis.values())
-		self.axis.x.setProperty("ProfileID", 22)
-		self.axis.y.setProperty("ProfileID", 23)
+
+		# For the ProfileID Values, look at dataray-profiles-enum.pdf
+		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
+		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.

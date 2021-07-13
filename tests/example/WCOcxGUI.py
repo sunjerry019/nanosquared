@@ -34,7 +34,7 @@ class MyApp( wx.App ):
                 datay = self.py.ctrl.GetProfileDataAsVariant()
                 data = [list(row) for row in zip(datax,datay)]#Makes a list of lists; X1 with Y1 in a list, X2 with Y2 in a list etc...
         filename = self.ti.Value
-        with open(filename, 'wb') as fp:
+        with open(filename, 'w') as fp:
             w = csv.writer(fp, delimiter=',')
             w.writerows(data)
 
