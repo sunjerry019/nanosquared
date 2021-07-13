@@ -417,7 +417,15 @@ class GSC01(SerialController):
             
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
-        """Home the stage"""
+        """Home the stage
+        
+        Speeds: 
+        - minSpeed = 500  PPS 
+        - maxSpeed = 5000 PPS 
+        - acdcTime = 200  ms
+        The above cannot be changed. 
+        
+        """
         ret = self.safesend(f"H:{self.axis}")
         self.waitClear()
 
