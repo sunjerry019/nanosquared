@@ -248,6 +248,8 @@ class GSC01(SerialController):
     
     Currently the device is to CENTRAL HOME, i.e. the origin is the center of the stage.
     """
+    
+    # SGSP26-200 : Travel Range 200mm
 
     # Additional Settings:
     # - Baudrate: 9600
