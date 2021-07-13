@@ -20,6 +20,7 @@ import signal
 import json
 import warnings
 import time
+from collections import namedtuple
 
 from typing import Union, Optional
 import traceback
@@ -30,6 +31,12 @@ import stage.errors
 import stage._stage as Stg
 
 import common.helpers as h
+
+import logging
+logging.captureWarnings(True)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
@@ -249,7 +256,7 @@ class GSC01(SerialController):
     # 					    Acceleration: 200 ms
     # - Jog Speed: 500 pps
     # - Run Current: 350 mA
-    # - Stop Current 175 mA\
+    # - Stop Current 175 mA
     # Set using the GSC-01 Configuration App
 
     # We always use the axis 1 instead of W
@@ -266,6 +273,15 @@ class GSC01(SerialController):
         
         self._powered = False # Internal management
         self.powered  = True
+
+        # Set speed
+        self.initSpeed = {
+            "jogSpeed": 500  ,
+            "minSpeed": 500  ,
+            "maxSpeed": 5000 ,
+            "acdcTime": 200 
+        }
+        self.setSpeed(**self.initSpeed)
 
         # Check dirtiness
         self.checkDirtiness()
@@ -308,30 +324,41 @@ class GSC01(SerialController):
     def setSpeed(self, jogSpeed: Optional[int] = None, \
                        minSpeed: Optional[int] = None, \
                        maxSpeed: Optional[int] = None, \
-                       acdcTime: Optional[int] = None):
+                       acdcTime: Optional[int] = None,
+                       init    : Optional[bool]= False):
         """Sets the driving speed of the stage.
 
         Set speed in units of 100 PPS. Values less than 100 PPS are rounded down.
         If negative values are given, the absolute values will be taken.
+        If any illegal values are given, the original values are taken. If this results in maxspeed < minspeed, then they will be switched.
+
+        Initial Values:
+        - jogSpeed = 500  PPS (Restart initializes this)
+        - minSpeed = 500  PPS 
+        - maxSpeed = 5000 PPS 
+        - acdcTime = 200  ms
 
         Parameters
         ----------
         jogSpeed : Optional[int], optional
             The jogging speed of the stage in Pulse Per Seconds, by default None
-
             If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
         minSpeed : Optional[int], optional
             The minimum speed of the stage in Pulse Per Seconds, by default None
-
             If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
         maxSpeed : Optional[int], optional
             The maximum speed of the stage in Pulse Per Seconds, by default None
-
             If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
         acdcTime : Optional[int], optional
             The acceleration and deceleration time of the stage in milliseconds, by default None
-
+            Acceptables values are 0 to 1000 ms.
             If set to None, current acceleration and deceleration time is used. 
+        init     : Optional[bool], optional
+            Resets the speeds to the initial values. If set to True, other parameters are ignored.
+            By default False.
 
         Returns
         -------
@@ -347,6 +374,9 @@ class GSC01(SerialController):
 
         """
         
+        if init:
+            return self.setSpeed(**self.initSpeed)
+
         newvals  = [jogSpeed, minSpeed, maxSpeed, acdcTime]
         original = [self.stage.speed.jog, self.stage.speed.min, self.stage.speed.max, self.stage.acdcTime]
 
@@ -360,19 +390,31 @@ class GSC01(SerialController):
                 new = (combine[i] // 100) * 100
                 warnings.warn(f"Got {combine[i]}, using {new}")
                 combine[i] = new
-            
-        # TODO: Boundary Checks within self.stage        
-        self.stage.speed.jog = combine[0]
-        self.stage.speed.min = combine[1]
-        self.stage.speed.max = combine[2]
+
+            # Speed Boundary checks
+            if not (100 <= combine[i] <= 20000):
+                warnings.warn(f"Illegal value {combine[i]}, using old value {original[i]}")
+                combine[i] = original[i]
+
+        # min/max speed check
+        combine[1], combine[2] = (combine[1], combine[2]) if (combine[1] <= combine[2]) else (combine[2], combine[1])
+
+        # acdc time boundary checks
+        if not (0 <= combine[3] <= 1000):
+            warnings.warn(f"Illegal value {combine[3]}, using old value {original[3]}")
+            combine[3] = original[3]
+    
+        keys             = ["jog", "min", "max"]
+        self.stage.speed = namedtuple("StageSpeed", keys)(*combine[:3])
         self.stage.acdcTime  = combine[3]
+
+        logger.info(f"Setting speed: Jog = %d, min = %d, max = %d, acdctime = %d", *combine)
 
         a = self.safesend(f"D:{self.axis}S{self.stage.speed.min}F{self.stage.speed.max}R{self.stage.acdcTime}")
         b = self.safesend(f"S:J{self.stage.speed.jog}")
 
         return a, b
-        
-    
+            
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
         """Home the stage"""
