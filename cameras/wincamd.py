@@ -37,6 +37,9 @@ class WinCamD(cam.Camera):
 		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
 		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
+		self.axis.x.show()
+		self.axis.y.show()
+
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
 
