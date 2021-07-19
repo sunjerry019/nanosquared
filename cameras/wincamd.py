@@ -11,9 +11,12 @@ from cameras.constants import WCD_Profiles
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
+from PyQt5 import QtCore
 
 import numpy as np
 from collections import namedtuple
+
+import time
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -40,6 +43,18 @@ class WinCamD(cam.Camera):
 		self.axis.x.show()
 		self.axis.y.show()
 
+
+		# time.sleep(1)
+		# self.axis.x.setWindowState(QtCore.Qt.WindowMinimized)
+		# self.axis.y.setWindowState(QtCore.Qt.WindowMinimized)
+
+		# self.axis.x.hide()
+		# self.axis.y.hide()
+
+		# self.axis.x.showMinimized()
+		# self.axis.y.showMinimized()
+		
+
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
 
@@ -56,6 +71,9 @@ class WinCamD(cam.Camera):
 		"""
 		if not self.apertureOpen:
 			return None
+
+		self.axis.x.repaint()
+		self.axis.y.repaint()
 
 		data = {
 			"x": self.axis.x.dynamicCall("GetProfileDataAsVariant"),
