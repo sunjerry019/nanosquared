@@ -263,15 +263,28 @@ class GSC01(SerialController):
 
     # We always use the axis 1 instead of W
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, stage: Stg.GSC01_Stage, *args, **kwargs):
+        """Constructor
+
+        Parameters
+        ----------
+        stage : stage._stage.GSC01_Stage
+            A stage instance with the correct boundary values set
+
+        """
+    
         super().__init__(implementation = True, *args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
         
         self.waitClear() # To make sure controller is on
 
-        self.stage   = Stg.GSC01_Stage(pos = self.getPositionReadOut())
-        self.axis    = "1"                                    # can take value 1 or W
+        # When the Stage is started, the current position is taken as 0
+        # For meaningful positioning, we need to home the stage.
+
+        self.stage          = stage
+        self.stage.position = self.getPositionReadOut()
+        self.axis           = "1"                                    # can take value 1 or W
         
         self._powered = False # Internal management
         self.powered  = True
@@ -294,6 +307,12 @@ class GSC01(SerialController):
             self.safesend(f"M:{self.axis}+P1")
         except stage.errors.ControllerError:
             self.stage.permDirty = True
+
+    # Helper Functions
+    def pulse_to_um(self, pps: float):
+        return self.stage.um_per_pulse * pps
+    def um_to_pulse(self, um: float):
+        return um / self.stage.um_per_pulse
 
     # Property functions here
     @property
@@ -434,6 +453,8 @@ class GSC01(SerialController):
         # We reset dirtiness
         self.stage._permDirty = False 
         self.stage.dirty      = False
+        # self.stage.resetStage() Eventuell, 
+        # but I don't want to deal with all the cases resulting from resetPositionToZero()
 
         self.resetPositionToZero()
         
@@ -745,7 +766,7 @@ class GSC01(SerialController):
         
 
 if __name__ == '__main__':
-    with GSC01(devMode = False) as m:
+    with GSC01(stage = Stg.SGSP26_200(), devMode = False) as m:
         print("with GSC01 as m")
         import code; code.interact(local=locals())
 

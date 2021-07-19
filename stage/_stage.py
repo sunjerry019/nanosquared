@@ -183,3 +183,25 @@ class GSC01_Stage(Stage):
         """
 
         super().positionSetter(x = h.ensureInt(x))
+    
+    def resetStage(self):
+        """Meant to set the upper and lower limit based on pulseRange after homing
+        """
+
+        return self.setLimits(lower = -16777215, upper = 16777215)
+
+class SGSP26_200(GSC01_Stage):    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs) 
+
+        self.travel     = 200 # mm
+        self.pulseRange = 100557
+        self.um_per_pulse = (self.travel * 1000) / self.pulseRange
+
+    def resetStage(self):
+        upper = (self.pulseRange - 1) / 2
+        lower = - upper
+
+        return self.setLimits(lower = lower, upper = upper)
+
+    
