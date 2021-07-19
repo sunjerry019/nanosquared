@@ -195,7 +195,7 @@ class SGSP26_200(GSC01_Stage):
         super().__init__(*args, **kwargs) 
 
         self.travel     = 200 # mm
-        self.pulseRange = 100557
+        self.pulseRange = 100557            # This is an approximate value, since the stage is abit temperamental
         self.um_per_pulse = (self.travel * 1000) / self.pulseRange
 
     def resetStage(self):
