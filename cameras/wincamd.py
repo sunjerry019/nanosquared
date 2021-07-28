@@ -43,26 +43,8 @@ class WinCamD(cam.Camera):
 		self.axis.x.show()
 		self.axis.y.show()
 
-		# # https://www.tutorialspoint.com/pyqt/pyqt_signals_and_slots.htm
-		# QtCore.connect(self.dataCtrl, QtCore.pyqtSignal('DataReady()'), self.on_DataReady)
-
-		# # https://www.riverbankcomputing.com/static/Docs/PyQt5/signals_slots.html
-		# self.DataReady = QtWidgets.QAction("DataReady()". s)
-
-		# time.sleep(1)
-		# self.axis.x.setWindowState(QtCore.Qt.WindowMinimized)
-		# self.axis.y.setWindowState(QtCore.Qt.WindowMinimized)
-
-		# self.axis.x.hide()
-		# self.axis.y.hide()
-
-		# self.axis.x.showMinimized()
-		# self.axis.y.showMinimized()
-
-	# https://www.riverbankcomputing.com/static/Docs/PyQt5/signals_slots.html#the-pyqtslot-decorator
-	# @QtCore.pyqtSlot(str, int, "void *")
-	# def slot(self, name, argc, argv):
-	# 	print(f"{name}")
+		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
+		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
 	def on_DataReady(self):
 		print("DataReady")
