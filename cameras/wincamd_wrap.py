@@ -5,11 +5,13 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.wincamd as wcd
+import time
 
 with wcd.WinCamD() as w:
     f = open('umu.txt', 'w')
 
     w.startDevice()
+    time.sleep(15)
     x = w.getAxisProfile('x')
     y = w.getAxisProfile('y')
 

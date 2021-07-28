@@ -43,6 +43,11 @@ class WinCamD(cam.Camera):
 		self.axis.x.show()
 		self.axis.y.show()
 
+		# # https://www.tutorialspoint.com/pyqt/pyqt_signals_and_slots.htm
+		# QtCore.connect(self.dataCtrl, QtCore.pyqtSignal('DataReady()'), self.on_DataReady)
+
+		# # https://www.riverbankcomputing.com/static/Docs/PyQt5/signals_slots.html
+		# self.DataReady = QtWidgets.QAction("DataReady()". s)
 
 		# time.sleep(1)
 		# self.axis.x.setWindowState(QtCore.Qt.WindowMinimized)
@@ -53,6 +58,14 @@ class WinCamD(cam.Camera):
 
 		# self.axis.x.showMinimized()
 		# self.axis.y.showMinimized()
+
+	# https://www.riverbankcomputing.com/static/Docs/PyQt5/signals_slots.html#the-pyqtslot-decorator
+	# @QtCore.pyqtSlot(str, int, "void *")
+	# def slot(self, name, argc, argv):
+	# 	print(f"{name}")
+
+	def on_DataReady(self):
+		print("DataReady")
 		
 
 	def getAxisProfile(self, axis):
@@ -71,9 +84,6 @@ class WinCamD(cam.Camera):
 		"""
 		if not self.apertureOpen:
 			return None
-
-		self.axis.x.repaint()
-		self.axis.y.repaint()
 
 		data = {
 			"x": self.axis.x.dynamicCall("GetProfileDataAsVariant"),
