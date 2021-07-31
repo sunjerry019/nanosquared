@@ -109,6 +109,25 @@ class ODRFitter():
         else:
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before printing output")
 
+    def predict(self, x):
+        """Predicts the `y` values based on the fitted result. 
+
+        Parameters
+        ----------
+        x : array_like
+            Values to predict
+
+        Returns
+        -------
+        y : array_like
+            Predicted Values
+
+        """
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running predict()")
+        
+        return self.model.fcn(self.output.beta, x)
+
 class MsqFitter(ODRFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
 
