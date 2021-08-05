@@ -14,6 +14,7 @@ from PyQt5 import QtWidgets, QAxContainer
 from PyQt5 import QtCore
 
 import queue
+import asyncio
 
 import numpy as np
 from collections import namedtuple
@@ -42,6 +43,9 @@ class WinCamD(cam.Camera):
 		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
 		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
+		self.axis.x.show()
+		self.axis.y.show()
+
 		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when data ready
 				
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
@@ -59,7 +63,16 @@ class WinCamD(cam.Camera):
 				break
 	
 	def wait_DataReady_Tasks(self):
-		self.dataReadyCallbacks.join()
+		# self.dataReadyCallbacks.join()
+		while True:
+			if self.dataReadyCallbacks.empty():
+				break
+			else:
+				# Hack to force DataReady to process
+				# Supposedly not a kosher way of doing this but I really dk
+				# how to concurrency
+				QtWidgets.QApplication.processEvents()
+
 		
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
@@ -72,7 +85,7 @@ class WinCamD(cam.Camera):
 		Returns
 		-------
 		ret : Union[array, None]
-			If the given `axis` is not 'x' or 'y', then `None`
+			If the given `axis` is not 'x', 'y', or 'xy', then `None`
 
 		"""
 		if not self.apertureOpen:
@@ -89,7 +102,15 @@ class WinCamD(cam.Camera):
 			"xy" : (dat["x"], dat["y"])
 		}
 
-		return np.array(data.get(axis, None))
+		self.prof_data = None
+
+		def temp_func():
+			self.prof_data = np.array(data.get(axis, None))
+
+		self.dataReadyCallbacks.put(temp_func)
+		self.wait_DataReady_Tasks()
+
+		return self.prof_data
 	
 	def getWinCamData(self):
 		"""Gets the WinCam Data as a numpy_array if the camera is running, else `None`
