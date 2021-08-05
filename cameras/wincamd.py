@@ -7,7 +7,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
-from cameras.constants import WCD_Profiles
+from cameras.constants import WCD_Profiles, OCX_Buttons
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
@@ -43,11 +43,18 @@ class WinCamD(cam.Camera):
 		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
 		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
-		self.axis.x.show()
-		self.axis.y.show()
+		self.axis.x.show() # u
+		self.axis.y.show() # v
+
+		self.prof_data = None
+
+		# For getting d4sigma
+		self.D4Sigma_data = None
+		
+
 
 		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when data ready
-				
+
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
@@ -76,6 +83,25 @@ class WinCamD(cam.Camera):
 				# Supposedly not a kosher way of doing this but I really dk
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
+
+	def getAxis_D4Sigma(self, axis):
+		if not self.apertureOpen:
+			return None
+
+		d4Sigma = {
+			"x"  : np.array(self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})")),
+			"y"  : np.array(self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})"))
+		}
+
+		self.D4Sigma_data = None
+
+		def temp_func():
+			self.D4Sigma_data = d4Sigma.get(axis, None)
+
+		self.dataReadyCallbacks.put(temp_func)
+		self.wait_DataReady_Tasks()
+
+		return self.D4Sigma_data
 
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
