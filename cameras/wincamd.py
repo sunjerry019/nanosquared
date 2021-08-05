@@ -52,6 +52,8 @@ class WinCamD(cam.Camera):
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
 	def on_DataReady(self):
+		"""When the DataReady event is fired, run dataReady callbacks
+		"""
 		while True:
 			try:
 				fun = self.dataReadyCallbacks.get(block = False)
@@ -63,6 +65,8 @@ class WinCamD(cam.Camera):
 				break
 	
 	def wait_DataReady_Tasks(self):
+		"""Waits for all the dataready callbacks to be called
+		"""
 		# self.dataReadyCallbacks.join()
 		while True:
 			if self.dataReadyCallbacks.empty():
@@ -73,7 +77,6 @@ class WinCamD(cam.Camera):
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
 
-		
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
 
