@@ -7,7 +7,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
-from cameras.constants import WCD_Profiles, OCX_Buttons
+from cameras.constants import WCD_Profiles, OCX_Buttons, CLIP_MODES
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
@@ -50,8 +50,9 @@ class WinCamD(cam.Camera):
 
 		# For getting d4sigma
 		self.D4Sigma_data = None
-		
-
+		# Percentage in decimal notation (A, B, MODE_A, MODE_B)
+		# If mode = D4SIGMA, then the clip levels don't matter
+		assert self.dataCtrl.dynamicCall(f"SetClipLevel(0, 0.5, {CLIP_MODES.D4SIGMA_METHOD}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
 
 		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when data ready
 
@@ -85,12 +86,25 @@ class WinCamD(cam.Camera):
 				QtWidgets.QApplication.processEvents()
 
 	def getAxis_D4Sigma(self, axis):
+		"""Get the d4sigma in one `axis` if the camera is running.
+
+		Parameters
+		----------
+		axis : str
+			May take values 'x' or 'y'
+
+		Returns
+		-------
+		ret : Union[array, None]
+			If the given `axis` is not 'x' or 'y', then `None`
+
+		"""
 		if not self.apertureOpen:
 			return None
 
 		d4Sigma = {
-			"x"  : np.array(self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})")),
-			"y"  : np.array(self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})"))
+			"x"  : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})"),
+			"y"  : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})")
 		}
 
 		self.D4Sigma_data = None

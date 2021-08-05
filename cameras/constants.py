@@ -38,9 +38,9 @@ _profiles = [
     "WC_DIV_X" ,
     "WC_DIV_Y" ,
 ]
-
 WCD_Profiles = namedtuple("Profiles", _profiles)(*range(len(_profiles)))
 
+# For buttonID values, look at dataray-index-to-test-parameters-enum.pdf
 _btns  = [
     "BlankParameters", 
     "DefaultParameters", 
@@ -484,5 +484,7 @@ _btns  = [
     "Blank_Button_15", 
     "Last_ID"
 ]
-
 OCX_Buttons = namedtuple("Buttons", _btns)(*range(len(_btns)))
+
+_clip_modes = ["CLIP_LEVEL_METHOD", "D4SIGMA_METHOD"]
+CLIP_MODES = namedtuple("ClipModes", _clip_modes)(*range(len(_clip_modes)))
