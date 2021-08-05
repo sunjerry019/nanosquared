@@ -11,7 +11,6 @@ with wcd.WinCamD() as w:
     f = open('umu.txt', 'w')
 
     w.startDevice()
-    time.sleep(15)
     x = w.getAxisProfile('x')
     y = w.getAxisProfile('y')
 

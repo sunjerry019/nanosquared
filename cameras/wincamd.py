@@ -42,10 +42,7 @@ class WinCamD(cam.Camera):
 		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
 		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
-		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when dataready
-
-		# self.axis.x.showMinimized()
-		# self.axis.y.showMinimized()
+		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when data ready
 				
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
@@ -64,14 +61,13 @@ class WinCamD(cam.Camera):
 	def wait_DataReady_Tasks(self):
 		self.dataReadyCallbacks.join()
 		
-
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
 
 		Parameters
 		----------
 		axis : str
-			May take values 'x' or 'y'.
+			May take values 'x', 'y', or 'xy'
 
 		Returns
 		-------
@@ -82,10 +78,17 @@ class WinCamD(cam.Camera):
 		if not self.apertureOpen:
 			return None
 
-		data = {
-			"x": self.axis.x.dynamicCall("GetProfileDataAsVariant"),
-			"y": self.axis.y.dynamicCall("GetProfileDataAsVariant")
+		dat = {
+			"x"  : self.axis.x.dynamicCall("GetProfileDataAsVariant"),
+			"y"  : self.axis.y.dynamicCall("GetProfileDataAsVariant")
 		}
+
+		data = {
+			"x"  : dat["x"],
+			"y"  : dat["y"],
+			"xy" : (dat["x"], dat["y"])
+		}
+
 		return np.array(data.get(axis, None))
 	
 	def getWinCamData(self):
