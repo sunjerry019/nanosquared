@@ -62,19 +62,28 @@ class WinCamD(cam.Camera):
 	def on_DataReady(self):
 		"""When the DataReady event is fired, run dataReady callbacks
 		"""
-	
+		
+		callbacks = []
+		
 		while True:
 			try:
 				fun = self.dataReadyCallbacks.get(block = False)
 				print(f"DataReady task {fun}")
-				fun()
-				print(f"DataReady task {fun} done")
-				self.dataReadyCallbacks.task_done()
-				# Since it is FIFO, it should not matter
-
+				callbacks.append(fun)
+				# Pop all at once and then run later so that
+				# Functions can add callbacks to the dataReady stack
+				# to be called in the next cycle
 			except queue.Empty as e:
-				print("End of one RTT")
+				print("End of queue")
 				break
+
+		for fun in callbacks:
+			fun()
+			print(f"DataReady task {fun} done")
+			self.dataReadyCallbacks.task_done()
+			# Since it was FIFO, it should not matter that we do this later
+		
+		print("End of one RTT\n")
 	
 	def wait_DataReady_Tasks(self):
 		"""Waits for all the dataready callbacks to be called
@@ -112,12 +121,17 @@ class WinCamD(cam.Camera):
 		}
 
 		self.D4Sigma_data = None
+		self.i = 0
 
 		def temp_func():
-			def temp_func_2():
-				# because we want to wait one cycle of DataReady
-				self.D4Sigma_data = d4Sigma.get(axis, None)
-			self.dataReadyCallbacks.put(temp_func_2)
+			t = d4Sigma.get(axis, None)
+			print(self.i, t)
+			
+			self.i += 1
+			if self.i >= 10: 
+				self.D4Sigma_data = t
+			else:
+				self.dataReadyCallbacks.put(temp_func)
 
 		self.dataReadyCallbacks.put(temp_func)
 		self.wait_DataReady_Tasks()
