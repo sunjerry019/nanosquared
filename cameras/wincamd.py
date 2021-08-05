@@ -91,23 +91,27 @@ class WinCamD(cam.Camera):
 		if not self.apertureOpen:
 			return None
 
-		dat = {
-			"x"  : self.axis.x.dynamicCall("GetProfileDataAsVariant"),
-			"y"  : self.axis.y.dynamicCall("GetProfileDataAsVariant")
-		}
-
 		data = {
-			"x"  : dat["x"],
-			"y"  : dat["y"],
-			"xy" : (dat["x"], dat["y"])
+			"x"  : np.array(self.axis.x.dynamicCall("GetProfileDataAsVariant")),
+			"y"  : np.array(self.axis.y.dynamicCall("GetProfileDataAsVariant"))
 		}
 
 		self.prof_data = None
 
-		def temp_func():
-			self.prof_data = np.array(data.get(axis, None))
+		if axis in data:
+			def temp_func():
+				self.prof_data = data.get(axis, None)
+			self.dataReadyCallbacks.put(temp_func)
+		elif axis == 'xy':
+			self.prof_data = [0, 0]
+			def temp_x():
+				self.prof_data[0] = data["x"]
+			def temp_y():
+				self.prof_data[1] = data["y"]
 
-		self.dataReadyCallbacks.put(temp_func)
+			self.dataReadyCallbacks.put(temp_x)
+			self.dataReadyCallbacks.put(temp_y)
+		
 		self.wait_DataReady_Tasks()
 
 		return self.prof_data

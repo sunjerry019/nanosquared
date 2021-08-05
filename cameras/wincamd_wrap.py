@@ -11,8 +11,7 @@ with wcd.WinCamD() as w:
     f = open('umu.txt', 'w')
 
     w.startDevice()
-    x = w.getAxisProfile('x')
-    y = w.getAxisProfile('y')
+    x, y = w.getAxisProfile('xy')
 
     f.write(f"x\n\n{x.tolist()}\n\n")
     f.write(f"y\n\n{y.tolist()}\n")
