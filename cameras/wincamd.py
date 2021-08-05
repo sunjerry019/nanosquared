@@ -13,6 +13,8 @@ import logging
 from PyQt5 import QtWidgets, QAxContainer
 from PyQt5 import QtCore
 
+import queue
+
 import numpy as np
 from collections import namedtuple
 
@@ -40,14 +42,27 @@ class WinCamD(cam.Camera):
 		self.axis.x.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_X)
 		self.axis.y.setProperty("ProfileID", WCD_Profiles.WC_PROFILE_Y)
 
-		self.axis.x.show()
-		self.axis.y.show()
+		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when dataready
 
+		# self.axis.x.showMinimized()
+		# self.axis.y.showMinimized()
+				
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
 	def on_DataReady(self):
-		print("DataReady")
+		while True:
+			try:
+				fun = self.dataReadyCallbacks.get(block = False)
+				print(f"DataReady task {fun}")
+				fun()
+				print(f"DataReady task {fun} done")
+				self.dataReadyCallbacks.task_done()
+			except queue.Empty as e:
+				break
+	
+	def wait_DataReady_Tasks(self):
+		self.dataReadyCallbacks.join()
 		
 
 	def getAxisProfile(self, axis):
