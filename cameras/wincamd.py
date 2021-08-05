@@ -62,6 +62,7 @@ class WinCamD(cam.Camera):
 	def on_DataReady(self):
 		"""When the DataReady event is fired, run dataReady callbacks
 		"""
+	
 		while True:
 			try:
 				fun = self.dataReadyCallbacks.get(block = False)
@@ -69,7 +70,10 @@ class WinCamD(cam.Camera):
 				fun()
 				print(f"DataReady task {fun} done")
 				self.dataReadyCallbacks.task_done()
+				# Since it is FIFO, it should not matter
+
 			except queue.Empty as e:
+				print("End of one RTT")
 				break
 	
 	def wait_DataReady_Tasks(self):
@@ -110,7 +114,10 @@ class WinCamD(cam.Camera):
 		self.D4Sigma_data = None
 
 		def temp_func():
-			self.D4Sigma_data = d4Sigma.get(axis, None)
+			def temp_func_2():
+				# because we want to wait one cycle of DataReady
+				self.D4Sigma_data = d4Sigma.get(axis, None)
+			self.dataReadyCallbacks.put(temp_func_2)
 
 		self.dataReadyCallbacks.put(temp_func)
 		self.wait_DataReady_Tasks()
