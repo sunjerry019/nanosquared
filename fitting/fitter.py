@@ -160,10 +160,10 @@ class ODRFitter():
 
         self.figure, self.axis = pyplot.subplots(1, 1) # nrow, ncol, position
 
-        self.axis.set_title("Fitted Plot")
-        self.axis.legend()
+        self.axis.set_title("Fitted Plot")        
         self.axis.plot(self.data.x, self.data.y, marker = '+')
         self.axis.plot(_x         , _y         , linestyle = "-", label = "Fit")
+        self.axis.legend()
 
         return self.figure, self.axis
         
