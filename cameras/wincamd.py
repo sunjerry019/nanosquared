@@ -100,6 +100,29 @@ class WinCamD(cam.Camera):
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
 
+	def wait_stable(self, numevents: int = 10):
+		"""Blocks until `numevents` of DataReady has passed. Opens the camera if necessary, then restores the previous state. 
+
+		Parameters
+		----------
+		numevents : int, optional
+			Number of DataReady events to wait for, by default 10
+
+		"""
+		_originalState = self.apertureOpen
+		if not self.apertureOpen:
+			self.startDevice()
+
+		def temp_func(i):
+			if i > 0:
+				self.dataReadyCallbacks.put(lambda: temp_func(i - 1))
+
+		self.dataReadyCallbacks.put(lambda: temp_func(numevents - 1))
+		self.wait_DataReady_Tasks()
+
+		if not _originalState:
+			self.stopDevice()
+
 	# Implementations
 	def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
 		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
@@ -107,7 +130,7 @@ class WinCamD(cam.Camera):
 
 		IMPT: Ensure that the camera has already corrected the baseline artefact. 
 		You can do this by starting the device and waiting for a few DataReady events.
-		This is provided the by function `self.waitStable()`
+		This is provided the by function `self.wait_stable()`
 
 		Parameters
 		----------
