@@ -57,6 +57,9 @@ class WinCamD(cam.Camera):
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
+		# Last thing we do is to make sure our camera is warmed up and ready
+		self.wait_stable()
+
 	# Support functions
 	def on_DataReady(self):
 		"""When the DataReady event is fired, run dataReady callbacks
@@ -119,6 +122,8 @@ class WinCamD(cam.Camera):
 
 		if not _originalState:
 			self.stopDevice()
+
+		return True
 
 	def setClipMode(self, mode, clip: float = 0):
 		"""Sets the clip mode for Clip A (i.e. 1). Throughout this code, we will only be using A
