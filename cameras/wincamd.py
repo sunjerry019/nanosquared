@@ -49,7 +49,8 @@ class WinCamD(cam.Camera):
 		self.prof_data = None
 
 		# For getting d4sigma
-		self.D4Sigma_data = None
+		self.D4Sigma_data  = None
+		self.originalState = None
 		# Percentage in decimal notation (A, B, MODE_A, MODE_B)
 		# If mode = D4SIGMA, then the clip levels don't matter
 		assert self.dataCtrl.dynamicCall(f"SetClipLevel(0, 0.5, {CLIP_MODES.D4SIGMA_METHOD}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
@@ -98,8 +99,14 @@ class WinCamD(cam.Camera):
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
 
+	def d4sig(self):
+		self.stopDevice()
+		print(w.getAxis_D4Sigma('x', direct = True))
+
 	def getAxis_D4Sigma(self, axis):
-		"""Get the d4sigma in one `axis` if the camera is running.
+		"""Get the d4sigma in one `axis`, opens the camera if necessary.
+
+		The function closes the camera before obtaining the data, then restores the previous state that the camera was in.
 
 		Parameters
 		----------
@@ -108,12 +115,16 @@ class WinCamD(cam.Camera):
 
 		Returns
 		-------
-		ret : Union[array, None]
-			If the given `axis` is not 'x' or 'y', then `None`
+		ret : double
+			Returns the d4sigma of the given axis in micrometer. 
+			If the given `axis` is not 'x' or 'y', then `None`.
 
 		"""
+		if self.originalState is None:
+			self.originalState = self.apertureOpen
+
 		if not self.apertureOpen:
-			return None
+			assert self.startDevice()
 
 		d4Sigma = {
 			"x"  : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})"),
@@ -121,17 +132,12 @@ class WinCamD(cam.Camera):
 		}
 
 		self.D4Sigma_data = None
-		self.i = 0
 
 		def temp_func():
-			t = d4Sigma.get(axis, None)
-			print(self.i, t)
-			
-			self.i += 1
-			if self.i >= 10: 
-				self.D4Sigma_data = t
-			else:
-				self.dataReadyCallbacks.put(temp_func)
+			self.stopDevice()
+			self.D4Sigma_data = d4Sigma.get(axis, None)
+			if self.originalState:
+				self.startDevice()
 
 		self.dataReadyCallbacks.put(temp_func)
 		self.wait_DataReady_Tasks()
