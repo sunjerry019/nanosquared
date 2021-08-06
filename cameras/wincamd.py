@@ -14,12 +14,9 @@ from PyQt5 import QtWidgets, QAxContainer
 from PyQt5 import QtCore
 
 import queue
-import asyncio
 
 import numpy as np
 from collections import namedtuple
-
-import time
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -53,7 +50,7 @@ class WinCamD(cam.Camera):
 		self.originalState = None
 		# Percentage in decimal notation (A, B, MODE_A, MODE_B)
 		# If mode = D4SIGMA, then the clip levels don't matter
-		assert self.dataCtrl.dynamicCall(f"SetClipLevel(0, 0.5, {CLIP_MODES.D4SIGMA_METHOD}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
+		assert self.setClipMode(CLIP_MODES.D4SIGMA_METHOD)
 
 		self.dataReadyCallbacks = queue.Queue() # Queue of callbacks to run when data ready
 
@@ -70,22 +67,22 @@ class WinCamD(cam.Camera):
 		while True:
 			try:
 				fun = self.dataReadyCallbacks.get(block = False)
-				print(f"DataReady task {fun}")
+				self.log(f"DataReady task {fun}", logging.DEBUG)
 				callbacks.append(fun)
 				# Pop all at once and then run later so that
 				# Functions can add callbacks to the dataReady stack
 				# to be called in the next cycle
 			except queue.Empty as e:
-				print("End of queue")
+				self.log("End of queue", logging.DEBUG)
 				break
 
 		for fun in callbacks:
 			fun()
-			print(f"DataReady task {fun} done")
+			self.log(f"DataReady task {fun} done", logging.DEBUG)
 			self.dataReadyCallbacks.task_done()
 			# Since it was FIFO, it should not matter that we do this later
 		
-		print("End of one RTT\n")
+		self.log("End of one RTT\n", logging.DEBUG)
 	
 	def wait_DataReady_Tasks(self):
 		"""Waits for all the dataready callbacks to be called
@@ -123,6 +120,38 @@ class WinCamD(cam.Camera):
 		if not _originalState:
 			self.stopDevice()
 
+	def setClipMode(self, mode, clip: float = 0):
+		"""Sets the clip mode for Clip A (i.e. 1). Throughout this code, we will only be using A
+
+		If mode = D4SIGMA, then the clip levels don't matter
+
+		Parameters
+		----------
+		mode : int
+			Can type values 0, or 1:
+			0 = CLIP_LEVEL_METHOD
+			1 = D4SIGMA_METHOD
+		clip : float
+			Value between 0 and 1, determines the clip level, if mode is CLIP_LEVEL_METHOD
+
+		Returns
+		-------
+		ret : bool
+			True if success
+		"""
+
+		if mode == CLIP_MODES.D4SIGMA_METHOD:
+			clip = 0
+		elif mode == CLIP_MODES.CLIP_LEVEL_METHOD:
+			if not (0 <= clip <= 1):
+				self.log(f"Invalid clip level {clip} received", logging.WARN)
+				return False
+		else:
+			return False
+
+		# Percentage in decimal notation (A, B, MODE_A, MODE_B)
+		return self.dataCtrl.dynamicCall(f"SetClipLevel({clip}, 0.5, {mode}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
+
 	# Implementations
 	def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
 		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
@@ -137,7 +166,7 @@ class WinCamD(cam.Camera):
 		axis : str
 			May take values 'x' or 'y'
 		numsamples : int
-			Numbr of samples to average over
+			Number of samples to average over
 
 		Returns
 		-------
@@ -150,6 +179,11 @@ class WinCamD(cam.Camera):
 		if axis not in ['x', 'y']:
 			return (None, None)
 
+		# Ensure we are in d4sigma mode:
+		mode = self.dataCtrl.dynamicCall(f"GetClipLevelMode(1)")
+		if mode != CLIP_MODES.D4SIGMA_METHOD:
+			self.setClipMode(CLIP_MODES.D4SIGMA_METHOD)
+
 		_originalState = self.apertureOpen
 
 		if not self.apertureOpen:
@@ -161,7 +195,7 @@ class WinCamD(cam.Camera):
 		if not _originalState:
 			self.stopDevice()
 		
-		print(f"Getting average of {len(data)} data points: {data}")
+		self.log(f"Getting average of {len(data)} data points: \n{data}", logging.INFO)
 
 		return (np.average(data), np.std(data))
 
@@ -298,6 +332,31 @@ class WinCamD(cam.Camera):
 		
 		return ret
 	
+	def log(self, msg: str, loglevel: int = logging.INFO):
+		"""Handles the logging to easily switch between different ways of handling
+
+		Parameters
+		----------
+		msg : str
+			The log message
+		loglevel : int
+			enum in https://docs.python.org/3/library/logging.html#logging-levels,
+			see https://github.com/python/cpython/blob/d730719b094cb006711b1cd546927b863c173b31/Lib/logging/__init__.py
+
+			CRITICAL = 50
+			FATAL = CRITICAL
+			ERROR = 40
+			WARNING = 30
+			WARN = WARNING
+			INFO = 20
+			DEBUG = 10
+			NOTSET = 0
+		"""
+
+		logging.log(loglevel, msg)
+		if loglevel >= logging.DEBUG:
+			print(f"{logging.getLevelName(loglevel)}: {msg}")
+
 	def __exit__(self, e_type, e_val, traceback):
 		if self.apertureOpen:
 			self.stopDevice()
