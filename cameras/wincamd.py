@@ -60,6 +60,7 @@ class WinCamD(cam.Camera):
 		# https://stackoverflow.com/questions/36442631/how-to-receive-activex-events-in-pyqt5
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
+	# Support functions
 	def on_DataReady(self):
 		"""When the DataReady event is fired, run dataReady callbacks
 		"""
@@ -99,9 +100,14 @@ class WinCamD(cam.Camera):
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
 
+	# Implementations
 	def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
 		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
 		This function opens the camera where necessary, and returns it to the previous state after it is done.
+
+		IMPT: Ensure that the camera has already corrected the baseline artefact. 
+		You can do this by starting the device and waiting for a few DataReady events.
+		This is provided the by function `self.waitStable()`
 
 		Parameters
 		----------
@@ -121,17 +127,20 @@ class WinCamD(cam.Camera):
 		if axis not in ['x', 'y']:
 			return (None, None)
 
-		originalState = self.apertureOpen
+		_originalState = self.apertureOpen
 
 		if not self.apertureOpen:
 			assert self.startDevice()
 		
-		data = [self.getAxis_D4Sigma(axis) for _ in range(numsamples + 1)]
+		# We discard the first data point because of some artefact
+		data = np.array([self.getAxis_D4Sigma(axis) for _ in range(numsamples + 1)][1:])
 
-		if not originalState:
+		if not _originalState:
 			self.stopDevice()
-
 		
+		print(f"Getting average of {len(data)} data points: {data}")
+
+		return (np.average(data), np.std(data))
 
 	def getAxis_D4Sigma(self, axis):
 		"""Get the d4sigma in one `axis`, opens the camera if necessary, then restores the previous state that the camera was in.
@@ -151,8 +160,7 @@ class WinCamD(cam.Camera):
 			If the given `axis` is not 'x' or 'y', then `None`.
 
 		"""
-		if self.originalState is None:
-			self.originalState = self.apertureOpen
+		_originalState = self.apertureOpen
 
 		if not self.apertureOpen:
 			assert self.startDevice()
@@ -166,10 +174,8 @@ class WinCamD(cam.Camera):
 
 		def temp_func():
 			self.D4Sigma_data = d4Sigma.get(axis, None)
-			if not self.originalState:
+			if not _originalState:
 				self.stopDevice()
-			
-			self.originalState = None
 			
 		self.dataReadyCallbacks.put(temp_func)
 		self.wait_DataReady_Tasks()
@@ -178,6 +184,7 @@ class WinCamD(cam.Camera):
 
 	def getAxisProfile(self, axis):
 		"""Get the profile in one `axis` if the camera is running.
+		Note: Does not work, but not important 
 
 		Parameters
 		----------
