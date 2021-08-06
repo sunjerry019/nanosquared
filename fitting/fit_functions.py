@@ -5,6 +5,8 @@ import numpy as np
 def omega_z(params, z):
 	"""Beam Radii Function to be fitted, according to https://docs.scipy.org/doc/scipy/reference/odr.html
 
+	Beam Radii to be the HALF of the D4Sigma definition of beam width.
+
 	Note that this function is normalized if:
 	- Everything is in SI-Units, or
 	- w, w_0: [um], z, z_0: [mm], lmbda: [nm]
