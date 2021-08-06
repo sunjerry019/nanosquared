@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import sys, os
+from typing import Tuple
+from matplotlib.figure import Figure
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
@@ -11,6 +13,8 @@ import warnings
 # from overrides import overrides, EnforceOverrides # https://github.com/mkorpela/overrides
 
 import fitting.fit_functions as fit_functions
+
+import matplotlib.pyplot as pyplot
 
 class ODRFitter():
     """The ODRFitter class fits the given data using scipy.odr
@@ -49,6 +53,9 @@ class ODRFitter():
 
         self.odr    = None
         self.output = None
+
+        self.figure = None
+        self.axis   = None
 
     def loadData(self, x, y, xerror, yerror):
         """Load the data into a data object
@@ -127,6 +134,41 @@ class ODRFitter():
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before running predict()")
         
         return self.model.fcn(self.output.beta, x)
+
+    def getPlotOfFit(self, numpoints: int = 4096) -> Tuple[pyplot.Figure, pyplot.Axes]:
+        """Plots the fitted function with the original data.
+        Opens a `matplotlib` figure to achieve this.
+
+        Returns the `matplotlib` figures and axes.
+
+        Parameters
+        ----------
+        numpoints : int, optional
+            Number of data points along the x-axis, by default 4096
+
+        """
+
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running getPlotOfFit()")
+
+        _min_x, _max_x = self.data.x.min(), self.data.x.max()
+        _x = np.linspace(_min_x, _max_x, num = numpoints, endpoint = True)
+        _y = self.predict(_x)
+
+        # self.figure = pyplot.figure()
+        # self.axis   = self.figure.add_subplot(1,1,1) 
+
+        self.figure, self.axis = pyplot.subplots(1, 1) # nrow, ncol, position
+
+        self.axis.set_title("Fitted Plot")
+        self.axis.legend()
+        self.axis.plot(self.data.x, self.data.y, marker = '+')
+        self.axis.plot(_x         , _y         , linestyle = "-", label = "Fit")
+
+        return self.figure, self.axis
+        
+
+    
 
 class MsqFitter(ODRFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,

@@ -10,3 +10,4 @@ dependencies:
     - pandas>=1.2.4
     - wxpython>=4.1.1
     - comtypes>=1.1.8
+    - matplotlib>=3.4.2

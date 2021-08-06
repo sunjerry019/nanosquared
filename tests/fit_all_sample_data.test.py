@@ -46,5 +46,6 @@ for i in range(len(labels)):
 	f.estimateAndFit()
 	f.printOutput()
 	print(labels[i], f.m_squared, '\n')
-	x = np.linspace(min(xs[i]), max(xs[i]), 10, endpoint = True)
-	print(f.predict(x))
+	fig, ax = f.getPlotOfFit()
+	fig.show()
+	break
