@@ -1,6 +1,10 @@
 # Nanoscan M-Squared Automation
 
-Automated M-Squared Scanner and Profiler using the Nanoscan Camera
+Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
+
+# Models
+
+The WinCamD Camera used is the [WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler).
 
 # Code Linting in VS Code
 

@@ -1,0 +1,10 @@
+Bus 001 Device 007: ID 1632:7006 DataRay WinCamD-IR-BB Control
+Bus 001 Device 006: ID 1632:7005 DataRay WinCamD-IR-BB Video
+
+
+https://dataray.com/blogs/dataray-blog/tutorial-wincamd-interface-to-python
+https://dataray.com/blogs/software/interfacing
+https://dataray-web.s3.amazonaws.com/sw/if/dataray-python-wincamd.zip
+
+ActiveX:
+PyQT: QAxWidget

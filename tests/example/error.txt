@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File ".\WCOcxGUI.py", line 97, in <module>
+    app = MyApp()
+  File ".\WCOcxGUI.py", line 49, in __init__
+    self.gd.ctrl.StartDriver()
+  File "C:\Users\Yudong.Sun\.conda\envs\nanosquared\lib\site-packages\comtypes\__init__.py", line 554, in func
+    return self.Invoke(obj, memid, _invkind=1, *args, **kw) # DISPATCH_METHOD
+  File "C:\Users\Yudong.Sun\.conda\envs\nanosquared\lib\site-packages\comtypes\automation.py", line 775, in Invoke
+    byref(result), byref(excepinfo), byref(argerr))
+OSError: exception: access violation writing 0x00000000

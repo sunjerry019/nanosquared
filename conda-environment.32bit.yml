@@ -1,0 +1,12 @@
+name: nanosquared
+channels:
+    - conda-forge/win-32
+    - defaults/win-32
+dependencies:
+    - python>=3.6
+    - scipy
+    - numpy
+    - pyserial
+    - pandas
+    - wxpython
+    - comtypes>1.1.4, <=1.1.8
