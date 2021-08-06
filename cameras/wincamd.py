@@ -99,14 +99,45 @@ class WinCamD(cam.Camera):
 				# how to concurrency
 				QtWidgets.QApplication.processEvents()
 
-	def d4sig(self):
-		self.stopDevice()
-		print(w.getAxis_D4Sigma('x', direct = True))
+	def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
+		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
+		This function opens the camera where necessary, and returns it to the previous state after it is done.
+
+		Parameters
+		----------
+		axis : str
+			May take values 'x' or 'y'
+		numsamples : int
+			Numbr of samples to average over
+
+		Returns
+		-------
+		ret : (double, double)
+			Returns the d4sigma of the given axis in micrometer in the form of (average, stddev)
+			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
+			
+		"""
+		
+		if axis not in ['x', 'y']:
+			return (None, None)
+
+		originalState = self.apertureOpen
+
+		if not self.apertureOpen:
+			assert self.startDevice()
+		
+		data = [self.getAxis_D4Sigma(axis) for _ in range(numsamples + 1)]
+
+		if not originalState:
+			self.stopDevice()
+
+		
 
 	def getAxis_D4Sigma(self, axis):
-		"""Get the d4sigma in one `axis`, opens the camera if necessary.
+		"""Get the d4sigma in one `axis`, opens the camera if necessary, then restores the previous state that the camera was in.
 
-		The function closes the camera before obtaining the data, then restores the previous state that the camera was in.
+		IMPT: You should discard the data to the first call to the function, then take some averages. 
+		This is some artefact where it keeps returning the previous data point. 
 
 		Parameters
 		----------
@@ -134,11 +165,12 @@ class WinCamD(cam.Camera):
 		self.D4Sigma_data = None
 
 		def temp_func():
-			self.stopDevice()
 			self.D4Sigma_data = d4Sigma.get(axis, None)
-			if self.originalState:
-				self.startDevice()
-
+			if not self.originalState:
+				self.stopDevice()
+			
+			self.originalState = None
+			
 		self.dataReadyCallbacks.put(temp_func)
 		self.wait_DataReady_Tasks()
 
