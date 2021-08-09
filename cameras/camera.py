@@ -5,6 +5,9 @@
 class Camera():
     def __init__(self):
         self.apertureOpen = False
+
+    def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
+        raise NotImplementedError
     
     def __enter__(self):
         return self
