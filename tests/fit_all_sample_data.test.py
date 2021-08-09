@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os
+from matplotlib import pyplot
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
@@ -47,5 +48,6 @@ for i in range(len(labels)):
 	f.printOutput()
 	print(labels[i], f.m_squared, '\n')
 	fig, ax = f.getPlotOfFit()
-	fig.show()
-	break
+	fig.suptitle(labels[i])
+	
+	pyplot.show()
