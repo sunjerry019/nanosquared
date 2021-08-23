@@ -15,8 +15,9 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
-NUM_X = 10
-NUM_Y = 10
+NUM_X = 100
+NUM_Y = 100
+BEREICH = 10
 
 total = NUM_X * NUM_Y
 chunksize = int(np.floor(total / size))
@@ -41,8 +42,8 @@ if rank == 0:
 	w_0 = y[min_w]
 	
 	# Variation
-	z_0_values = z_0 + np.linspace(-5, 5, endpoint=True, num = NUM_X, dtype = 'float64')
-	w_0_values = w_0 + np.linspace(-5, 5, endpoint=True, num = NUM_Y, dtype = 'float64')
+	z_0_values = z_0 + np.linspace(-BEREICH, BEREICH, endpoint=True, num = NUM_X, dtype = 'float64')
+	w_0_values = w_0 + np.linspace(-BEREICH, BEREICH, endpoint=True, num = NUM_Y, dtype = 'float64')
 	
 	# https://stackoverflow.com/a/11144716
 	# Cartesian Product
