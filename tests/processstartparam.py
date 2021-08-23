@@ -108,7 +108,7 @@ results = comm.gather(results, root=0)
 
 if rank == 0:
 	results = [item for sublist in results for item in sublist]
-	with open("output.ignore.out", 'w') as f:
+	with open("./slurm/output.ignore.out", 'w') as f:
 		f.write("# init_z\tinit_w\tm2\tdm2\tbeta\n")
 		for res in results:
 			init = '\t'.join(res['init'])
