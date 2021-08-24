@@ -32,3 +32,32 @@ def omega_z(params, z):
 			(np.pi * (w_0**2))
 		)**2)
 	)
+
+def omega_z_lambda(wavelength: float):
+	"""Returns a w_0 Function to be fitted, according to https://docs.scipy.org/doc/scipy/reference/odr.html that has wavelength already included
+
+	Refer to fit_functions.omega_z for documentation
+
+	Parameters
+	----------
+	wavelength : float
+		Wavelength to be used for the M^2 Fit
+
+	Returns
+	-------
+	func : f(params, z) -> y
+		omega_z function that has lambda included
+
+	"""
+	
+	def omega_z(params, z):
+		w_0, z_0, M_sq = params
+		
+		return w_0 * np.sqrt(
+			1 + ((z - z_0)**2)*((
+				(M_sq * wavelength)/
+				(np.pi * (w_0**2))
+			)**2)
+		)
+
+	return omega_z
