@@ -12,5 +12,6 @@
 
 # source /etc/profile.d/modules.sh
 # module load openmpi
+# srun mpiexec -n 20 python3 processstartparam.py
 
-mpiexec -n 20 python3 processstartparam.py
+mpiexec -n 20 python3 test_mpi.py
