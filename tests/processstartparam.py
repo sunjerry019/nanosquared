@@ -34,9 +34,9 @@ chunks  = None
 print(f"World: {size}, Chunksize: {eachNode[rank]}")
 
 if rank == 0:
-	diode_data_fast = pd.read_csv('../data/diode/fast_axis.txt', delimiter = '; ', engine='python', decimal=",")	
-	x = diode_data_fast["position[mm]"]
-	y = diode_data_fast["diam_y[um]"] / 2
+	diode_data_fast = pd.read_csv('../data/diode/slow_axis.txt', delimiter = '; ', engine='python', decimal=",")	
+	x = diode_data_fast["position[cm]"] * 10
+	y = diode_data_fast["diam_x[um]"] / 2
 
 	min_w = np.argmin(y)
 

@@ -2,7 +2,7 @@
 #
 #SBATCH --job-name=procStartParams
 #SBATCH --comment="Process Start Params of fitting"
-#SBATCH --ntasks=20
+#SBATCH --ntasks=50
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yudong.Sun@physik.uni-muenchen.de
@@ -13,4 +13,4 @@
 # source /etc/profile.d/modules.sh
 # module load openmpi
 
-mpiexec -n 20 python3 processstartparam.py
+mpiexec -n 50 python3 processstartparam.py
