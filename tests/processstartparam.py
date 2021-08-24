@@ -15,7 +15,7 @@ from mpi4py import MPI
 NUM_X = 100
 NUM_Y = 100
 BEREICH = 10
-slow_axis = True
+slow_axis = False
 # ==  END  SETTINGS ==
 
 comm = MPI.COMM_WORLD
@@ -82,7 +82,8 @@ f = fitting.fitter.MsqFitter(
 	xerror         = 0.5,
 	yerror         = 1,
 	wavelength     = 1650,
-	wavelength_err = 0
+	wavelength_err = 0,
+	msq_lambda     = False
 )
 print(f"{rank}: Processing start")
 
@@ -115,7 +116,10 @@ results = comm.gather(results, root=0)
 if rank == 0:
 	# Collapse the list of results from each node into one big list
 	results = [item for sublist in results for item in sublist]
-	with open("/home/y/Yudong.Sun/attoworld/slurm/output.ignore.out", 'w') as f:
+
+	filename = f"/home/y/Yudong.Sun/attoworld/slurm/{'slow' if slow_axis else 'fast'}_axis.ignore.out" 
+		
+	with open(filename, 'w') as f:
 		f.write("# init_z\tinit_w\tm2\tdm2\tbeta\n")
 		for res in results:
 			init = '\t'.join(res['init'])
