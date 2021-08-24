@@ -11,13 +11,16 @@ import numpy as np
 import fitting.fitter
 from mpi4py import MPI
 
-comm = MPI.COMM_WORLD
-size = comm.Get_size()
-rank = comm.Get_rank()
-
+# == BEGIN SETTINGS ==
 NUM_X = 100
 NUM_Y = 100
 BEREICH = 10
+slow_axis = True
+# ==  END  SETTINGS ==
+
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
 
 total = NUM_X * NUM_Y
 chunksize = int(np.floor(total / size))
@@ -27,16 +30,20 @@ eachNode[0] = total - (size - 1) * chunksize
 # the number of datapoints each node should get
 # The main node gets more
 
-sendbuf = None
-recvbuf = None
 chunks  = None
 
 print(f"World: {size}, Chunksize: {eachNode[rank]}")
 
 if rank == 0:
-	diode_data_fast = pd.read_csv('../data/diode/slow_axis.txt', delimiter = '; ', engine='python', decimal=",")	
-	x = diode_data_fast["position[cm]"] * 10
-	y = diode_data_fast["diam_x[um]"] / 2
+
+	if slow_axis:
+		diode_data_fast = pd.read_csv('../data/diode/slow_axis.txt', delimiter = '; ', engine='python', decimal=",")	
+		x = diode_data_fast["position[cm]"] * 10
+		y = diode_data_fast["diam_x[um]"] / 2
+	else:
+		diode_data_fast = pd.read_csv('../data/diode/fast_axis.txt', delimiter = '; ', engine='python', decimal=",")	
+		x = diode_data_fast["position[mm]"]
+		y = diode_data_fast["diam_y[um]"] / 2
 
 	min_w = np.argmin(y)
 
