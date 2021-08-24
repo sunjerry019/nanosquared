@@ -31,7 +31,7 @@ sendbuf = None
 recvbuf = None
 chunks  = None
 
-print(f"World: {size}, Chunksize: {chunksize}")
+print(f"World: {size}, Chunksize: {eachNode[rank]}")
 
 if rank == 0:
 	diode_data_fast = pd.read_csv('../data/diode/fast_axis.txt', delimiter = '; ', engine='python', decimal=",")	
