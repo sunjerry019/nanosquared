@@ -60,9 +60,6 @@ else:
 	x = np.empty(19, dtype='float64')
 	y = np.empty(19, dtype='float64')
 
-	z_0s = np.empty(eachNode[rank], dtype='float64')
-	w_0s = np.empty(eachNode[rank], dtype='float64')
-
 x = comm.bcast(x, root=0)
 y = comm.bcast(y, root=0)
 
