@@ -346,5 +346,10 @@ class MsqFitter(ODRFitter):
         self.estimateInitialGuesses()
         return self.fit()
 
+
+class CurveFitter():
+    def __init__(self):
+        pass
+
 if __name__ == "__main__":
     import code; code.interact(local=locals())
