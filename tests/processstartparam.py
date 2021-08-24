@@ -31,7 +31,7 @@ sendbuf = None
 recvbuf = None
 chunks  = None
 
-print(f"World: {size}, Chunksize: {chunksize}")
+print(f"World: {size}, Chunksize: {eachNode[rank]}")
 
 if rank == 0:
 	diode_data_fast = pd.read_csv('../data/diode/fast_axis.txt', delimiter = '; ', engine='python', decimal=",")	
@@ -109,6 +109,7 @@ comm.Barrier()
 results = comm.gather(results, root=0)
 
 if rank == 0:
+	# Collapse the list of results from each node into one big list
 	results = [item for sublist in results for item in sublist]
 	with open("/home/y/Yudong.Sun/attoworld/slurm/output.ignore.out", 'w') as f:
 		f.write("# init_z\tinit_w\tm2\tdm2\tbeta\n")
