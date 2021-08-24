@@ -103,8 +103,8 @@ for (z_0, w_0) in mychunk:
 
 	results.append(result)
 
-comm.Barrier()
 print(f"{rank}: Processing end")
+comm.Barrier()
 
 results = comm.gather(results, root=0)
 
