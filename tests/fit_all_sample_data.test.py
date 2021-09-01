@@ -37,7 +37,7 @@ wvs     = corr_wv * np.array([2300, 2300, 1650, 1650], dtype = np.float64)
 wvs_err = corr_wv * np.zeros(4)
 
 xs_e    = [corr_x * 0.5] * 4
-ys_e    = [corr_y*ye for ye in [0.25, 0.25, 1, 1 ]]
+ys_e    = [0.25, 0.25, 1 , 1 ]
 
 for i in range(len(labels)):
 	f = fitting.fitter.MsqFitter(
