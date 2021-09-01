@@ -28,7 +28,13 @@ class Fitter():
         
         raise NotImplementedError
 
+    def fit(self, initial_params):
+        raise NotImplementedError
+
     def predict(self, x):
+        raise NotImplementedError
+
+    def printOutput(self):
         raise NotImplementedError
     
     def getPlotOfFit(self, numpoints: int = 4096) -> Tuple[pyplot.Figure, pyplot.Axes]:
@@ -62,7 +68,6 @@ class Fitter():
         self.axis.legend()
 
         return self.figure, self.axis
-
 
 
 class OCFFitter(Fitter):
@@ -117,8 +122,6 @@ class OCFFitter(Fitter):
             Rank 1, Independent variable
         y : array_like
             Rank 1, Dependent variable, should be of the same shape as ``x``
-        xerror : array_like or function
-            Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror
         yerror : array_like or function
             Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
 
@@ -321,7 +324,7 @@ class ODRFitter(Fitter):
         
         return self.model.fcn(self.output.beta, x)
 
-class MsqFitter(ODRFitter):
+class MsqODRFitter(ODRFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
 
     By default, initial guesses for w_0 and z_0 are 1.
@@ -496,7 +499,6 @@ class MsqFitter(ODRFitter):
         """
         self.estimateInitialGuesses()
         return self.fit()
-
 
 class CurveFitter():
     def __init__(self):
