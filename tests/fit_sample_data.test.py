@@ -17,7 +17,7 @@ print("X-Axis")
 x = data["position[mm]"] / np.power(10, 3)
 y = data["diam_x[um]"]   / (np.power(10, 6) * 2)
 
-f = fitting.fitter.MsqFitter(
+f = fitting.fitter.MsqODRFitter(
 	x              = x, 
 	y              = y, 
 	xerror         = lambda x: 0.01*x, 

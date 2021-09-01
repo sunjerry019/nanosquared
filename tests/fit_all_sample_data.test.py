@@ -40,7 +40,7 @@ xs_e    = [corr_x * 0.5] * 4
 ys_e    = [0.25, 0.25, 1 , 1 ]
 
 for i in range(len(labels)):
-	f = fitting.fitter.MsqFitter(
+	f = fitting.fitter.MsqODRFitter(
 		x              = xs[i], 
 		y              = ys[i], 
 		xerror         = xs_e[i],

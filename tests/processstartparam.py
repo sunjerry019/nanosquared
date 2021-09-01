@@ -76,7 +76,7 @@ comm.Scatter(chunks, mychunk, root=0)
 
 print(f"{rank}: shape = {mychunk.shape}")
 
-f = fitting.fitter.MsqFitter(
+f = fitting.fitter.MsqODRFitter(
 	x              = x, 
 	y              = y, 
 	xerror         = 0.5,
