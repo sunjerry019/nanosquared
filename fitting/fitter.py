@@ -28,6 +28,15 @@ class Fitter():
         
         raise NotImplementedError
 
+    def ensureNP(self, ref, varb):
+        if not isinstance(varb, np.ndarray):
+            if isinstance(varb, list):
+                varb = np.array(list)
+            elif isinstance(varb, (float, int)):
+                varb = np.full_like(ref, varb)
+
+        return varb
+
     def fit(self, initial_params):
         raise NotImplementedError
 
@@ -69,7 +78,6 @@ class Fitter():
 
         return self.figure, self.axis
 
-
 class OCFFitter(Fitter):
     """The OCFFitter class fits the given data using scipy.optimize.curve_fit (OCF) and the least-squares method
 
@@ -80,7 +88,7 @@ class OCFFitter(Fitter):
     y : array_like
         Rank-1, Dependent variable, should be of the same shape as ``x``
     yerror : array_like or function
-        Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+        Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror or scalar
     func : function
         fcn(beta, x) --> y
 
@@ -123,10 +131,11 @@ class OCFFitter(Fitter):
         y : array_like
             Rank 1, Dependent variable, should be of the same shape as ``x``
         yerror : array_like or function
-            Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+            Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror or scalar
 
         """
-        yerror = yerror(x) if callable(yerror) else yerror
+        yerror = yerror(y) if callable(yerror) else yerror
+        yerror = self.ensureNP(y, yerror)
 
         data = {
             "x"     : x,
@@ -219,9 +228,9 @@ class ODRFitter(Fitter):
     y : array_like
         Rank-1, Dependent variable, should be of the same shape as ``x``
     xerror : array_like or function
-        Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror
+        Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror or scalar
     yerror : array_like or function
-        Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+        Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror or scalar
     func : function
         fcn(beta, x) --> y
 
@@ -260,13 +269,16 @@ class ODRFitter(Fitter):
         y : array_like
             Rank 1, Dependent variable, should be of the same shape as ``x``
         xerror : array_like or function
-            Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror
+            Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror or scalar
         yerror : array_like or function
-            Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+            Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror or scalar
 
         """
         xerror = xerror(x) if callable(xerror) else xerror
-        yerror = yerror(x) if callable(yerror) else yerror
+        yerror = yerror(y) if callable(yerror) else yerror
+
+        xerror = self.ensureNP(x, xerror)
+        yerror = self.ensureNP(y, yerror)
         
         self.data = scipy.odr.RealData(x, y, sx=xerror, sy=yerror)
 
@@ -416,7 +428,6 @@ class MsqFitter():
             self._m_squared_calculated = True
         
         return self._m_squared
-
 
 class MsqODRFitter(ODRFitter, MsqFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
