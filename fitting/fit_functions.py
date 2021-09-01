@@ -2,6 +2,31 @@
 
 import numpy as np
 
+from typing import Callable
+
+def convertODRtoOCF(func):
+	"""Generates a function for scipy.optimize.curve_fit based on a scipy.odr function
+
+	Parameters
+	----------
+	func : function
+		fcn(beta, x) --> y
+
+	Returns
+	-------
+	func : function
+		fcn(x, *beta) --> y
+
+		where beta = paramaters
+
+	"""
+	def newFunc(x, *args):
+		return func(args, x)
+
+	# newFunc.__name__ = func.__name__ doesn't work and its not important
+	
+	return newFunc
+
 def omega_z(params, z):
 	"""Beam Radii Function to be fitted, according to https://docs.scipy.org/doc/scipy/reference/odr.html
 
