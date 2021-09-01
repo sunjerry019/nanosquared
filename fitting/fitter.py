@@ -519,7 +519,7 @@ class MsqODRFitter(ODRFitter, MsqFitter):
         self.estimateInitialGuesses()
         return self.fit()
 
-class MsqODFFitter(OCFFitter, MsqFitter):
+class MsqOCFFitter(OCFFitter, MsqFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using scipy.optimize.curve_fit
 
     By default, initial guesses for w_0 and z_0 are 1.
