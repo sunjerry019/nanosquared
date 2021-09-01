@@ -9,6 +9,7 @@ sys.path.insert(0, root_dir)
 
 import numpy as np
 import scipy.odr
+from   scipy.optimize import curve_fit
 import warnings
 # from overrides import overrides, EnforceOverrides # https://github.com/mkorpela/overrides
 
@@ -16,7 +17,191 @@ import fitting.fit_functions as fit_functions
 
 import matplotlib.pyplot as pyplot
 
-class ODRFitter():
+from collections import namedtuple
+
+class Fitter():
+    """Fitter provides the superclass for ODRFitter and OCFFitter
+    """
+    def __init__(self) -> None:
+        self.output = None
+        self.figure, self.axis = None, None
+        
+        raise NotImplementedError
+
+    def predict(self, x):
+        raise NotImplementedError
+    
+    def getPlotOfFit(self, numpoints: int = 4096) -> Tuple[pyplot.Figure, pyplot.Axes]:
+        """Plots the fitted function with the original data.
+        Opens a `matplotlib` figure to achieve this.
+
+        Returns the `matplotlib` figures and axes.
+
+        Parameters
+        ----------
+        numpoints : int, optional
+            Number of data points along the x-axis, by default 4096
+
+        """
+
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running getPlotOfFit()")
+
+        _min_x, _max_x = self.data.x.min(), self.data.x.max()
+        _x = np.linspace(_min_x, _max_x, num = numpoints, endpoint = True)
+        _y = self.predict(_x)
+
+        # self.figure = pyplot.figure()
+        # self.axis   = self.figure.add_subplot(1,1,1) 
+
+        self.figure, self.axis = pyplot.subplots(1, 1) # nrow, ncol, position
+
+        self.axis.set_title("Fitted Plot")        
+        self.axis.plot(self.data.x, self.data.y, linestyle = "None", marker = '+')
+        self.axis.plot(_x         , _y         , linestyle = "-"   , label = "Fit")
+        self.axis.legend()
+
+        return self.figure, self.axis
+
+
+
+class OCFFitter(Fitter):
+    """The OCFFitter class fits the given data using scipy.optimize.curve_fit (OCF) and the least-squares method
+
+    Parameters
+    ----------
+    x : array_like
+        Rank-1, Independent variable
+    y : array_like
+        Rank-1, Dependent variable, should be of the same shape as ``x``
+    yerror : array_like or function
+        Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+    func : function
+        fcn(beta, x) --> y
+
+        This is based on scipy.odr. It will be converted to 
+        a function suitable for scipy.optimize.curve_fit where necessary.
+
+    Attributes
+    ----------
+    data : namedtuple
+        .x = xdata
+        .y = ydata
+        .yerror = yerror
+        .xerror = None
+
+
+    output: array_like
+        Returns [optimalparams, sd_params]
+    
+    """
+
+    def __init__(self, x, y, yerror, func) -> None:
+        self.xdata  = None
+        self.ydata  = None
+        self.yerror = None 
+        self.loadData(x, y, yerror)
+
+        self.func = fit_functions.convertODRtoOCF(func)
+        self.output = None
+
+        self.figure = None
+        self.axis   = None
+    
+    def loadData(self, x, y, yerror):
+        """Load the data into a data object
+
+        Parameters
+        ----------
+        x : array_like
+            Rank 1, Independent variable
+        y : array_like
+            Rank 1, Dependent variable, should be of the same shape as ``x``
+        xerror : array_like or function
+            Rank 1, Error in x, should be of the same shape as ``x`` or func(x) --> xerror
+        yerror : array_like or function
+            Rank 1, Error in y, should be of the same shape as ``y`` or func(y) --> yerror
+
+        """
+        yerror = yerror(x) if callable(yerror) else yerror
+
+        data = {
+            "x"     : x,
+            "y"     : y,
+            "xerror": None,
+            "yerror": yerror
+        }
+        self.data = namedtuple("Data", data.keys())(*data.values())
+
+    def fit(self, initial_params):
+        """Fit the data using ``scipy.optimize.curve_fit()`` and saves the output to ``self.output``
+
+        Parameters
+        ----------
+        initial_params : array_like
+            Represents the initial guesses. Rank 1 Array with length equal to the number of parameters defined for self.model. 
+            For w(z): Rank 1 of length 4 with ``initial_params = array([w_0, z_0, M_sq, lmbda])``
+        
+        Returns
+        -------
+        self.output : array_like
+            Returns [optimalparams, sd_params], where sd_params = one standard deviation errors on the parameters
+
+        Raises
+        ------
+        RuntimeError
+            If the fit does not converge
+
+        """
+        
+        popt, pcov = curve_fit(
+            f = self.func, 
+            xdata  = self.data.x, 
+            ydata  = self.data.y, 
+            p0     = initial_params, 
+            sigma  = self.data.yerror,
+            method = 'lm',
+        )
+
+        self.output = [popt, np.sqrt(np.diag(pcov))]
+        
+        return self.output
+
+    def printOutput(self):
+        """Prints the output of .fit(), otherwise raises a warning
+
+        Raises
+        ------
+        RuntimeWarning
+            Raised if .fit() has not been run.
+
+        """
+        if self.output is not None:
+            print("Optimized: ", self.output[0])
+            print("Errors:    ", self.output[1])
+        else:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before printing output")
+    
+    def predict(self, x):
+        """Predicts the `y` values based on the fitted result. 
+
+        Parameters
+        ----------
+        x : array_like
+            Values to predict
+
+        Returns
+        -------
+        y : array_like
+            Predicted Values
+
+        """
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running predict()")
+        
+        return self.func(x, *self.output[0])
+
+class ODRFitter(Fitter):
     """The ODRFitter class fits the given data using scipy.odr
 
     Parameters
@@ -83,7 +268,8 @@ class ODRFitter():
         Parameters
         ----------
         initial_params : array_like
-            Represents the initial guesses. Rank 1 Array with length equal to the number of parameters defined for self.model.For w(z): Rank 1 of length 4 with ``initial_params = array([w_0, z_0, M_sq, lmbda])``
+            Represents the initial guesses. Rank 1 Array with length equal to the number of parameters defined for self.model.
+            For w(z): Rank 1 of length 3 with ``initial_params = array([w_0, z_0, M_sq_lmbda])``
         
         Returns
         -------
@@ -134,41 +320,6 @@ class ODRFitter():
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before running predict()")
         
         return self.model.fcn(self.output.beta, x)
-
-    def getPlotOfFit(self, numpoints: int = 4096) -> Tuple[pyplot.Figure, pyplot.Axes]:
-        """Plots the fitted function with the original data.
-        Opens a `matplotlib` figure to achieve this.
-
-        Returns the `matplotlib` figures and axes.
-
-        Parameters
-        ----------
-        numpoints : int, optional
-            Number of data points along the x-axis, by default 4096
-
-        """
-
-        if self.output is None:
-            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running getPlotOfFit()")
-
-        _min_x, _max_x = self.data.x.min(), self.data.x.max()
-        _x = np.linspace(_min_x, _max_x, num = numpoints, endpoint = True)
-        _y = self.predict(_x)
-
-        # self.figure = pyplot.figure()
-        # self.axis   = self.figure.add_subplot(1,1,1) 
-
-        self.figure, self.axis = pyplot.subplots(1, 1) # nrow, ncol, position
-
-        self.axis.set_title("Fitted Plot")        
-        self.axis.plot(self.data.x, self.data.y, linestyle = "None", marker = '+')
-        self.axis.plot(_x         , _y         , linestyle = "-"   , label = "Fit")
-        self.axis.legend()
-
-        return self.figure, self.axis
-        
-
-    
 
 class MsqFitter(ODRFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
