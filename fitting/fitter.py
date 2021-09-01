@@ -462,6 +462,10 @@ class MsqFitter():
 
             elif self.mode == 2:
                 # ISO Method
+
+                # ISSUE HERE: ERROR TOO BIG
+                # TODO
+
                 a , b , c  = self.output.beta
                 da, db, dc = self.output.sd_beta
                 wv, dwv    = self.wavelength
