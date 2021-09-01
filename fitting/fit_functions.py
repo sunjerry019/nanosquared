@@ -96,6 +96,13 @@ def iso_omega_z(params, z):
 	The original function uses the diameter, we change it to use the radii by dividing it by 2.
 	We assume a stigmatic/simple astigmatic beam. 
 
+	d_sigma(z) = sqrt(a + bz + cz^2)
+	z_0        = - b / 2c
+	d_0        = sqrt((4ac - b^2)/(4c))
+	w_0        = 0.5 * sqrt((4ac - b^2)/(4c))
+	z_R        = sqrt(4ac - b^2)/(2c)
+	M_sq       = (pi/(8*lmbda)) * sqrt(4ac - b^2)
+
 	Parameters
 	----------
 	params : array_like
