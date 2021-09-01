@@ -384,7 +384,7 @@ class MsqFitter():
         self._m_squared            = None
 
     def setInitialGuesses(self, w_0 : float = 1, z_0 : float = 1):
-        """Sets the initial guesses
+        """Sets the initial guesses, only for mode = 0 or 1
 
         Parameters
         ----------
@@ -394,19 +394,27 @@ class MsqFitter():
             Guess for focal point position, by default 1
 
         """
-
-        self.initial_guesses[0:2] = [w_0, z_0]
+        if self.mode == 0 or self.mode == 1:
+            self.initial_guesses[0:2] = [w_0, z_0]
+            
+        elif self.mode == 2:
+            pass
 
     def estimateInitialGuesses(self):
         """Estimates the initial parameters w_0, z_0 from the data given using the minimum y-value and save it into self.initial_guesses.
+           Only for mode = 0 or 1
         """
 
-        min_w = np.argmin(self.data.y)
+        if self.mode == 0 or self.mode == 1:
+            min_w = np.argmin(self.data.y)
 
-        z_0 = self.data.x[min_w]
-        w_0 = self.data.y[min_w]
+            z_0 = self.data.x[min_w]
+            w_0 = self.data.y[min_w]
 
-        self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+            self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+
+        elif self.mode == 2:
+            pass
     
     @property
     def m_squared(self):
@@ -454,7 +462,25 @@ class MsqFitter():
 
             elif self.mode == 3:
                 # ISO Method
-                pass
+                a , b , c  = self.output.beta
+                da, db, dc = self.output.sd_beta
+                wv, dwv    = self.wavelength
+
+                m_sq = (np.pi / (8 * wv)) * np.sqrt((4*a*c) - (b*b))
+
+                _faktor = np.sqrt(4*a*c - b*b)
+                dM_da   =   (np.pi * c) / (4*wv*_faktor)
+                dM_db   = - (np.pi * b) / (8*wv*_faktor)
+                dM_dc   =   (np.pi * a) / (4*wv*_faktor)
+                dM_dwv  = - (np.pi * _faktor) / (8*wv*wv)
+
+                arr     = np.array([dM_da * da, dM_db * db, dM_dc * dc, dM_dwv * dwv])
+                m_sq_error = np.sqrt(np.sum(np.square(arr)))
+
+                # Error propagation with gauss method
+                # delta M = sqrt(sum (dM_di*DI)2)
+
+                self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
 
             self._m_squared_calculated = True
         
