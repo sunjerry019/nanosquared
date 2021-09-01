@@ -396,7 +396,7 @@ class MsqFitter():
         """
         if self.mode == 0 or self.mode == 1:
             self.initial_guesses[0:2] = [w_0, z_0]
-            
+
         elif self.mode == 2:
             pass
 
@@ -460,7 +460,7 @@ class MsqFitter():
 
                 self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
 
-            elif self.mode == 3:
+            elif self.mode == 2:
                 # ISO Method
                 a , b , c  = self.output.beta
                 da, db, dc = self.output.sd_beta

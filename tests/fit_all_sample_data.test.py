@@ -47,7 +47,7 @@ for i in range(len(labels)):
 		yerror         = ys_e[i],
 		wavelength     = wvs[i],
 		wavelength_err = wvs_err[i],
-		mode           = 0
+		mode           = 2
 	)
 
 	f.estimateAndFit()
