@@ -197,6 +197,10 @@ class MsqFitter(ODRFitter):
     wavelength_err : float_like, optional
         Error of the wavelength of the laser, to be used in error propagation to find the m_squared
         By default: 0
+    msq_lambda : bool
+        If set to True, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+        If set to True, the error of the wavelength is disregarded. 
+        By default: True
 
     Attributes
     ----------
@@ -214,19 +218,31 @@ class MsqFitter(ODRFitter):
         initial_guesses for the fit
     m_squared : array_like
         ``np.array([m_squared, m_squared_err])`` of floats; calculated m_squared based on self.wavelength and the fit
+    msq_lambda : bool
+        Flag to fit to M_sq_lambda or M_sq 
 
     """
-    def __init__(self, x, y, xerror, yerror, wavelength: float, wavelength_err: float = 0):        
+    def __init__(self, x, y, xerror, yerror, wavelength: float, wavelength_err: float = 0, msq_lambda: bool = False):        
         # NOTE: To use ``fit_functions.omega_z`` as a default value in a function: https://stackoverflow.com/a/41921291
+        
+        self.msq_lambda = msq_lambda
 
         self.wavelength      = np.array([wavelength, wavelength_err], dtype= np.float64)
-        self.initial_guesses = np.array([1  , 1  , wavelength], dtype = np.float64)
-        #                                w_0, z_0, M_sq_lmbda
+
+        if msq_lambda:
+            self.initial_guesses = np.array([1  , 1  , wavelength], dtype = np.float64)
+            #                                w_0, z_0, M_sq_lmbda
+        else:
+            self.initial_guesses = np.array([1  , 1  , 1], dtype = np.float64)
+            #                                w_0, z_0, M_sq
 
         self._m_squared_calculated = False
         self._m_squared            = None
-
-        super().__init__(x, y, xerror, yerror, fit_functions.omega_z)
+        
+        if msq_lambda:
+            super().__init__(x, y, xerror, yerror, fit_functions.omega_z)
+        else:
+            super().__init__(x, y, xerror, yerror, fit_functions.omega_z_lambda(wavelength = wavelength))
 
     @property
     def m_squared(self):
@@ -247,6 +263,11 @@ class MsqFitter(ODRFitter):
 
         if self.output is None:
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before getting m_squared")
+
+        if not self.msq_lambda:
+            # The fitted quantity is directly m2
+            self._m_squared = np.array([self.output.beta[2], self.output.sd_beta[2]], dtype = np.float64) 
+            self._m_squared_calculated = True
     
         if not self._m_squared_calculated:
             # m_squared has not been calculated for the current fit
@@ -324,6 +345,11 @@ class MsqFitter(ODRFitter):
         """
         self.estimateInitialGuesses()
         return self.fit()
+
+
+class CurveFitter():
+    def __init__(self):
+        pass
 
 if __name__ == "__main__":
     import code; code.interact(local=locals())

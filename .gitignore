@@ -2,6 +2,7 @@
 data/
 NanoScan
 .vscode
+*.ignore.*
 
 # Sphinx
 doc/_build/*
