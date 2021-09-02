@@ -12,6 +12,9 @@ class ControllerError(Exception):
 class PositionOutOfBoundsError(Exception):
     """Raised when the position given is out of bounds of what the controller supports"""
 
+class PositionDirtyError(Exception):
+    """Raised when the position that is requested is dirty"""
+
 def FailSilently(method):
     @wraps(method)
     def _impl(self, *method_args, **method_kwargs):
