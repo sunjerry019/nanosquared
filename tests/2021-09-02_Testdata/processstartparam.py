@@ -78,12 +78,12 @@ def processFile(filename):
 	comm.Scatter(chunks, mychunk, root=0)
 
 	print(f"{rank}: shape = {mychunk.shape}")
-
+	
 	f = fitting.fitter.MsqOCFFitter(
 		x              = x, 
 		y              = y, 
 		# xerror         = 0.5,
-		yerror         = 1,
+		yerror         = lambda y: 0.01*y, # 1% error
 		wavelength     = 1650,
 		wavelength_err = 0,
 		mode           = fitting.fitter.MsqFitter.M2_MODE
@@ -93,16 +93,23 @@ def processFile(filename):
 	results = []
 
 	for (z_0, w_0) in mychunk:
-		f.setInitialGuesses(w_0 = w_0, z_0 = z_0)
-		f.fit()
+		nofit = False
 
-		if ((isinstance(f, fitting.fitter.ODRFitter) and f.output.info >= 4) or
+		f.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+		try:
+			f.fit()
+		except RuntimeError as e:
+			nofit = True
+			print(f"{(z_0, w_0)}: Did not converge: {e}")
+
+		if (nofit or
+		    (isinstance(f, fitting.fitter.ODRFitter) and f.output.info >= 4) or
 		    (isinstance(f, fitting.fitter.OCFFitter) and ((not np.isfinite(f.output.sd_beta).any()) or f.m_squared[0] < 1))
 		):
 			result = {
 				"init": (str(z_0), str(w_0)),
 				"m2"  : ['0', '0'], 
-				"beta": [str(i) for i in f.output.beta]
+				"beta": ['0', '0', '0'] if nofit else [str(i) for i in f.output.beta]
 			}
 		else:
 			result = {
