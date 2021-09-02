@@ -1,0 +1,132 @@
+(nanosquared) PS Y:\path\to\project\> python .\wincamd.py
+Number of devices is 4
+with WinCamD as w
+Python 3.9.5 | packaged by conda-forge | (default, Jun 19 2021, 00:22:33) [MSC v.1916 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+(InteractiveConsole)
+>>> w.startDevice(); w.getAxis_D4Sigma('x'); w.stopDevice()
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+0 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+1 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+2 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+3 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+4 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+5 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+6 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+7 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+8 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160>
+End of queue
+9 0.0
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82BC160> done
+End of one RTT
+
+d4sigma = 0.0
+>>> w.startDevice(); w.getAxis_D4Sigma('x'); w.stopDevice()
+True
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+0 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+1 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+2 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+3 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+4 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+5 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+6 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+7 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+8 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0>
+End of queue
+9 68.12327260122706
+DataReady task <function WinCamD.getAxis_D4Sigma.<locals>.temp_func at 0x0000019BB82C71F0> done
+End of one RTT
+
+d4sigma = 68.12327260122706
+False

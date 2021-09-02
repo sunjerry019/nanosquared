@@ -1,0 +1,5 @@
+Installation Notes:
+
+1. Install the 64 Bit DataRay software to use with 64 Bit Python
+2. Copy the FTD3XX.dll from your "Program Files\DataRay" directory to the directory where you are running your Python script
+    -> Question: Can I dynamically link this from somewhere?

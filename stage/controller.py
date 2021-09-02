@@ -20,6 +20,7 @@ import signal
 import json
 import warnings
 import time
+from collections import namedtuple
 
 from typing import Union, Optional
 import traceback
@@ -28,6 +29,14 @@ import abc
 
 import stage.errors
 import stage._stage as Stg
+
+import common.helpers as h
+
+import logging
+logging.captureWarnings(True)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 
 class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
@@ -239,6 +248,8 @@ class GSC01(SerialController):
     
     Currently the device is to CENTRAL HOME, i.e. the origin is the center of the stage.
     """
+    
+    # SGSP26-200 : Travel Range 200mm
 
     # Additional Settings:
     # - Baudrate: 9600
@@ -248,26 +259,203 @@ class GSC01(SerialController):
     # - Jog Speed: 500 pps
     # - Run Current: 350 mA
     # - Stop Current 175 mA
+    # Set using the GSC-01 Configuration App
 
     # We always use the axis 1 instead of W
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, stage: Stg.GSC01_Stage, *args, **kwargs):
+        """Constructor
+
+        Parameters
+        ----------
+        stage : stage._stage.GSC01_Stage
+            A stage instance with the correct boundary values set
+
+        """
+    
         super().__init__(implementation = True, *args, **kwargs)
 
         self.ENTER = b'\x0D\x0A' # CRLF
         
         self.waitClear() # To make sure controller is on
 
-        self.stage = Stg.GSC01_Stage(pos = self.getPositionReadOut())
-        self.axis  = "1"                                    # can take value 1 or W
+        # When the Stage is started, the current position is taken as 0
+        # For meaningful positioning, we need to home the stage.
+
+        self.stage          = stage
+        self.stage.position = self.getPositionReadOut()
+        self.axis           = "1"                                    # can take value 1 or W
+        
+        self._powered = False # Internal management
+        self.powered  = True
+
+        # Set speed
+        self.initSpeed = {
+            "jogSpeed": 500  ,
+            "minSpeed": 500  ,
+            "maxSpeed": 5000 ,
+            "acdcTime": 200 
+        }
+        self.setSpeed(**self.initSpeed)
+
+        # Check dirtiness
+        self.checkDirtiness()
+    
+    # Init Funcs here
+    def checkDirtiness(self):
+        try:
+            self.safesend(f"M:{self.axis}+P1")
+        except stage.errors.ControllerError:
+            self.stage.permDirty = True
+
+    # Helper Functions
+    def pulse_to_um(self, pps: float):
+        return self.stage.um_per_pulse * pps
+    def um_to_pulse(self, um: float):
+        return um / self.stage.um_per_pulse
+
+    # Property functions here
+    @property
+    def powered(self):
+        return self._powered
+
+    @powered.setter
+    def powered(self, state: bool):
+        """Sets whether the motor is powered or free spinning.
+
+        Parameters
+        ----------
+        state : bool
+            True for powered, False for not powered
+
+        """
+
+        on = 1 if state else 0
+
+        self.safesend(f"C:{self.axis}{on}")
+
+        if self._powered and not state:
+            self.stage.permDirty = True
+
+        self._powered = state
     
     # Implementation Functions here
-     
+
+    @stage.errors.FailWithWarning
+    def setSpeed(self, jogSpeed: Optional[int] = None, \
+                       minSpeed: Optional[int] = None, \
+                       maxSpeed: Optional[int] = None, \
+                       acdcTime: Optional[int] = None,
+                       init    : Optional[bool]= False):
+        """Sets the driving speed of the stage.
+
+        Set speed in units of 100 PPS. Values less than 100 PPS are rounded down.
+        If negative values are given, the absolute values will be taken.
+        If any illegal values are given, the original values are taken. If this results in maxspeed < minspeed, then they will be switched.
+
+        Initial Values:
+        - jogSpeed = 500  PPS (Restart initializes this)
+        - minSpeed = 500  PPS 
+        - maxSpeed = 5000 PPS 
+        - acdcTime = 200  ms
+
+        Parameters
+        ----------
+        jogSpeed : Optional[int], optional
+            The jogging speed of the stage in Pulse Per Seconds, by default None
+            If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
+        minSpeed : Optional[int], optional
+            The minimum speed of the stage in Pulse Per Seconds, by default None
+            If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
+        maxSpeed : Optional[int], optional
+            The maximum speed of the stage in Pulse Per Seconds, by default None
+            If set to None, current speed is used. 
+            Acceptables values are 100 - 20000 PPS.
+        acdcTime : Optional[int], optional
+            The acceleration and deceleration time of the stage in milliseconds, by default None
+            Acceptables values are 0 to 1000 ms.
+            If set to None, current acceleration and deceleration time is used. 
+        init     : Optional[bool], optional
+            Resets the speeds to the initial values. If set to True, other parameters are ignored.
+            By default False.
+
+        Returns
+        -------
+        (retSpeed, retJog) : Statuses
+            See GSC01.safesend()
+
+        Raises
+        ------
+        AssertionError
+            If `minSpeed` is more than `maxSpeed`, or if `maxSpeed` is 0
+        TypeError
+            If any of the values are not integers.
+
+        """
+        
+        if init:
+            return self.setSpeed(**self.initSpeed)
+
+        newvals  = [jogSpeed, minSpeed, maxSpeed, acdcTime]
+        original = [self.stage.speed.jog, self.stage.speed.min, self.stage.speed.max, self.stage.acdcTime]
+
+        combine  = [abs(h.ensureInt(x)) if x is not None else original[i] for i, x in enumerate(newvals)]
+
+        assert combine[1] <= combine[2], "minSpeed should be <= maxSpeed"
+
+        for i in range(3):
+            # Check if values are multiples of 100
+            if (combine[i] % 100):
+                new = (combine[i] // 100) * 100
+                warnings.warn(f"Got {combine[i]}, using {new}")
+                combine[i] = new
+
+            # Speed Boundary checks
+            if not (100 <= combine[i] <= 20000):
+                warnings.warn(f"Illegal value {combine[i]}, using old value {original[i]}")
+                combine[i] = original[i]
+
+        # min/max speed check
+        combine[1], combine[2] = (combine[1], combine[2]) if (combine[1] <= combine[2]) else (combine[2], combine[1])
+
+        # acdc time boundary checks
+        if not (0 <= combine[3] <= 1000):
+            warnings.warn(f"Illegal value {combine[3]}, using old value {original[3]}")
+            combine[3] = original[3]
+    
+        keys             = ["jog", "min", "max"]
+        self.stage.speed = namedtuple("StageSpeed", keys)(*combine[:3])
+        self.stage.acdcTime  = combine[3]
+
+        logger.info(f"Setting speed: Jog = %d, min = %d, max = %d, acdctime = %d", *combine)
+
+        a = self.safesend(f"D:{self.axis}S{self.stage.speed.min}F{self.stage.speed.max}R{self.stage.acdcTime}")
+        b = self.safesend(f"S:J{self.stage.speed.jog}")
+
+        return a, b
+            
     @stage.errors.FailSilently # To be deleted with GUI
     def homeStage(self):
-        """Home the stage"""
+        """Home the stage
+        
+        Speeds: 
+        - minSpeed = 500  PPS 
+        - maxSpeed = 5000 PPS 
+        - acdcTime = 200  ms
+        The above cannot be changed. 
+        
+        """
         ret = self.safesend(f"H:{self.axis}")
         self.waitClear()
+
+        # We reset dirtiness
+        self.stage._permDirty = False 
+        self.stage.dirty      = False
+        # self.stage.resetStage() Eventuell, 
+        # but I don't want to deal with all the cases resulting from resetPositionToZero()
+
         self.resetPositionToZero()
         
         return ret
@@ -275,7 +463,45 @@ class GSC01(SerialController):
     def resetPositionToZero(self):
         self.stage.position = 0
         return self.safesend(f"R:{self.axis}")
+    
+    @stage.errors.FailWithWarning
+    def jog(self, positive: bool = True, secs: Optional[float] = None):
+        """Starts the stage jogging. 
 
+        The stage moves continousely at a preset jog speed without acceleration/deceleration until stopped
+        Use `self.setspeed(speed, jog = True)` to set the speed. 
+        Use `self.stop(emergency = False)` to stop. 
+
+        Parameters
+        ----------
+        positive : bool, optional
+            Whether to move in the positive direction, by default True
+        secs : float, optional
+            If given, the amount of time in seconds to jog, by default None
+            Uses the system time, so not very accurate, use at own risk. 
+
+        Returns
+        -------
+        ret : Status
+            See GSC01.safesend()
+
+        """
+
+        direction = "+" if positive else "-"
+
+        self.safesend(f"J:{self.axis}{direction}")
+
+        ret = self.safesend("G:")
+        self.stage.dirty = True
+
+        if secs is not None and secs >= 0:
+            time.sleep(secs)
+            return self.stop()
+        elif secs is not None and secs < 0:
+            raise ValueError(f"Jog Time cannot be negative, got {secs}.")
+        
+        return ret
+    
     @stage.errors.FailWithWarning
     def move(self, pos: int):
         """Absolution move to coordinate `pos``
@@ -332,6 +558,36 @@ class GSC01(SerialController):
         self.safesend(f"M:{self.axis}{direction}P{abs(delta)}")
         return self.safesend("G:")
     
+    @stage.errors.FailWithWarning
+    def releaseMotor(self):
+        self.powered = False
+    
+    @stage.errors.FailWithWarning
+    def powerMotor(self):
+        self.powered = True
+
+    @stage.errors.FailWithWarning
+    def syncPosition(self):
+        """Gets the position from the controller and syncs it to `stage.position`.
+        To calibrate in the other direction (using the software as the source), use `self.move`.
+
+        If the stage is powered, also clears the dirty state of the stage. 
+
+        Returns
+        -------
+        pos: int
+            Current Position of the stage
+
+        """
+
+        pos = self.getPositionReadOut()
+        self.stage.position = pos  # Should not raise any error
+
+        if self.powered:
+            self.stage.dirty = False
+
+        return pos
+
     @stage.errors.FailWithWarning
     def getPositionReadOut(self):
         """Gets the position from the controller. 
@@ -400,6 +656,9 @@ class GSC01(SerialController):
         """
         if emergency:
             return self.safesend("L:E")
+
+        if self.stage.dirty:
+            self.syncPosition()
 
         return self.safesend(f"L:{self.axis}")
 
@@ -507,7 +766,7 @@ class GSC01(SerialController):
         
 
 if __name__ == '__main__':
-    with GSC01(devMode = False) as m:
+    with GSC01(stage = Stg.SGSP26_200(), devMode = False) as m:
         print("with GSC01 as m")
         import code; code.interact(local=locals())
 

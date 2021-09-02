@@ -4,8 +4,11 @@ numpy>=1.20.3
 overrides>=6.1.0
 
 # wincamd
+# Test
 wxpython>=4.1.1
 comtypes>=1.1.8
+# My Use
+pyqt5>=5.15
 
 # Testing Environment
 pandas>=1.2.4
