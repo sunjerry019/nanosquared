@@ -356,6 +356,10 @@ class MsqFitter():
         If using `mode = 1`, the error of the wavelength is disregarded. 
 
     """
+    M2LAMBDA_MODE = 0
+    M2_MODE = 1
+    ISO_MODE = 2
+
     def __init__(self, wavelength: float, wavelength_err: float = 0, mode: int = 3):
         self.mode = mode if (isinstance(mode, int) and (0 <= mode <= 2)) else None
 
