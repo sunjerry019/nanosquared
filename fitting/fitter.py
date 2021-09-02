@@ -101,8 +101,8 @@ class OCFFitter(Fitter):
     data : namedtuple
         .x = xdata
         .y = ydata
-        .yerror = yerror
-        .xerror = None
+        .sy = yerror
+        .sx = None
 
     output: namedtuple
         .beta = params
@@ -137,10 +137,10 @@ class OCFFitter(Fitter):
         yerror = self.ensureNP(y, yerror)
 
         data = {
-            "x"     : x,
-            "y"     : y,
-            "xerror": None,
-            "yerror": yerror
+            "x"  : x,
+            "y"  : y,
+            "sx" : None,
+            "sy" : yerror
         }
         self.data = namedtuple("Data", data.keys())(*data.values())
 
@@ -170,7 +170,7 @@ class OCFFitter(Fitter):
             xdata  = self.data.x, 
             ydata  = self.data.y, 
             p0     = initial_params, 
-            sigma  = self.data.yerror,
+            sigma  = self.data.sy,
             method = 'lm',
         )
 
