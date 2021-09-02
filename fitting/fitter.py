@@ -73,8 +73,8 @@ class Fitter():
         self.figure, self.axis = pyplot.subplots(1, 1) # nrow, ncol, position
 
         self.axis.set_title("Fitted Plot")        
-        self.axis.plot(self.data.x, self.data.y, linestyle = "None", marker = '+')
-        self.axis.plot(_x         , _y         , linestyle = "-"   , label = "Fit")
+        self.axis.errorbar(self.data.x, self.data.y, yerr = self.data.sy, xerr = self.data.sx, linestyle = "None", marker = '+', barsabove = True)
+        self.axis.plot(    _x         , _y         , linestyle = "-"   , label = "Fit")
         self.axis.legend()
 
         return self.figure, self.axis
