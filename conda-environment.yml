@@ -10,5 +10,8 @@ dependencies:
     - pandas>=1.2.4
     - wxpython>=4.1.1
     - comtypes==1.1.8
+    - matplotlib>=3.4.2
+    - pyqt>=5.9.2
+    - qt>=5.9.7
     - pip:
         - pyqt5>=5.15
