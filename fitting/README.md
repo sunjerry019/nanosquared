@@ -1,3 +1,4 @@
+# Fitting for M²
 ```
 Fitter ┬─> ODRFitter (scipy.odr):                optimizes x and y-error
        ├─> OCFFitter (scipy.optimize.curve_fit): optimizes y-error
