@@ -25,6 +25,7 @@ class Fitter():
     def __init__(self) -> None:
         self.output = None
         self.figure, self.axis = None, None
+        self.data = None
         
         raise NotImplementedError
 
@@ -110,12 +111,10 @@ class OCFFitter(Fitter):
     """
 
     def __init__(self, x, y, yerror, func) -> None:
-        self.xdata  = None
-        self.ydata  = None
-        self.yerror = None 
+        self.data   = None
         self.loadData(x, y, yerror)
 
-        self.func = fit_functions.convertODRtoOCF(func)
+        self.func   = fit_functions.convertODRtoOCF(func)
         self.output = None
 
         self.figure = None
