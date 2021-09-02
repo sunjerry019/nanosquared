@@ -6,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=Yudong.Sun@physik.uni-muenchen.de
-#SBATCH --chdir=/home/y/Yudong.Sun/attoworld/nanosquared/tests
+#SBATCH --chdir=/home/y/Yudong.Sun/attoworld/nanosquared/tests/2021-09-02_Testdata/
 #SBATCH --output=/home/y/Yudong.Sun/attoworld/slurm/slurm.%j.%N.out
 #SBATCH --error=/home/y/Yudong.Sun/attoworld/slurm/slurm.%j.%N.err.out
 

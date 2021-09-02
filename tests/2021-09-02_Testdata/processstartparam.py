@@ -3,7 +3,7 @@
 import sys, os
 from matplotlib import pyplot
 base_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(base_dir, "../../"))
+root_dir = os.path.abspath(os.path.join(base_dir, "..", ".."))
 sys.path.insert(0, root_dir)
 
 import pandas as pd
@@ -29,12 +29,13 @@ eachNode[0] = total - (size - 1) * chunksize
 # the number of datapoints each node should get
 # The main node gets more
 
-chunks  = None
-
-print(f"World: {size}, Chunksize: {eachNode[rank]}")
+print(f"{rank}:\tWorld: {size}, Chunksize: {eachNode[rank]}")
 
 def processFile(filename):
+	# Init
+	
 	numpoints = 0
+	chunks = None
 	x = None
 	y = None
 
@@ -96,7 +97,8 @@ def processFile(filename):
 		f.fit()
 
 		if ((isinstance(f, fitting.fitter.ODRFitter) and f.output.info >= 4) or
-		    (isinstance(f, fitting.fitter.OCFFitter) and not np.isfinite(f.output.sd_beta))):
+		    (isinstance(f, fitting.fitter.OCFFitter) and ((not np.isfinite(f.output.sd_beta).any()) or f.m_squared[0] < 1))
+		):
 			result = {
 				"init": (str(z_0), str(w_0)),
 				"m2"  : ['0', '0'], 
@@ -120,7 +122,7 @@ def processFile(filename):
 		# Collapse the list of results from each node into one big list
 		results = [item for sublist in results for item in sublist]
 
-		filename = f"/home/y/Yudong.Sun/attoworld/slurm/{os.path.basename(filename)}.ignore.out" 
+		filename = f"/home/y/Yudong.Sun/attoworld/slurm/{os.path.basename(filename)}.ignore.tsv" 
 			
 		with open(filename, 'w') as f:
 			f.write("# init_z\tinit_w\tm2\tdm2\tbeta\n")
