@@ -83,7 +83,7 @@ f = fitting.fitter.MsqODRFitter(
 	yerror         = 1,
 	wavelength     = 1650,
 	wavelength_err = 0,
-	msq_lambda     = False
+	mode           = 0
 )
 print(f"{rank}: Processing start")
 

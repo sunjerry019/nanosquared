@@ -15,9 +15,9 @@ diode_data_fast = pd.read_csv('../data/diode/fast_axis.txt', delimiter = '; ', e
 diode_data_slow = pd.read_csv('../data/diode/slow_axis.txt', delimiter = '; ', engine='python', decimal=",")
 
 # Unit Conversions
-corr_x  = 1 # 10e-3
-corr_y  = 1 # 10e-6
-corr_wv = 1 # 10e-9
+corr_x  = 1 # 10e-3  
+corr_y  = 1 # 10e-6  
+corr_wv = 1 # 10e-9  
 
 # Prepare pairs to fit
 labels = ["Oscillator X-Axis", "Oscillator Y-Axis", "Diode Fast Axis", "Diode Slow Axis"]
@@ -42,12 +42,12 @@ ys_e    = [0.25, 0.25, 1 , 1 ]
 for i in range(len(labels)):
 	f = fitting.fitter.MsqOCFFitter(
 		x              = xs[i], 
-		y              = ys[i], 
+		y              = corr_y * ys[i], 
 		# xerror         = xs_e[i],
-		yerror         = ys_e[i],
+		yerror         = corr_y * ys_e[i],
 		wavelength     = wvs[i],
 		wavelength_err = wvs_err[i],
-		msq_lambda     = False
+		mode           = fitting.fitter.MsqFitter.ISO_MODE
 	)
 
 	f.estimateAndFit()

@@ -343,24 +343,52 @@ class ODRFitter(Fitter):
 
 class MsqFitter():
     """Superclass of all Msq Fitters
+
+    Parameters
+    ----------
+    mode: int
+        0: Fit using Msq*lambda as one term in the beam width equation 
+        1: Fit using Msq as one term in the beam width equation, lambda directly included
+        2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)
+
+        If using `mode = 0`, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+        The ISO Fitting method also takes into account the error of the wavelength.
+        If using `mode = 1`, the error of the wavelength is disregarded. 
+
     """
-    def __init__(self, wavelength: float, wavelength_err: float = 0, msq_lambda: bool = False):
-        self.msq_lambda = msq_lambda
+    M2LAMBDA_MODE = 0
+    M2_MODE = 1
+    ISO_MODE = 2
+
+    def __init__(self, wavelength: float, wavelength_err: float = 0, mode: int = 3):
+        self.mode = mode if (isinstance(mode, int) and (0 <= mode <= 2)) else None
+
+        if self.mode is None:
+            raise RuntimeError(f"Invalid Mode: {mode}")
+
+        self.funcs = [
+            fit_functions.omega_z, 
+            fit_functions.omega_z_lambda(wavelength = wavelength),
+            fit_functions.iso_omega_z
+        ]
+
+        self.i_params = [
+            # w_0, z_0, M_sq_lmbda
+            [1  , 1  , wavelength],
+            # w_0, z_0, M_sq
+            [1  , 1  , 1],
+            # a, b, c
+            [1, 1, 1]
+        ]
 
         self.wavelength      = np.array([wavelength, wavelength_err], dtype= np.float64)
-
-        if msq_lambda:
-            self.initial_guesses = np.array([1  , 1  , wavelength], dtype = np.float64)
-            #                                w_0, z_0, M_sq_lmbda
-        else:
-            self.initial_guesses = np.array([1  , 1  , 1], dtype = np.float64)
-            #                                w_0, z_0, M_sq
+        self.initial_guesses = np.array(self.i_params[self.mode], dtype = np.float64)                 
 
         self._m_squared_calculated = False
         self._m_squared            = None
 
     def setInitialGuesses(self, w_0 : float = 1, z_0 : float = 1):
-        """Sets the initial guesses
+        """Sets the initial guesses, only for mode = 0 or 1
 
         Parameters
         ----------
@@ -370,19 +398,27 @@ class MsqFitter():
             Guess for focal point position, by default 1
 
         """
+        if self.mode == 0 or self.mode == 1:
+            self.initial_guesses[0:2] = [w_0, z_0]
 
-        self.initial_guesses[0:2] = [w_0, z_0]
+        elif self.mode == 2:
+            pass
 
     def estimateInitialGuesses(self):
         """Estimates the initial parameters w_0, z_0 from the data given using the minimum y-value and save it into self.initial_guesses.
+           Only for mode = 0 or 1
         """
 
-        min_w = np.argmin(self.data.y)
+        if self.mode == 0 or self.mode == 1:
+            min_w = np.argmin(self.data.y)
 
-        z_0 = self.data.x[min_w]
-        w_0 = self.data.y[min_w]
+            z_0 = self.data.x[min_w]
+            w_0 = self.data.y[min_w]
 
-        self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+            self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+
+        elif self.mode == 2:
+            pass
     
     @property
     def m_squared(self):
@@ -407,24 +443,53 @@ class MsqFitter():
         if self.output is None:
             raise RuntimeWarning(".fit() has not been run. Please run .fit() before getting m_squared")
 
-        if not self.msq_lambda:
-            # The fitted quantity is directly m2
-            self._m_squared = np.array([self.output.beta[2], self.output.sd_beta[2]], dtype = np.float64) 
-            self._m_squared_calculated = True
-    
         if not self._m_squared_calculated:
             # m_squared has not been calculated for the current fit
 
-            m_sq = self.output.beta[2] / self.wavelength[0]
-            m_sq_error = m_sq * np.sqrt(
-                    (self.output.sd_beta[2]/self.output.beta[2]) ** 2 +
-                    (self.wavelength[1]    /self.wavelength[0] ) ** 2 
-                )
+            # The following is arranged according to the computation difficulty
 
-            # Error propagation with gauss method
-            # delta M / M = sqrt((delta b/b)^2 + (delta l/l)^2)
+            if self.mode == 1:
+                # The fitted quantity is directly m2
+                self._m_squared = np.array([self.output.beta[2], self.output.sd_beta[2]], dtype = np.float64) 
 
-            self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
+            elif self.mode == 0:
+                m_sq = self.output.beta[2] / self.wavelength[0]
+                m_sq_error = m_sq * np.sqrt(
+                        (self.output.sd_beta[2]/self.output.beta[2]) ** 2 +
+                        (self.wavelength[1]    /self.wavelength[0] ) ** 2 
+                    )
+
+                # Error propagation with gauss method
+                # delta M / M = sqrt((delta b/b)^2 + (delta l/l)^2)
+
+                self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
+
+            elif self.mode == 2:
+                # ISO Method
+
+                # ISSUE HERE: ERROR TOO BIG
+                # TODO
+
+                a , b , c  = self.output.beta
+                da, db, dc = self.output.sd_beta
+                wv, dwv    = self.wavelength
+
+                m_sq = (np.pi / (8 * wv)) * np.sqrt((4*a*c) - (b*b))
+
+                _faktor = np.sqrt(4*a*c - b*b)
+                dM_da   =   (np.pi * c) / (4*wv*_faktor)
+                dM_db   = - (np.pi * b) / (8*wv*_faktor)
+                dM_dc   =   (np.pi * a) / (4*wv*_faktor)
+                dM_dwv  = - (np.pi * _faktor) / (8*wv*wv)
+
+                arr     = np.array([dM_da * da, dM_db * db, dM_dc * dc, dM_dwv * dwv])
+                m_sq_error = np.sqrt(np.sum(np.square(arr)))
+
+                # Error propagation with gauss method
+                # delta M = sqrt(sum (dM_di*DI)2)
+
+                self._m_squared = np.array([m_sq, m_sq_error], dtype = np.float64)
+
             self._m_squared_calculated = True
         
         return self._m_squared
@@ -456,10 +521,14 @@ class MsqODRFitter(ODRFitter, MsqFitter):
     wavelength_err : float_like, optional
         Error of the wavelength of the laser, to be used in error propagation to find the m_squared
         By default: 0
-    msq_lambda : bool
-        If set to True, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
-        If set to True, the error of the wavelength is disregarded. 
-        By default: True
+    mode: int
+        0: Fit using Msq*lambda as one term in the beam width equation 
+        1: Fit using Msq as one term in the beam width equation, lambda directly included
+        2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)
+
+        If using `mode = 0`, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+        The ISO Fitting method also takes into account the error of the wavelength.
+        If using `mode = 1`, the error of the wavelength is disregarded.  
 
     Attributes
     ----------
@@ -481,15 +550,11 @@ class MsqODRFitter(ODRFitter, MsqFitter):
         Flag to fit to M_sq_lambda or M_sq 
 
     """
-    def __init__(self, x, y, xerror, yerror, wavelength: float, wavelength_err: float = 0, msq_lambda: bool = False):          
+    def __init__(self, x, y, xerror, yerror, wavelength: float, wavelength_err: float = 0, mode: int = 3):          
         # NOTE: To use ``fit_functions.omega_z`` as a default value in a function: https://stackoverflow.com/a/41921291
         
-        MsqFitter.__init__(self, wavelength = wavelength, wavelength_err = wavelength_err, msq_lambda = msq_lambda)
-        
-        if msq_lambda:
-            ODRFitter.__init__(self, x, y, xerror, yerror, fit_functions.omega_z)
-        else:
-            ODRFitter.__init__(self, x, y, xerror, yerror, fit_functions.omega_z_lambda(wavelength = wavelength))
+        MsqFitter.__init__(self, wavelength = wavelength, wavelength_err = wavelength_err, mode = mode)
+        ODRFitter.__init__(self, x, y, xerror, yerror, self.funcs[self.mode])
 
     @property
     def m_squared(self):
@@ -555,10 +620,14 @@ class MsqOCFFitter(OCFFitter, MsqFitter):
     wavelength_err : float_like, optional
         Error of the wavelength of the laser, to be used in error propagation to find the m_squared
         By default: 0
-    msq_lambda : bool
-        If set to True, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
-        If set to True, the error of the wavelength is disregarded. 
-        By default: True
+    mode: int
+        0: Fit using Msq*lambda as one term in the beam width equation 
+        1: Fit using Msq as one term in the beam width equation, lambda directly included
+        2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)
+
+        If using `mode = 0`, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+        The ISO Fitting method also takes into account the error of the wavelength.
+        If using `mode = 1`, the error of the wavelength is disregarded.  
 
     Attributes
     ----------
@@ -572,15 +641,11 @@ class MsqOCFFitter(OCFFitter, MsqFitter):
         Flag to fit to M_sq_lambda or M_sq 
 
     """
-    def __init__(self, x, y, yerror, wavelength: float, wavelength_err: float = 0, msq_lambda: bool = False):        
+    def __init__(self, x, y, yerror, wavelength: float, wavelength_err: float = 0, mode: int = 3):        
         # NOTE: To use ``fit_functions.omega_z`` as a default value in a function: https://stackoverflow.com/a/41921291
         
-        MsqFitter.__init__(self, wavelength = wavelength, wavelength_err = wavelength_err, msq_lambda = msq_lambda)
-        
-        if msq_lambda:
-            OCFFitter.__init__(self, x = x, y = y, yerror = yerror, func = fit_functions.omega_z)
-        else:
-            OCFFitter.__init__(self, x = x, y = y, yerror = yerror, func = fit_functions.omega_z_lambda(wavelength = wavelength))
+        MsqFitter.__init__(self, wavelength = wavelength, wavelength_err = wavelength_err, mode = mode)
+        OCFFitter.__init__(self, x, y, yerror, self.funcs[self.mode])
     
     def fit(self):
         """Fits using self.initial_guesses and OCFFitter.fit()

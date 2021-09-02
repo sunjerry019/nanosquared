@@ -86,3 +86,44 @@ def omega_z_lambda(wavelength: float):
 		)
 
 	return omega_z
+
+def iso_omega_z(params, z):
+	"""Beam Radii Function to be fitted according to ISO 11146-1:2021
+
+	Version Referenced: BS EN ISO 11146-1:2021, equation (24) in Section 9
+	Beam Diameter Definition: BS EN ISO 11145:2018, Section 3.5.2 (d4sigma)
+
+	The original function uses the diameter, we change it to use the radii by dividing it by 2.
+	We assume a stigmatic/simple astigmatic beam. 
+
+	d_sigma(z) = sqrt(a + bz + cz^2)
+	z_0        = - b / 2c
+	d_0        = sqrt((4ac - b^2)/(4c))
+	w_0        = 0.5 * sqrt((4ac - b^2)/(4c))
+	z_R        = sqrt(4ac - b^2)/(2c)
+	M_sq       = (pi/(8*lmbda)) * sqrt(4ac - b^2)
+
+	Parameters
+	----------
+	params : array_like
+		rank-1 array of length 3 where ``beta = array([a, b, c])``
+	z : array_like
+		rank-1 array of positions along an axis
+
+	Returns
+	-------
+	y : array_like
+		Rank-1, calculated beam-radii of a single axis based on given parameters
+
+	Notes
+	-----
+	1. From Wikipedia:  If the beam does not fill more than a third of the beam profiler's sensor area, 
+		then there will be a significant number of pixels at the edges of the sensor that register a small 
+		baseline value (the background value). If the baseline value is large or if it is not subtracted out 
+		of the image, then the computed D4σ value will be larger than the actual value because the baseline 
+		value near the edges of the sensor are weighted in the D4σ integral by x2. Therefore, baseline subtraction 
+		is necessary for accurate D4σ measurements
+
+	"""
+	a, b, c = params
+	return 0.5 * np.sqrt(a + b*z + c*(z**2))
