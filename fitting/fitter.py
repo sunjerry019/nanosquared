@@ -19,6 +19,10 @@ import matplotlib.pyplot as pyplot
 
 from collections import namedtuple
 
+# TODO: allow-variation:
+# When the fit does not converge, or if the M^2 value does not make sense, automatically vary the
+# start parameter until a reasonable result is obtained
+
 class Fitter():
     """Fitter provides the superclass for ODRFitter and OCFFitter
     """
