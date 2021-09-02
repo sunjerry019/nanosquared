@@ -96,6 +96,8 @@ def iso_omega_z(params, z):
 	The original function uses the diameter, we change it to use the radii by dividing it by 2.
 	We assume a stigmatic/simple astigmatic beam. 
 
+	The ISO Norm says that normally, the errors in the x,y-axis are optimized (i.e. using scipy.optimize.curve_fit)
+
 	d_sigma(z) = sqrt(a + bz + cz^2)
 	z_0        = - b / 2c
 	d_0        = sqrt((4ac - b^2)/(4c))
