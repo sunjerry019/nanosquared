@@ -157,7 +157,7 @@ class Measurement():
                 right = right_third
 
         # Left and right are the current bounds; the maximum is between them
-        return np.round((left + right) / 2, dtype = np.integer)
+        return np.around((left + right) / 2).astype(int)
                     
     def measure_at(self, axis: str, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
