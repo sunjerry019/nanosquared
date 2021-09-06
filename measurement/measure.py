@@ -41,6 +41,8 @@ class Measurement():
 
         """
 
+        self.devMode = devMode
+
         if controller is None:
             controller = GSC01(devMode = devMode)
         
@@ -52,6 +54,8 @@ class Measurement():
 
         self.controller = controller
         self.camera     = camera
+
+        self.controller.homeStage()
 
     def __enter__(self):
         return self
@@ -82,8 +86,36 @@ class Measurement():
         if (self.controller.stage.travel / 2) < 3*rayleighLength:
             raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Travel = {self.controller.stage.travel} , z_R = {rayleighLength})")
 
-        
-        
+        if not self.devMode and self.controller.stage.dirty:
+            self.controller.homeStage()
+
+        _center    = self.find_center()
+        _z_R_pulse = np.round(self.controller.um_to_pulse(um = rayleighLength * 1000), 0)
+
+        _within_points = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 11, dtype = np.integer)
+        _within_points += _center
+
+        print(_within_points)
+
+        # self.controller.move(pos = _center)      
+
+    def find_center(self, rayleighLength: float = 15) -> int:
+        """Finds the approximate position of the beam waist.
+
+        Returns
+        -------
+        center: int
+            The approximate beam-waist position
+        """
+
+        while(True):
+            # Loop until some threshold has been reached
+            break
+
+        # TODO: not yet implemented
+
+        return 10
+                    
 
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
