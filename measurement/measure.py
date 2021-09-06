@@ -149,13 +149,15 @@ class Measurement():
         # Left and right are the current bounds; the maximum is between them
         return np.round((left + right) / 2, dtype = np.integer)
                     
-    def measure_at(self, axis: str, pos: int):
+    def measure_at(self, axis: str, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
 
         Parameters
         ----------
         pos : int
             Position to measure at
+        numsamples: int
+            Number of samples to take, by default 10
 
         Returns
         -------
@@ -164,7 +166,7 @@ class Measurement():
         """
         self.controller.move(pos = pos)
 
-        return self.camera.getAxis_avg_D4Sigma(axis, numsamples = 10)
+        return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
        
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
