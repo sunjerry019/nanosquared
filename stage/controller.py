@@ -464,7 +464,7 @@ class GSC01(SerialController):
         currpos = self.stage.position
         self.stage.position = 0
         
-        if self.ranged:
+        if self.stage.ranged:
             delta = - currpos
             self.stage.setLimits(upper = self.stage.LIMIT_UPPER + delta, lower = self.stage.LIMIT_LOWER + delta)
 
@@ -481,8 +481,12 @@ class GSC01(SerialController):
             The obtained pulse range.
         """
 
-        self.stage.pulseRange = 0
+        if self.devMode:
+            self.stage.pulseRange = 100557
+        else:
+            self.stage.pulseRange = 0
 
+        orig_speed = self.stage.speed.jog
         self.setSpeed(jogSpeed = 10000)
 
         self.jog(positive = True)
@@ -500,6 +504,8 @@ class GSC01(SerialController):
         self.stage.setLimits(upper = max(left, right), lower = min(left, right))
 
         self.stage.ranged = True
+
+        self.setSpeed(jogSpeed = orig_speed)
 
         return self.stage.pulseRange    
 
