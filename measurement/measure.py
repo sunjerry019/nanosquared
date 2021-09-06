@@ -83,8 +83,8 @@ class Measurement():
 
         # Check if the rayleigh length fits the stage being used. 
 
-        if (self.controller.stage.travel / 2) < 3*rayleighLength:
-            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Travel = {self.controller.stage.travel} , z_R = {rayleighLength})")
+        if ((self.controller.stage.travel - 10) / 2) < 3*rayleighLength:
+            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Usable travel = {self.controller.stage.travel - 10} , z_R = {rayleighLength})")
 
         if not self.devMode and self.controller.stage.dirty:
             self.controller.homeStage()
@@ -99,8 +99,15 @@ class Measurement():
 
         # self.controller.move(pos = _center)      
 
-    def find_center(self, rayleighLength: float = 15) -> int:
-        """Finds the approximate position of the beam waist.
+    def find_center(self, left: int = None, right: int = None) -> int:
+        """Finds the approximate position of the beam waist using ternary search
+
+        Parameters
+        ----------
+        left : int, optional
+            The smallest possible position, by default None
+        right : int, optional
+            The biggest possible position, by default None
 
         Returns
         -------
@@ -108,14 +115,42 @@ class Measurement():
             The approximate beam-waist position
         """
 
-        while(True):
-            # Loop until some threshold has been reached
-            break
+        default_abs_pres   = 10
+        absolute_precision = default_abs_pres
 
-        # TODO: not yet implemented
+        # We implement the iterative method
+        while np.abs(right - left) >= absolute_precision:
+            left_third  = np.round(left  + (right - left) / 3, decimals = 0)
+            right_third = np.round(right - (right - left) / 3, decimals = 0)
+            
+            l = self.measure_at(left_third)
+            r = self.measure_at(right_third)
 
-        return 10
+            absolute_precision = np.max([l[1], r[1], default_abs_pres])
+
+            if l[0] > r[0]:
+                left = left_third
+            else:
+                right = right_third
+
+        # Left and right are the current bounds; the maximum is between them
+        return (left + right) / 2
                     
+    def measure_at(self, pos: int):
+        """Moves the stage to that position and takes a measurement for the diameter
+
+        Parameters
+        ----------
+        pos : int
+            Position to measure at
+
+        Returns
+        -------
+        d4sigma : Tuple[float, float]
+            d4Sigma 
+        """
+
+        raise NotImplementedError
 
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
