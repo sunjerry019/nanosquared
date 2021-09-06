@@ -464,6 +464,34 @@ class GSC01(SerialController):
         self.stage.position = 0
         return self.safesend(f"R:{self.axis}")
     
+    def findRange(self):
+        """Find the range of the stage in number of pulses. Updates `self.stage.pulseRange` directly and returns the pulseRange.
+
+        The `self.stage.um_per_pulse` is also recalculated.
+        
+        Returns
+        -------
+        `self.stage.pulseRange` : int
+            The obtained pulse range.
+        """
+
+        self.stage.pulseRange = 0
+
+        self.setSpeed(jogSpeed = 10000)
+
+        self.jog(positive = True)
+        self.waitClear()
+        left = self.getPositionReadOut()
+
+        self.jog(positive = False)
+        self.waitClear()
+        right = self.getPositionReadOut()
+
+        self.stage.pulseRange = abs(left - right)
+        self.stage.recalculateUmPerPulse()
+
+        return self.stage.pulseRange    
+
     @stage.errors.FailWithWarning
     def jog(self, positive: bool = True, secs: Optional[float] = None):
         """Starts the stage jogging. 

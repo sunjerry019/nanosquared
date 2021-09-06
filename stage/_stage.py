@@ -137,6 +137,9 @@ class GSC01_Stage(Stage):
 
         super().__init__(pos = pos) 
 
+        self.pulseRange = 1
+        self.travel     = 1
+
         speed = {
             "jog": 0,
             "min": 0,
@@ -184,6 +187,13 @@ class GSC01_Stage(Stage):
 
         super().positionSetter(x = h.ensureInt(x))
     
+    def recalculateUmPerPulse(self):
+        """Recalculates the um_per_pulse after setting `self.pulseRange`
+        
+        `self.pulseRange` needs to be set beforehand.
+        """
+        self.um_per_pulse = (self.travel * 1000) / self.pulseRange
+
     def resetStage(self):
         """Meant to set the upper and lower limit based on pulseRange after homing
         """
