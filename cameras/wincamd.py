@@ -11,7 +11,7 @@ from cameras.constants import WCD_Profiles, OCX_Buttons, CLIP_MODES
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
-from PyQt5 import QtCore
+# from PyQt5 import QtCore
 
 import queue
 
@@ -22,8 +22,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class WinCamD(cam.Camera):
-	def __init__(self, *args, **kwargs):
+	def __init__(self, devMode: bool = False, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+
+		self.devMode = devMode
 
 		self.dummyapp = QtWidgets.QApplication([''])
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
@@ -58,7 +60,8 @@ class WinCamD(cam.Camera):
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
 		# Last thing we do is to make sure our camera is warmed up and ready
-		self.wait_stable()
+		if not self.devMode:
+			self.wait_stable()
 
 	# Support functions
 	def on_DataReady(self):
