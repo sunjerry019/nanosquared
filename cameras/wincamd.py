@@ -174,8 +174,8 @@ class WinCamD(cam.Camera):
 		----------
 		axis : str
 			May take values 'x' or 'y'
-		numsamples : int
-			Number of samples to average over
+		numsamples : int, optional
+			Number of samples to average over, by default 20
 
 		Returns
 		-------
