@@ -1,0 +1,2 @@
+Option for lens choice
+Option for rayleigh length
