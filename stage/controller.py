@@ -461,7 +461,13 @@ class GSC01(SerialController):
         return ret
 
     def resetPositionToZero(self):
+        currpos = self.stage.position
         self.stage.position = 0
+        
+        if self.ranged:
+            delta = - currpos
+            self.stage.setLimits(upper = self.stage.LIMIT_UPPER + delta, lower = self.stage.LIMIT_LOWER + delta)
+
         return self.safesend(f"R:{self.axis}")
     
     def findRange(self):
@@ -491,6 +497,9 @@ class GSC01(SerialController):
         self.stage.recalculateUmPerPulse()
 
         self.syncPosition()
+        self.stage.setLimits(upper = max(left, right), lower = min(left, right))
+
+        self.stage.ranged = True
 
         return self.stage.pulseRange    
 

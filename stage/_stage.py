@@ -28,6 +28,7 @@ class Stage(abc.ABC):
         # Sets whether or not the position data in the stage object is dirty (i.e not reliable)
         self._dirty     = False
         self._permDirty = False
+        self.ranged     = False # Sets whether we can trust the LIMIT_UPPER and LIMIT_LOWER
 
     @abc.abstractmethod
     def setLimits(self, upper, lower):
