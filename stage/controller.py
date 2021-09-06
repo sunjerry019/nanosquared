@@ -42,7 +42,7 @@ class Controller(abc.ABC):
     """Abstract Base Class for a controller"""
 
     def __init__(self, devMode: bool = True, implementation: bool = False):
-        """[summary]
+        """
 
         Parameters
         ----------
@@ -615,6 +615,8 @@ class GSC01(SerialController):
             ACK2: L = LS Stop, K = Normal Stop
             ACK3: B = Busy Status, R = Ready Status
         """
+        if self.devMode:
+            return "0,K,K,R"
 
         return self.safesend("Q:", *args, **kwargs).split(b",")
 
@@ -627,6 +629,8 @@ class GSC01(SerialController):
         ret: bool
             True if Busy, False if Ready, None if output is self.read returns None
         """
+        if self.devMode:
+            return False
 
         ret = self.safesend("!:", *args, **kwargs)
         if ret == b'R':
@@ -667,6 +671,9 @@ class GSC01(SerialController):
             self.dev.close()
 
     def safesend(self, *args, **kwargs):
+        if self.devMode:
+            return True
+
         ret = self.send(*args, **kwargs)
 
         if ret == b'NG':
@@ -738,6 +745,9 @@ class GSC01(SerialController):
             If the controller does not respond
         """
         # we wait until all commands are done running and the controller is ready
+        if self.devMode:
+            return True
+
         timeoutCount = 0
         timeoutLimit = 5
         waitTime = 0
