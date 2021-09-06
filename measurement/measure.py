@@ -56,6 +56,7 @@ class Measurement():
         self.camera     = camera
 
         self.controller.homeStage()
+        self.controller.findRange()
 
     def __enter__(self):
         return self
@@ -90,7 +91,7 @@ class Measurement():
             self.controller.homeStage()
 
         _center    = self.find_center()
-        _z_R_pulse = np.round(self.controller.um_to_pulse(um = rayleighLength * 1000), 0)
+        _z_R_pulse = np.round(self.controller.um_to_pulse(um = rayleighLength * 1000), dtype = np.integer)
 
         _within_points = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 11, dtype = np.integer)
         _within_points += _center
@@ -100,7 +101,10 @@ class Measurement():
         # self.controller.move(pos = _center)      
 
     def find_center(self, left: int = None, right: int = None) -> int:
-        """Finds the approximate position of the beam waist using ternary search
+        """Finds the approximate position of the beam waist using ternary search. 
+        If `left` or `right` is set to None, the limits of the stage are taken
+
+        Code Reference: https://en.wikipedia.org/wiki/Ternary_search
 
         Parameters
         ----------
@@ -115,13 +119,22 @@ class Measurement():
             The approximate beam-waist position
         """
 
+        if not self.controller.stage.ranged and (left is None or right is None):
+            self.controller.findRange()
+
+        if left is None and self.controller.stage.ranged:
+            left = self.controller.stage.LIMIT_LOWER
+        
+        if right is None and self.controller.stage.ranged:
+            right = self.controller.stage.LIMIT_UPPER
+
         default_abs_pres   = 10
         absolute_precision = default_abs_pres
 
         # We implement the iterative method
         while np.abs(right - left) >= absolute_precision:
-            left_third  = np.round(left  + (right - left) / 3, decimals = 0)
-            right_third = np.round(right - (right - left) / 3, decimals = 0)
+            left_third  = np.round(left  + (right - left) / 3, dtype = np.integer)
+            right_third = np.round(right - (right - left) / 3, dtype = np.integer)
             
             l = self.measure_at(left_third)
             r = self.measure_at(right_third)
@@ -134,9 +147,9 @@ class Measurement():
                 right = right_third
 
         # Left and right are the current bounds; the maximum is between them
-        return (left + right) / 2
+        return np.round((left + right) / 2, dtype = np.integer)
                     
-    def measure_at(self, pos: int):
+    def measure_at(self, axis: str, pos: int):
         """Moves the stage to that position and takes a measurement for the diameter
 
         Parameters
@@ -147,11 +160,12 @@ class Measurement():
         Returns
         -------
         d4sigma : Tuple[float, float]
-            d4Sigma 
+            d4Sigma diameter obtained in the form: [diam, delta diam]
         """
+        self.controller.move(pos = pos)
 
-        raise NotImplementedError
-
+        return self.camera.getAxis_avg_D4Sigma(axis, numsamples = 10)
+       
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
         """Returns the beam waist radius and the Rayleigh length. 
