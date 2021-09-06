@@ -29,8 +29,9 @@ class WinCamD(cam.Camera):
 
 		self.dummyapp = QtWidgets.QApplication([''])
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
-				
-		assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
+		
+		if not self.devMode:
+			assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
 
 		axis = {
 			"x" : QAxContainer.QAxWidget("DATARAYOCX.ProfilesCtrl.1"),

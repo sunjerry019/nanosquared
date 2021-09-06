@@ -19,10 +19,10 @@ import numpy as np
 
 class Measurement():
     def __init__(self, 
-        camera: Camera         = None, 
-        controller: Controller = None,
-        devMode: bool          = True
-    ) -> None:
+            camera: Camera         = None, 
+            controller: Controller = None,
+            devMode: bool          = True
+        ) -> None:
         """Backend to the GUI
 
         Parameters
@@ -50,6 +50,12 @@ class Measurement():
 
         self.controller = controller
         self.camera     = camera
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, e_type, e_val, traceback):
+        pass
 
     def take_measurements(self, rayleighLength: float = 15):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
@@ -100,13 +106,6 @@ class Measurement():
         beam_waist_radius = (2 * M2 * wavelength * focalLength) / (np.pi * diamAtLens) 
 
         return beam_waist_radius / 1000
-
-
-
-
-        
-
-
 
 if __name__ == '__main__':
     with Measurement() as M:
