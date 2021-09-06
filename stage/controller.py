@@ -490,6 +490,8 @@ class GSC01(SerialController):
         self.stage.pulseRange = abs(left - right)
         self.stage.recalculateUmPerPulse()
 
+        self.syncPosition()
+
         return self.stage.pulseRange    
 
     @stage.errors.FailWithWarning
