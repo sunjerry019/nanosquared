@@ -4,6 +4,7 @@
 
 import os,sys
 from typing import Tuple
+from PyQt5.QtCore import center
 import numpy as np
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
@@ -91,12 +92,18 @@ class Measurement():
             self.controller.homeStage()
 
         _center    = self.find_center()
-        _z_R_pulse = np.round(self.controller.um_to_pulse(um = rayleighLength * 1000), dtype = np.integer)
+        _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
-        _within_points = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 11, dtype = np.integer)
-        _within_points += _center
+        _within_points    = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 10, dtype = np.integer)        
+        _without_points_1 = np.linspace(start=2*_z_R_pulse, stop=3*_z_R_pulse, endpoint = True, num = 5, dtype = np.integer) 
+        _without_points_2 = -_without_points_1
 
-        print(_within_points)
+        points  = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
+        points += _center
+
+        points = np.sort(points, kind = 'stable')
+
+        print(points)
 
         # self.controller.move(pos = _center)      
 
@@ -119,6 +126,9 @@ class Measurement():
             The approximate beam-waist position
         """
 
+        if self.devMode:
+            return 15
+
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
 
@@ -133,8 +143,8 @@ class Measurement():
 
         # We implement the iterative method
         while np.abs(right - left) >= absolute_precision:
-            left_third  = np.round(left  + (right - left) / 3, dtype = np.integer)
-            right_third = np.round(right - (right - left) / 3, dtype = np.integer)
+            left_third  = np.around(left  + (right - left) / 3).astype(int)
+            right_third = np.around(right - (right - left) / 3).astype(int)
             
             l = self.measure_at(left_third)
             r = self.measure_at(right_third)
