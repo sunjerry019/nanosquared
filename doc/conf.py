@@ -12,12 +12,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath(os.path.join('..', 'src')))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'Nanoscan M-Squared Automation'
+project = 'M-Squared Automation'
 copyright = '2021, Yudong Sun'
 author = 'Yudong Sun'
 
