@@ -263,13 +263,13 @@ class GSC01(SerialController):
 
     # We always use the axis 1 instead of W
 
-    def __init__(self, stage: Stg.GSC01_Stage, *args, **kwargs):
+    def __init__(self, stage: Stg.GSC01_Stage = Stg.SGSP26_200(), *args, **kwargs):
         """Constructor
 
         Parameters
         ----------
         stage : stage._stage.GSC01_Stage
-            A stage instance with the correct boundary values set
+            A stage instance with the correct boundary values set, by default stage._stage.SGSP26_200()
 
         """
     
