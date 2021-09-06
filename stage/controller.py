@@ -479,12 +479,10 @@ class GSC01(SerialController):
         -------
         `self.stage.pulseRange` : int
             The obtained pulse range.
+
         """
 
-        if self.devMode:
-            self.stage.pulseRange = 100557
-        else:
-            self.stage.pulseRange = 0
+        self.stage.pulseRange = 0
 
         orig_speed = self.stage.speed.jog
         self.setSpeed(jogSpeed = 10000)
@@ -497,7 +495,7 @@ class GSC01(SerialController):
         self.waitClear()
         right = self.getPositionReadOut()
 
-        self.stage.pulseRange = abs(left - right)
+        self.stage.pulseRange = abs(left - right) if not self.devMode else 100557
         self.stage.recalculateUmPerPulse()
 
         self.syncPosition()
