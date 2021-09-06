@@ -3,6 +3,7 @@
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
 import os,sys
+from typing import Tuple
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -78,6 +79,55 @@ class Measurement():
         # Check if the rayleigh length fits the stage being used. 
 
         pass
+
+    @staticmethod
+    def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
+        """Returns the beam waist radius and the Rayleigh length. 
+
+        Parameters
+        ----------
+        diamAtLens : float
+            Diameter of the beam at the lens in millimeter
+        focalLength : float
+            Focal length of the lens in millimeter
+        wavelength : float
+            Wavelength of the laser light in nanometer
+        M2 : float, optional
+            Estimated M^2 of the beam, by default 1
+
+        Returns
+        -------
+        w0, zR : Tuple[float, float]
+            Tuple with the beam waist radius and the Rayleigh length.
+        """
+        w0 = Measurement.beam_waist_radius(diamAtLens, focalLength, wavelength, M2)
+        zR = Measurement.rayleigh_length(w0, wavelength, M2)
+
+        return (w0, zR)
+
+    @staticmethod
+    def rayleigh_length(waistRadius: float, wavelength: float, M2: float = 1) -> float:
+        """Calculates the Rayleigh leight given the following parameters
+
+        Reference: https://www.rp-photonics.com/rayleigh_length.html
+
+        Parameters
+        ----------
+        waistRadius : float
+            Beam waist radius in um.
+        wavelength : float
+            Wavelength of the light used in nm.
+        M2 : float, optional
+            Estimated M^2 of the beam, by default 1
+
+        Returns
+        -------
+        rayleigh_length : float
+            The Rayleigh length in mm
+
+        """
+
+        return (np.pi * (waistRadius**2)) / wavelength 
 
     @staticmethod
     def beam_waist_radius(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> float:
