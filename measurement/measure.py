@@ -4,7 +4,6 @@
 
 import os,sys
 from typing import Tuple
-from PyQt5.QtCore import center
 import numpy as np
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
@@ -118,7 +117,9 @@ class Measurement():
 
         # Take the measurements
         for n, pt in enumerate(points):
+            # https://stackoverflow.com/a/25293744
             self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
+            
             for ax in ['x', 'y']:
                 y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
                 x = self.controller.pulse_to_um(pps = pt)
