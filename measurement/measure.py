@@ -18,6 +18,8 @@ from stage.controller import Controller, GSC01
 
 from fitting.fitter import MsqFitter, MsqOCFFitter
 
+import logging
+
 import measurement.errors as me
 
 class Measurement():
@@ -56,6 +58,8 @@ class Measurement():
         self.controller = controller
         self.camera     = camera
 
+        self.data = { 'x' : None, 'y': None }
+
         self.controller.homeStage()
         self.controller.findRange()
 
@@ -65,7 +69,7 @@ class Measurement():
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, rayleighLength: float = 15):
+    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -81,6 +85,8 @@ class Measurement():
         ----------
         rayleighLength : float, optional
             Rayleigh Length (z_0) in millimeter, by default 15
+        numsamples : int, optional
+            Number of samples to take at each point, by default 50
         """
 
         # Check if the rayleigh length fits the stage being used. 
@@ -90,7 +96,11 @@ class Measurement():
 
         if not self.devMode and self.controller.stage.dirty:
             self.controller.homeStage()
+        
+        # initialization
+        self.data = { 'x' : None, 'y': None }
 
+        # find params
         _center    = self.find_center()
         _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
@@ -103,9 +113,24 @@ class Measurement():
 
         points = np.sort(points, kind = 'stable')
 
-        print(points)
+        totalpts = len(points)
+        digits   = len(str(totalpts))
 
-        # self.controller.move(pos = _center)      
+        # Take the measurements
+        for n, pt in enumerate(points):
+            self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
+            for ax in ['x', 'y']:
+                y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
+                x = self.controller.pulse_to_um(pps = pt)
+
+                dtpt = np.array([x, y[0], y[1]])
+                
+                if self.data[ax] is None:
+                    self.data[ax] = dtpt
+                else:
+                    self.data[ax] = np.vstack((self.data[ax], dtpt))
+
+        return self.data
 
     def find_center(self, left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
@@ -254,6 +279,31 @@ class Measurement():
         beam_waist_radius = (2 * M2 * wavelength * focalLength) / (np.pi * diamAtLens) 
 
         return beam_waist_radius / 1000
+
+    def log(self, msg: str, loglevel: int = logging.INFO):
+        """Handles the logging to easily switch between different ways of handling
+
+        Parameters
+        ----------
+        msg : str
+            The log message
+        loglevel : int
+            enum in https://docs.python.org/3/library/logging.html#logging-levels,
+            see https://github.com/python/cpython/blob/d730719b094cb006711b1cd546927b863c173b31/Lib/logging/__init__.py
+
+            CRITICAL = 50
+            FATAL = CRITICAL
+            ERROR = 40
+            WARNING = 30
+            WARN = WARNING
+            INFO = 20
+            DEBUG = 10
+            NOTSET = 0
+        """
+
+        logging.log(loglevel, msg)
+        if loglevel >= logging.DEBUG:
+            print(f"{logging.getLevelName(loglevel)}: {msg}")
 
 if __name__ == '__main__':
     with Measurement() as M:

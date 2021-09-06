@@ -499,7 +499,11 @@ class GSC01(SerialController):
         self.stage.recalculateUmPerPulse()
 
         self.syncPosition()
-        self.stage.setLimits(upper = max(left, right), lower = min(left, right))
+
+        if self.devMode:
+            self.stage.setLimits(upper = 50278, lower = -50278)
+        else:
+            self.stage.setLimits(upper = max(left, right), lower = min(left, right))
 
         self.stage.ranged = True
 

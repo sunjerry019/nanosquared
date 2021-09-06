@@ -188,6 +188,9 @@ class WinCamD(cam.Camera):
 		if axis not in ['x', 'y']:
 			return (None, None)
 
+		if self.devMode:
+			return (123, 10)
+
 		# Ensure we are in d4sigma mode:
 		mode = self.dataCtrl.dynamicCall(f"GetClipLevelMode(1)")
 		if mode != CLIP_MODES.D4SIGMA_METHOD:
