@@ -4,6 +4,7 @@
 
 import os,sys
 from typing import Tuple
+import numpy as np
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -16,7 +17,7 @@ from stage.controller import Controller, GSC01
 
 from fitting.fitter import MsqFitter, MsqOCFFitter
 
-import numpy as np
+import measurement.errors as me
 
 class Measurement():
     def __init__(self, 
@@ -78,7 +79,11 @@ class Measurement():
 
         # Check if the rayleigh length fits the stage being used. 
 
-        pass
+        if (self.controller.stage.travel / 2) < 3*rayleighLength:
+            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Travel = {self.controller.stage.travel} , z_R = {rayleighLength})")
+
+        
+        
 
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
