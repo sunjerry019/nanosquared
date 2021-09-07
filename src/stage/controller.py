@@ -551,7 +551,7 @@ class GSC01(SerialController):
     
     @stage.errors.FailWithWarning
     def move(self, pos: int):
-        """Absolution move to coordinate `pos``
+        """Absolution move to coordinate `pos`
 
         Parameters
         ----------

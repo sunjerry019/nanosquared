@@ -133,7 +133,7 @@ class Measurement():
 
         return self.data
 
-    def find_center(self, left: int = None, right: int = None) -> int:
+    def find_center(self, axis: str = 'x', left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -141,6 +141,8 @@ class Measurement():
 
         Parameters
         ----------
+        axis : str
+            Can take 'x' or 'y', by default 'x'
         left : int, optional
             The smallest possible position, by default None
         right : int, optional
@@ -172,8 +174,8 @@ class Measurement():
             left_third  = np.around(left  + (right - left) / 3).astype(int)
             right_third = np.around(right - (right - left) / 3).astype(int)
             
-            l = self.measure_at(left_third)
-            r = self.measure_at(right_third)
+            l = self.measure_at(axis = axis, pos = left_third)
+            r = self.measure_at(axis = axis, pos = right_third)
 
             absolute_precision = np.max([l[1], r[1], default_abs_pres])
 
