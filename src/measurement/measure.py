@@ -203,6 +203,7 @@ class Measurement():
             d4Sigma diameter obtained in the form: [diam, delta diam]
         """
         self.controller.move(pos = pos)
+        self.controller.waitClear()
 
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
        
