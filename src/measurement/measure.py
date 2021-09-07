@@ -49,7 +49,7 @@ class Measurement():
             controller = GSC01(devMode = devMode)
         
         if camera is None:
-            camera = WinCamD(devMode = devMode)
+            camera = WinCamD(devMode = True)
         
         assert isinstance(camera, Camera), f"Camera ({camera}) is not recognized"
         assert isinstance(controller, Controller), f"Controller ({controller}) is not recognized"
