@@ -19,11 +19,13 @@ import matplotlib.pyplot as pyplot
 
 from collections import namedtuple
 
+import common.helpers as h
+
 # TODO: allow-variation:
 # When the fit does not converge, or if the M^2 value does not make sense, automatically vary the
 # start parameter until a reasonable result is obtained
 
-class Fitter():
+class Fitter(h.LoggerMixIn):
     """Fitter provides the superclass for ODRFitter and OCFFitter
     """
     def __init__(self) -> None:

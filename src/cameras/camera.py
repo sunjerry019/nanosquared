@@ -2,7 +2,9 @@
 
 """File provides the class camera that all camera types should inherit"""
 
-class Camera():
+import common.helpers as h
+
+class Camera(h.LoggerMixIn):
     def __init__(self):
         self.apertureOpen = False
 

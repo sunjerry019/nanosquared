@@ -10,6 +10,9 @@ The WinCamD Camera used is the [WinCamD-IR-BB](https://dataray.com/collections/b
 ## Measuring Beam-Width Data
 ## Fitting the Data
 
+# Logging
+All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
+
 # Code Linting in VS Code
 
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:

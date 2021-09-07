@@ -19,10 +19,11 @@ from fitting.fitter import MsqFitter, MsqOCFFitter
 from fitting.fit_functions import omega_z
 
 import logging
+import common.helpers as h
 
 import measurement.errors as me
 
-class Measurement():
+class Measurement(h.LoggerMixIn):
     def __init__(self, 
             camera: Camera         = None, 
             controller: Controller = None,
@@ -306,31 +307,6 @@ class Measurement():
         beam_waist_radius = (2 * M2 * wavelength * focalLength) / (np.pi * diamAtLens) 
 
         return beam_waist_radius / 1000
-
-    def log(self, msg: str, loglevel: int = logging.INFO):
-        """Handles the logging to easily switch between different ways of handling
-
-        Parameters
-        ----------
-        msg : str
-            The log message
-        loglevel : int
-            enum in https://docs.python.org/3/library/logging.html#logging-levels,
-            see https://github.com/python/cpython/blob/d730719b094cb006711b1cd546927b863c173b31/Lib/logging/__init__.py
-
-            CRITICAL = 50
-            FATAL = CRITICAL
-            ERROR = 40
-            WARNING = 30
-            WARN = WARNING
-            INFO = 20
-            DEBUG = 10
-            NOTSET = 0
-        """
-
-        logging.log(loglevel, msg)
-        if loglevel >= logging.DEBUG:
-            print(f"{logging.getLevelName(loglevel)}: {msg}")
 
 if __name__ == '__main__':
     with Measurement(devMode = False) as M:

@@ -4,6 +4,38 @@ base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
+import logging
+logging.captureWarnings(True)
+
+class LoggerMixIn():
+	def __init__(self, *args, **kwargs) -> None:
+		super().__init__(*args, **kwargs)
+
+	def log(self, msg: str, loglevel: int = logging.INFO):
+		"""Handles the logging to easily switch between different ways of handling
+
+		Parameters
+		----------
+		msg : str
+			The log message
+		loglevel : int
+			enum in https://docs.python.org/3/library/logging.html#logging-levels,
+			see https://github.com/python/cpython/blob/d730719b094cb006711b1cd546927b863c173b31/Lib/logging/__init__.py
+
+			CRITICAL = 50
+			FATAL = CRITICAL
+			ERROR = 40
+			WARNING = 30
+			WARN = WARNING
+			INFO = 20
+			DEBUG = 10
+			NOTSET = 0
+		"""
+
+		logging.log(loglevel, msg)
+		if loglevel >= logging.DEBUG:
+			print(f"{logging.getLevelName(loglevel)}: {msg}")
+
 def ensureInt(x: int):
 	"""Returns `x` if it is an integer, otherwise raises TypeError
 

@@ -33,12 +33,8 @@ import stage._stage as Stg
 import common.helpers as h
 
 import logging
-logging.captureWarnings(True)
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
 
-class Controller(abc.ABC):
+class Controller(abc.ABC, h.LoggerMixIn):
     """Abstract Base Class for a controller"""
 
     def __init__(self, devMode: bool = True, implementation: bool = False):
@@ -174,7 +170,7 @@ class SerialController(Controller, abc.ABC):
             if isinstance(devConfig, dict):
                 cfg.update(devConfig)
             else:
-                warnings.warn("Non-dictionary devConfig. Skipped: {}".format(devConfig))
+                self.log("Non-dictionary devConfig. Skipped: {}".format(devConfig), loglevel = logging.WARN)
         else:
             # We attempt to load the config from a default "config.local.json" if it exists
             base_dir = os.path.dirname(os.path.realpath(__file__))
@@ -186,7 +182,7 @@ class SerialController(Controller, abc.ABC):
                         devConfig = json.load(f)
                 except json.decoder.JSONDecodeError as e:
                     if self.devMode:
-                        warnings.warn("Invalid local config file, not loaded!\n\nError: {}\n\n".format(e))
+                        self.log("Invalid local config file, not loaded!\n\nError: {}\n\n".format(e), loglevel = logging.WARN)
                     else:
                         raise RuntimeError("Invalid config.local.json found! Delete or correct errors!\n\nError: {}".format(e))
                 else:
@@ -228,7 +224,7 @@ class SerialController(Controller, abc.ABC):
                 # sys.exit(0)
         else:
             self.dev = None
-            warnings.warn("devmode -- No serial device will be used")
+            self.log("devmode -- No serial device will be used", loglevel = logging.WARN)
 
     def closeDevice(self):
         """Closes the serial device connection"""
@@ -409,12 +405,12 @@ class GSC01(SerialController):
             # Check if values are multiples of 100
             if (combine[i] % 100):
                 new = (combine[i] // 100) * 100
-                warnings.warn(f"Got {combine[i]}, using {new}")
+                self.log(f"Got {combine[i]}, using {new}", loglevel = logging.WARN)
                 combine[i] = new
 
             # Speed Boundary checks
             if not (100 <= combine[i] <= 20000):
-                warnings.warn(f"Illegal value {combine[i]}, using old value {original[i]}")
+                self.log(f"Illegal value {combine[i]}, using old value {original[i]}", loglevel = logging.WARN)
                 combine[i] = original[i]
 
         # min/max speed check
@@ -422,14 +418,14 @@ class GSC01(SerialController):
 
         # acdc time boundary checks
         if not (0 <= combine[3] <= 1000):
-            warnings.warn(f"Illegal value {combine[3]}, using old value {original[3]}")
+            self.log(f"Illegal value {combine[3]}, using old value {original[3]}", loglevel = logging.WARN)
             combine[3] = original[3]
     
         keys             = ["jog", "min", "max"]
         self.stage.speed = namedtuple("StageSpeed", keys)(*combine[:3])
         self.stage.acdcTime  = combine[3]
 
-        logger.info(f"Setting speed: Jog = %d, min = %d, max = %d, acdctime = %d", *combine)
+        self.log("Setting speed: Jog = {}, min = {}, max = {}, acdctime = {}".format(*combine), loglevel = logging.INFO)
 
         a = self.safesend(f"D:{self.axis}S{self.stage.speed.min}F{self.stage.speed.max}R{self.stage.acdcTime}")
         b = self.safesend(f"S:J{self.stage.speed.jog}")
