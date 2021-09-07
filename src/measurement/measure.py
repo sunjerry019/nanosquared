@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Made 2021, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
 import os,sys

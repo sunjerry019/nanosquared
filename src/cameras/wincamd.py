@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Made 2021, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
 import os,sys
 
 base_dir = os.path.dirname(os.path.realpath(__file__))

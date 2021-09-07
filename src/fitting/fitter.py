@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Made 2021, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
 import sys, os
 from typing import Tuple
 from matplotlib.figure import Figure
