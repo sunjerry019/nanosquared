@@ -307,7 +307,7 @@ class Measurement():
             print(f"{logging.getLevelName(loglevel)}: {msg}")
 
 if __name__ == '__main__':
-    with Measurement() as M:
+    with Measurement(devMode = False) as M:
         print("with Measurement() as M")
         import code; code.interact(local=locals())
     
