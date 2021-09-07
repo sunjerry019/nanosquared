@@ -16,6 +16,7 @@ from cameras.wincamd import WinCamD
 from stage.controller import Controller, GSC01
 
 from fitting.fitter import MsqFitter, MsqOCFFitter
+from fitting.fit_functions import omega_z
 
 import logging
 
@@ -177,7 +178,7 @@ class Measurement():
             l = self.measure_at(axis = axis, pos = left_third)
             r = self.measure_at(axis = axis, pos = right_third)
 
-            absolute_precision = np.max([l[1], r[1], default_abs_pres])
+            # absolute_precision = np.max([l[1], r[1], default_abs_pres])
 
             if l[0] > r[0]:
                 left = left_third
@@ -185,7 +186,9 @@ class Measurement():
                 right = right_third
 
         # Left and right are the current bounds; the maximum is between them
-        return np.around((left + right) / 2).astype(int)
+        cen = np.around((left + right) / 2).astype(int)
+        self.log(f"Center at {cen}")
+        return cen
                     
     def measure_at(self, axis: str, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
@@ -202,10 +205,30 @@ class Measurement():
         d4sigma : Tuple[float, float]
             d4Sigma diameter obtained in the form: [diam, delta diam]
         """
+        
         self.controller.move(pos = pos)
         self.controller.waitClear()
 
+        if self.camera.devMode:
+            return self.simulate_beam(pos = pos)
+
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
+
+    def simulate_beam(self, pos: int):
+        """Simulates a beam with center at 0
+
+        Parameters
+        ----------
+        pos : int
+            Position
+
+        Returns
+        -------
+        d4sigma : Tuple[float, float]
+            d4Sigma diameter obtained in the form: [diam, delta diam]
+        """
+
+        return [2 * omega_z(z = self.controller.pulse_to_um(pos), params = [100,0,2300]), 10]
        
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
