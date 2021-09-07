@@ -52,7 +52,7 @@ class Stage(abc.ABC):
             raise ValueError("Given upper limit lower than given lower limit")
         
         self.LIMIT_LOWER = lower
-        self.LIMIT_upper = upper
+        self.LIMIT_UPPER = upper
 
     @property
     def permDirty(self):
