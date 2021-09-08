@@ -47,7 +47,7 @@ for i in range(len(labels)):
 		yerror         = corr_y * ys_e[i],
 		wavelength     = wvs[i],
 		wavelength_err = wvs_err[i],
-		mode           = fitting.fitter.MsqFitter.M2_MODE
+		mode           = fitting.fitter.MsqFitter.ISO_MODE
 	)
 
 	f.estimateAndFit()
@@ -62,3 +62,5 @@ for i in range(len(labels)):
 	fig.suptitle(labels[i])
 	
 	pyplot.show()
+
+	break

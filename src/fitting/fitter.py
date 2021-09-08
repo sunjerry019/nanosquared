@@ -188,6 +188,9 @@ class OCFFitter(Fitter):
             "sd_beta": np.sqrt(np.diag(pcov))
         }
 
+        print(popt, "\n")
+        print(pcov)
+
         self.output = namedtuple("Output", output.keys())(*output.values())
         
         return self.output
@@ -395,7 +398,7 @@ class MsqFitter():
         self._m_squared_calculated = False
         self._m_squared            = None
 
-    def setInitialGuesses(self, w_0 : float = 1, z_0 : float = 1):
+    def setInitialGuesses(self, w_0 : float = 1, z_0 : float = 1, M_sq: float = 1):
         """Sets the initial guesses, only for mode = 0 or 1
 
         Parameters
@@ -407,7 +410,7 @@ class MsqFitter():
 
         """
         if self.mode == 0 or self.mode == 1:
-            self.initial_guesses[0:2] = [w_0, z_0]
+            self.initial_guesses = [w_0, z_0, M_sq]
 
         elif self.mode == 2:
             pass
@@ -417,16 +420,33 @@ class MsqFitter():
            Only for mode = 0 or 1
         """
 
-        if self.mode == 0 or self.mode == 1:
+        if self.mode == self.M2_MODE or self.mode == self.M2LAMBDA_MODE:
             min_w = np.argmin(self.data.y)
 
             z_0 = self.data.x[min_w]
             w_0 = self.data.y[min_w]
 
-            self.setInitialGuesses(w_0 = w_0, z_0 = z_0)
+            self.setInitialGuesses(w_0 = w_0, z_0 = z_0, M_sq = 1)
 
-        elif self.mode == 2:
-            pass
+            # TODO: estimate M^2 here
+
+        elif self.mode == self.ISO_MODE:
+            self.mode = self.M2_MODE
+            self.estimateInitialGuesses()
+            self.func = fit_functions.convertODRtoOCF(self.funcs[self.mode])
+            self.fit()
+
+            w_0, z_0, Msq = self.output.beta
+
+            c = Msq**2 * (self.wavelength[0]/(np.pi*w_0))**2
+            a = w_0**2 + c*(z_0**2)
+            b = -2*z_0*c
+            
+            self.initial_guesses = np.array([a,b,c])
+
+            self.mode = self.ISO_MODE
+            self.func = fit_functions.convertODRtoOCF(self.funcs[self.mode])
+            
     
     @property
     def m_squared(self):

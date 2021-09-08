@@ -127,5 +127,6 @@ def iso_omega_z(params, z):
 		is necessary for accurate D4σ measurements
 
 	"""
+	print(params)
 	a, b, c = params
 	return 0.5 * np.sqrt(a + b*z + c*(z**2))
