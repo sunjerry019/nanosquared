@@ -34,7 +34,10 @@ class WinCamD(cam.Camera):
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
 		
 		if not self.devMode:
+			print("a")
 			assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
+
+		print("b")
 
 		axis = {
 			"x" : QAxContainer.QAxWidget("DATARAYOCX.ProfilesCtrl.1"),
@@ -64,8 +67,8 @@ class WinCamD(cam.Camera):
 		self.dataCtrl.DataReady.connect(self.on_DataReady)
 
 		# Last thing we do is to make sure our camera is warmed up and ready
-		if not self.devMode:
-			self.wait_stable()
+		# if not self.devMode:
+			# self.wait_stable()
 
 	# Support functions
 	def on_DataReady(self):

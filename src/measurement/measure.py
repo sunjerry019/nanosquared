@@ -54,7 +54,7 @@ class Measurement(h.LoggerMixIn):
             controller = GSC01(devMode = devMode)
         
         if camera is None:
-            camera = WinCamD(devMode = True)
+            camera = WinCamD(devMode = devMode)
         
         assert isinstance(camera, Camera), f"Camera ({camera}) is not recognized"
         assert isinstance(controller, Controller), f"Controller ({controller}) is not recognized"
