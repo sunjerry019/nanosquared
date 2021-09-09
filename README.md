@@ -1,4 +1,4 @@
-# Nanoscan M-Squared Automation
+# M-Squared Automation
 
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
