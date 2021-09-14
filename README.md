@@ -1,12 +1,11 @@
 # M-Squared Automation
-
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
 ## Models
-
 The WinCamD Camera used is the [WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
 
 The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
+
 ## How it works
 ### Measuring Beam-Width Data
 ### Fitting the Data
@@ -14,13 +13,13 @@ The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-
 All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 ## Extending this code
-
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script (currently WIP on branch [combination](https://github.com/sunjerry019/nanosquared/tree/combination)). As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
 
 Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/src/fitting) for documentation on the fitting module. 
 
-## Code Linting in VS Code
+If one wants to use the `WinCamD()` module in any script, then the DLL `FTP3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
 
+## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
 ```json
 "python.linting.pylintArgs": [
