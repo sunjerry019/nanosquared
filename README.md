@@ -17,7 +17,7 @@ The code responsible for communicating with each component are separated into di
 
 Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/src/fitting) for documentation on the fitting module. 
 
-If one wants to use the `WinCamD()` module in any script, then the DLL `FTP3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
+If one wants to use the `WinCamD()` module in any script, then the DLL `FTD3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
 
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
