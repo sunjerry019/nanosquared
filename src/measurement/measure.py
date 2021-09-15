@@ -64,8 +64,11 @@ class Measurement(h.LoggerMixIn):
 
         self.data = { 'x' : None, 'y': None }
 
+        if not self.devMode:
+            self.camera.wait_stable()
+
         self.controller.homeStage()
-        self.controller.findRange()
+        self.controller.findRange()        
 
     def __enter__(self):
         return self

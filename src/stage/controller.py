@@ -481,7 +481,7 @@ class GSC01(SerialController):
         self.stage.pulseRange = 0
 
         orig_speed = self.stage.speed.jog
-        self.setSpeed(jogSpeed = 3000)
+        self.setSpeed(jogSpeed = 4000)
 
         self.jog(positive = True)
         self.waitClear()
