@@ -34,10 +34,8 @@ class WinCamD(cam.Camera):
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
 		
 		if not self.devMode:
-			print("a")
+			self.log("Not DevMode, starting driver", loglevel=logging.DEBUG)
 			assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
-
-		print("b")
 
 		axis = {
 			"x" : QAxContainer.QAxWidget("DATARAYOCX.ProfilesCtrl.1"),
@@ -92,6 +90,10 @@ class WinCamD(cam.Camera):
 		for fun in callbacks:
 			fun()
 			self.log(f"DataReady task {fun} done", logging.DEBUG)
+			
+			shutterState = self.dataCtrl.dynamicCall("GetShutterSetting()")
+			self.log(f"Shutterstate = {shutterState}", loglevel = logging.DEBUG)
+
 			self.dataReadyCallbacks.task_done()
 			# Since it was FIFO, it should not matter that we do this later
 		
@@ -134,6 +136,22 @@ class WinCamD(cam.Camera):
 			self.stopDevice()
 
 		return True
+
+	def wait_shutter_open(self):
+		"""Waits until the shutter is open before returning"""
+		
+		def wait_for_shutter():
+			# shutterState = self.dataCtrl.dynamicCall("GetShutterSetting()")
+			# if shutterState != 1:
+			# 	self.log(f"Shutterstate = {shutterState}", loglevel = logging.DEBUG)
+			# 	self.dataReadyCallbacks.put(wait_for_shutter)
+			# else:
+			# 	self.log(f"Shutterstate = {shutterState}", loglevel = logging.INFO)
+			pass
+		
+		self.dataReadyCallbacks.put(wait_for_shutter)
+
+		return self.wait_DataReady_Tasks()
 
 	def setClipMode(self, mode, clip: float = 0):
 		"""Sets the clip mode for Clip A (i.e. 1). Throughout this code, we will only be using A
@@ -246,6 +264,8 @@ class WinCamD(cam.Camera):
 		}
 
 		self.D4Sigma_data = None
+
+		self.wait_shutter_open() # We wait for the shutter to open before taking any data
 
 		def temp_func():
 			self.D4Sigma_data = d4Sigma.get(axis, None)
