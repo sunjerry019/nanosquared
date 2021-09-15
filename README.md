@@ -19,6 +19,10 @@ Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/s
 
 If one wants to use the `WinCamD()` module in any script, then the DLL `FTD3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
 
+## Troubleshooting
+### WinCamD is not giving my any data/no DataReady events are fired
+This could be because there are some limitation on the number of devices that can be plugged into one set of USB ports on the computer. Try plugging the stage and WinCamD to separate sides of the computer/laptop.
+
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
 ```json

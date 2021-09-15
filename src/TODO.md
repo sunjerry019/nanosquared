@@ -1,0 +1,1 @@
+- Get the Shutter State of the WinCamD and only get data when the shutter is open
