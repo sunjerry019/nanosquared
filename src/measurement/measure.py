@@ -80,7 +80,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None):
+    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -101,6 +101,12 @@ class Measurement(h.LoggerMixIn):
         writeToFile : Optional[str], optional
             File to write to, if set to None, the data will be written to a temporary file for safety sake.
             If set to anything else, it will raise a warning and no file will be written. 
+        metadata : dict, optional
+            A dictionary of metadata to write to the file. Will be combined with `default_meta`. 
+            Format: ` # [key]: [Value] `
+            With `default_meta = { "Rayleigh Length": f"{rayleighLength} mm" }`.
+            Values in `default_meta` will be overwritten by entries in this parameter. 
+            By default, empty `dict()`
         """
 
         # Check if the rayleigh length fits the stage being used. 
@@ -150,7 +156,13 @@ class Measurement(h.LoggerMixIn):
         # self.data = {'x': xdata, 'y': ydata }
         # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
 
-        self.write_to_file(writeToFile = writeToFile)
+        default_meta = {
+            "Rayleigh Length": f"{rayleighLength} mm"
+        }
+
+        metadata = {**default_meta, **metadata}
+
+        self.write_to_file(writeToFile = writeToFile, metadata = metadata)
 
         return self.data
 
@@ -166,9 +178,7 @@ class Measurement(h.LoggerMixIn):
             If set to `None`, a temporary file is generated in `{ROOT}/data/local/`
         metadata : Optional[dict], optional
             A dictionary of metadata to write to the file in the format:
-            ```
-            # [key]: [Value]
-            ```
+            ``` # [key]: [Value] ```
             If set to `None`, no metadata will be written.
 
         Returns
