@@ -6,8 +6,12 @@
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
 import os,sys
-from typing import Tuple
+from typing import Optional, Tuple, Union
 import numpy as np
+
+import tempfile
+from pathlib import Path
+from datetime import datetime
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -76,7 +80,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50):
+    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -94,6 +98,9 @@ class Measurement(h.LoggerMixIn):
             Rayleigh Length (z_0) in millimeter, by default 15
         numsamples : int, optional
             Number of samples to take at each point, by default 50
+        writeToFile : Optional[str], optional
+            File to write to, if set to None, the data will be written to a temporary file for safety sake.
+            If set to anything else, it will raise a warning and no file will be written. 
         """
 
         # Check if the rayleigh length fits the stage being used. 
@@ -130,7 +137,7 @@ class Measurement(h.LoggerMixIn):
             
             for ax in ['x', 'y']:
                 y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
-                x = self.controller.pulse_to_um(pps = pt)
+                x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
 
                 dtpt = np.array([x, y[0], y[1]])
                 
@@ -139,7 +146,89 @@ class Measurement(h.LoggerMixIn):
                 else:
                     self.data[ax] = np.vstack((self.data[ax], dtpt))
 
+        # self.data has the format
+        # self.data = {'x': xdata, 'y': ydata }
+        # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
+
+        self.write_to_file(writeToFile = writeToFile)
+
         return self.data
+
+    def write_to_file(self, writeToFile: Optional[str] = None, metadata: Optional[dict] = None) -> Union[str, None]:
+        """Writes `self.data` to a file given by the parameter `writeToFile`.
+
+        Assumes that `self.data` is written by `self.take_measurements()`.
+
+        Parameters
+        ----------
+        writeToFile : Optional[str], optional
+            The filepath to write to, by default None
+            If set to `None`, a temporary file is generated in `{ROOT}/data/local/`
+        metadata : Optional[dict], optional
+            A dictionary of metadata to write to the file in the format:
+            ```
+            # [key]: [Value]
+            ```
+            If set to `None`, no metadata will be written.
+
+        Returns
+        -------
+        pfad : Union[str,None]
+            Returns either the file that has been written to, or None if no file was written.
+
+        """
+        f = None
+        pfad = writeToFile
+
+        now = datetime.now()
+
+        if pfad is not None and isinstance(pfad, str):
+            # We use the given file
+            try:
+                f = open(pfad, 'w')
+            except OSError as e:
+                self.log(f"{pfad}: OSError {e}", logging.ERROR)
+        elif pfad is None:
+            # We create a file in the M2 directory to save the data.
+
+            tempdir = os.path.join(root_dir, "data", "M2")
+            Path(tempdir).mkdir(parents=True, exist_ok=True)
+            fd, pfad = tempfile.mkstemp(suffix = ".dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
+            # Returns a file descriptor instead of the file
+
+            f = os.fdopen(fd, 'w')
+        else:
+            self.log(f"Invalid parameter WriteToFile: {writeToFile}. Skipping writing to file.", logging.WARNING)
+
+            return None
+        
+        self.log(f"Using {pfad}", logging.INFO)
+
+        f.write(f"# Data written on {now.strftime('%Y-%m-%d at %H:%M:%S')}\n")
+
+        if metadata is not None and isinstance(metadata, dict):
+            f.write("# ==== Metadata ====\n")
+            for key, val in metadata.items():
+                f.write(f"#\t{key}: {val}\n")
+        elif metadata is not None:
+            self.log(f"No metadata written, invalid metadata received: {metadata}", logging.WARN)
+        
+        f.write("# ==== Data ====\n")
+        # NOT SAFE BUT
+        # We assume that the x and y axis have the same number of datapoints, with same z-coordinates
+        if self.data['x'].shape == self.data['y'].shape:
+            f.write(f"# position[mm]\tx_diam[um]\tdx_diam[um]\ty_diam[um]\tdy_diam[um]\n")
+            for i in range(self.data['x'].shape[0]):
+                f.write(f"{self.data['x'][i][0]}\t")
+                f.write(f"{self.data['x'][i][1]}\t{self.data['x'][i][2]}\t")
+                f.write(f"{self.data['y'][i][1]}\t{self.data['y'][i][2]}\n")
+
+        f.close()
+
+        self.log(f"Data written to {pfad}", logging.INFO)
+
+        return pfad
+    
 
     def find_center(self, axis: str = 'x', left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
@@ -234,8 +323,9 @@ class Measurement(h.LoggerMixIn):
         d4sigma : Tuple[float, float]
             d4Sigma diameter obtained in the form: [diam, delta diam]
         """
-
-        return [2 * omega_z(z = self.controller.pulse_to_um(pos), params = [100,0,2300]), 10]
+        
+        # z in mm
+        return [2 * omega_z(z = self.controller.pulse_to_um(pos) / 1000, params = [100,0,2300]), 10]
        
     @staticmethod
     def get_w0_zR(diamAtLens: float, focalLength: float, wavelength: float, M2: float = 1) -> Tuple[float, float]:
@@ -315,7 +405,7 @@ class Measurement(h.LoggerMixIn):
         return beam_waist_radius / 1000
 
 if __name__ == '__main__':
-    with Measurement(devMode = False) as M:
+    with Measurement(devMode = True) as M:
         print("with Measurement() as M")
         import code; code.interact(local=locals())
     
