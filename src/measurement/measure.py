@@ -22,7 +22,7 @@ from cameras.wincamd import WinCamD
 
 from stage.controller import Controller, GSC01
 
-from fitting.fitter import MsqFitter, MsqOCFFitter
+from fitting.fitter import MsqFitter, MsqOCFFitter, MsqODRFitter
 from fitting.fit_functions import omega_z
 
 import logging
@@ -223,7 +223,7 @@ class Measurement(h.LoggerMixIn):
         elif metadata is not None:
             self.log(f"No metadata written, invalid metadata received: {metadata}", logging.WARN)
         
-        f.write("# ==== Data ====\n")
+        f.write("# ====== Data ======\n")
         # NOT SAFE BUT
         # We assume that the x and y axis have the same number of datapoints, with same z-coordinates
         if self.data['x'].shape == self.data['y'].shape:
@@ -238,7 +238,60 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Data written to {pfad}", logging.INFO)
 
         return pfad
-    
+
+    def fit_data(self, axis: str, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None):
+        """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time.
+
+        Returns False on error
+
+        Parameters
+        ----------
+        axis : str
+            May take values 'x' or 'y'. 
+        wavelength : float
+            Wavelength to be used
+        wavelength_error : float
+            Error of the wavelength to be taken into account. Only taken into account for M2LAMBDA_MODE and ISO_MODE
+        mode : int, optional
+            Fitting Mode, by default MsqFitter.M2_MODE
+        useODR : bool, optional
+            Whether to use the ODR fitter instead of `scipy.optimize.curve_fit`, by default False
+        xerror: Union[float, array_like], optional
+            Error in the z-position in mm. Can also be numpy array with the same size as `self.data[axis][:,0]` i.e. the first column.
+            If using ODR, `xerror` needs to be provided. 
+            If set to None and `useODR` is set to `True`, `xerror` will be taken as 1 pulse (converted into mm).
+            By default None
+        """
+        if self.data[axis] == None:
+            self.log("Please measure data before fitting!", logging.ERROR)
+            return False
+
+        if axis not in ['x', 'y']:
+            return False
+
+        kwargs = {
+            "x"              : self.data[axis][:,0],
+            "y"              : self.data[axis][:,1],
+            "yerror"         : self.data[axis][:,2],
+            "wavelength"     : wavelength,
+            "wavelength_err" : wavelength_error,
+            "mode"           : mode
+        }
+        
+        if useODR:
+            # Ensure xerror is of correct type
+            if not isinstance(xerror, (int, float, np.ndarray)):
+                self.log(f"Ignoring invalid xerror of type {type(xerror)}: {xerror}", logging.WARN)
+                xerror = None
+            elif isinstance(xerror, np.ndarray) and self.data[axis][:,0].shape != xerror.shape:
+                self.log(f"Ignoring invalid xerror of dimension {xerror.shape}, expected {self.data[axis][:,0].shape}", logging.WARN)
+                xerror = None
+
+            kwargs["xerror"] = xerror if xerror is not None else (self.controller.stage.um_per_pulse(1) / 1000)
+
+        fitter = MsqODRFitter(**kwargs) if useODR else MsqOCFFitter(**kwargs)
+        
+
 
     def find_center(self, axis: str = 'x', left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
