@@ -21,9 +21,6 @@ import queue
 import numpy as np
 from collections import namedtuple
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 class WinCamD(cam.Camera):
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		super().__init__(*args, **kwargs)
