@@ -66,7 +66,8 @@ class Measurement(h.LoggerMixIn):
         self.controller = controller
         self.camera     = camera
 
-        self.data = { 'x' : None, 'y': None }
+        self.data   = { 'x' : None, 'y': None }
+        self.fitter = None
 
         if not self.devMode:
             self.camera.wait_stable()
@@ -239,10 +240,8 @@ class Measurement(h.LoggerMixIn):
 
         return pfad
 
-    def fit_data(self, axis: str, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None):
-        """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time.
-
-        Returns False on error
+    def fit_data(self, axis: str, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None) -> np.ndarray:
+        """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time and overwrites the `self.fitter` object. 
 
         Parameters
         ----------
@@ -261,13 +260,23 @@ class Measurement(h.LoggerMixIn):
             If using ODR, `xerror` needs to be provided. 
             If set to None and `useODR` is set to `True`, `xerror` will be taken as 1 pulse (converted into mm).
             By default None
+
+        Returns 
+        -------
+        m_squared : array_like of length 2
+            np.array([m_squared, m_squared_err]) of floats
+            Value of the fitted m_squared and its corresponding error
+
+            Returns [0, 0] upon error.
+            
         """
         if self.data[axis] == None:
             self.log("Please measure data before fitting!", logging.ERROR)
-            return False
+            return np.zeros(shape = (2,))
 
         if axis not in ['x', 'y']:
-            return False
+            self.log(f"Unexpected axis {axis}", logging.ERROR)
+            return np.zeros(shape = (2,))
 
         kwargs = {
             "x"              : self.data[axis][:,0],
@@ -289,8 +298,10 @@ class Measurement(h.LoggerMixIn):
 
             kwargs["xerror"] = xerror if xerror is not None else (self.controller.stage.um_per_pulse(1) / 1000)
 
-        fitter = MsqODRFitter(**kwargs) if useODR else MsqOCFFitter(**kwargs)
-        
+        self.fitter = MsqODRFitter(**kwargs) if useODR else MsqOCFFitter(**kwargs)
+        self.fitter.estimateAndFit()
+
+        return self.fitter.m_squared     
 
 
     def find_center(self, axis: str = 'x', left: int = None, right: int = None) -> int:
