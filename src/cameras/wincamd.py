@@ -134,22 +134,6 @@ class WinCamD(cam.Camera):
 
 		return True
 
-	def wait_shutter_open(self):
-		"""Waits until the shutter is open before returning"""
-		
-		def wait_for_shutter():
-			# shutterState = self.dataCtrl.dynamicCall("GetShutterSetting()")
-			# if shutterState != 1:
-			# 	self.log(f"Shutterstate = {shutterState}", loglevel = logging.DEBUG)
-			# 	self.dataReadyCallbacks.put(wait_for_shutter)
-			# else:
-			# 	self.log(f"Shutterstate = {shutterState}", loglevel = logging.INFO)
-			pass
-		
-		self.dataReadyCallbacks.put(wait_for_shutter)
-
-		return self.wait_DataReady_Tasks()
-
 	def setClipMode(self, mode, clip: float = 0):
 		"""Sets the clip mode for Clip A (i.e. 1). Throughout this code, we will only be using A
 
@@ -205,6 +189,8 @@ class WinCamD(cam.Camera):
 			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
 			
 		"""
+
+		frames_needed_for_stable = 8  # Empirical Data
 		
 		if axis not in ['x', 'y']:
 			return (None, None)
@@ -223,7 +209,7 @@ class WinCamD(cam.Camera):
 			assert self.startDevice()
 		
 		# We discard the first data point because of some artefact
-		data = np.array([self.getAxis_D4Sigma(axis) for _ in range(numsamples + 1)][1:])
+		data = np.array([self.getAxis_D4Sigma(axis) for _ in range(numsamples + frames_needed_for_stable)][frames_needed_for_stable:])
 
 		if not _originalState:
 			self.stopDevice()
@@ -261,8 +247,6 @@ class WinCamD(cam.Camera):
 		}
 
 		self.D4Sigma_data = None
-
-		self.wait_shutter_open() # We wait for the shutter to open before taking any data
 
 		def temp_func():
 			self.D4Sigma_data = d4Sigma.get(axis, None)

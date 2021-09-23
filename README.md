@@ -17,7 +17,12 @@ The code responsible for communicating with each component are separated into di
 
 Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/src/fitting) for documentation on the fitting module. 
 
-If one wants to use the `WinCamD()` module in any script, then the DLL `FTD3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
+## Version Information
+For Python packages used, refer to `conda-environment.yml`. 
+
+The DataRay Software versions used for the development of this code are as follows:
+- 32-bit: iDataRay80D63
+- 64-bit: iDataRay80D62_x64
 
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
