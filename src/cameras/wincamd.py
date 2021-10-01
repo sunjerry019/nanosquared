@@ -87,10 +87,6 @@ class WinCamD(cam.Camera):
 		for fun in callbacks:
 			fun()
 			self.log(f"DataReady task {fun} done", logging.DEBUG)
-			
-			shutterState = self.dataCtrl.dynamicCall("GetShutterSetting()")
-			self.log(f"Shutterstate = {shutterState}", loglevel = logging.DEBUG)
-
 			self.dataReadyCallbacks.task_done()
 			# Since it was FIFO, it should not matter that we do this later
 		
