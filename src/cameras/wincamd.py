@@ -21,9 +21,6 @@ import queue
 import numpy as np
 from collections import namedtuple
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 class WinCamD(cam.Camera):
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -34,10 +31,8 @@ class WinCamD(cam.Camera):
 		self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
 		
 		if not self.devMode:
-			print("a")
+			self.log("Not DevMode, starting driver", loglevel=logging.DEBUG)
 			assert self.dataCtrl.dynamicCall("StartDriver") # Returns True if successful
-
-		print("b")
 
 		axis = {
 			"x" : QAxContainer.QAxWidget("DATARAYOCX.ProfilesCtrl.1"),
@@ -190,6 +185,8 @@ class WinCamD(cam.Camera):
 			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
 			
 		"""
+
+		frames_needed_for_stable = 8  # Empirical Data
 		
 		if axis not in ['x', 'y']:
 			return (None, None)
@@ -208,7 +205,7 @@ class WinCamD(cam.Camera):
 			assert self.startDevice()
 		
 		# We discard the first data point because of some artefact
-		data = np.array([self.getAxis_D4Sigma(axis) for _ in range(numsamples + 1)][1:])
+		data = np.array([self.getAxis_D4Sigma(axis) for _ in range(numsamples + frames_needed_for_stable)][frames_needed_for_stable:])
 
 		if not _originalState:
 			self.stopDevice()
