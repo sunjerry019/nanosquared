@@ -12,7 +12,7 @@ sys.path.insert(0, root_dir)
 import cameras.camera as cam
 
 import logging
-from PyQt5 import QtWidgets, QAxContainer
+from PyQt5 import QtWidgets, QAxContainer, QtCore
 
 import numpy as np
 from collections import namedtuple
@@ -26,8 +26,16 @@ class NanoScan(cam.Camera):
 		self.devMode = devMode
 
 		self.dummyapp = QtWidgets.QApplication([''])
-		# self.dataCtrl = QAxContainer.QAxWidget("DATARAYOCX.GetDataCtrl.1")
-		
+
+		# Early Binding: NanoScanII.INanoScanII
+		# We have to use Late Binding
+		self.NS = QAxContainer.QAxWidget("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
+		# print(self.NS.dynamicCall("NsAsGetDeviceID()"))
+
+		ui = QtCore.QMetaType(36) # ushort https://doc.qt.io/qt-5/qmetatype.html
+		x = self.NS.dynamicCall("NsAsGetDeviceID", ui)
+		print(x, ui)
+				
 
 	def __exit__(self, e_type, e_val, traceback):
 		return super().__exit__(e_type, e_val, traceback)

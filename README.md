@@ -35,3 +35,6 @@ Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, 
 		"--disable=W0142,W0403,W0613,W0232,R0903,R0913,C0103,R0914,C0304,F0401,W0402,E1101,W0614,C0111,C0301"
 	]	
 ```
+
+## References
+https://stackoverflow.com/a/1067842
