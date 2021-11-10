@@ -11,8 +11,11 @@ sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
 
+import win32com
+import win32com.client as wc
+# import nanoscan_genpy as NSAx # does not work
+
 import logging
-from PyQt5 import QtWidgets, QAxContainer, QtCore
 
 class NanoScan(cam.Camera):
 	"""Provides interface to the NanoScan 2s Pyro/9/5"""
@@ -22,23 +25,18 @@ class NanoScan(cam.Camera):
 
 		self.devMode = devMode
 
-		self.dummyapp = QtWidgets.QApplication([''])
-
 		# Early Binding: NanoScanII.INanoScanII
 		# We have to use Late Binding
-		self.NS = QAxContainer.QAxWidget("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
+		self.NS = wc.Dispatch("photon-nanoscan")
 
-		numDevices = [-1]
+		# ui = QtCore.QMetaType(36) # ushort https://doc.qt.io/qt-5/qmetatype.html
+		# ui = QtCore.QMetaType(31) # voidstar https://doc.qt.io/qt-5/qmetatype.html
+		# ui = np.array([-1], dtype=np.int16)
+		# ui = ctypes.c_short(-1)
+
+		numDevices = -1
+		self.NS.NsAsGetNumDevices(numDevices)
 		print(numDevices)
-		ret = self.NS.dynamicCall("NsAsGetNumDevices(short&)", numDevices)
-		print(ret, numDevices)
-
-		print("NsAsShowWindow:")
-		x = self.NS.property("NsAsShowWindow")
-		print(x)
-		self.NS.setProperty("NsAsShowWindow()", True)
-		x = self.NS.property("NsAsShowWindow")
-		print(x)
 
 	def __exit__(self, e_type, e_val, traceback):
 		return super().__exit__(e_type, e_val, traceback)
