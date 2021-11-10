@@ -5,9 +5,6 @@
 
 import os,sys
 
-import ctypes
-
-
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
@@ -16,9 +13,6 @@ import cameras.camera as cam
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer, QtCore
-
-import numpy as np
-from collections import namedtuple
 
 class NanoScan(cam.Camera):
 	"""Provides interface to the NanoScan 2s Pyro/9/5"""
