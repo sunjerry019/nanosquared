@@ -17,14 +17,13 @@ class NanoScan():
 
         # Early Binding: NanoScanII.INanoScanII
         # We have to use Late Binding
-        self.NS = QAxContainer.QAxWidget("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
+        self.NS = QAxContainer.QAxObject("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
 
-        wahr = QtCore.QVariant(True)
-        self.NS.setProperty("NsAsShowWindow(bool)", wahr)
-
-        numDevices = QtCore.QVariant(-1)
+        numDevices = [-1]
         x = self.NS.dynamicCall("NsAsGetNumDevices(short&)", numDevices) # https://stackoverflow.com/a/25378588
-        print(numDevices.value())
+        print(numDevices[0])
+
+        self.NS.dynamicCall("NsAsShowWindow", True)
     
     def __enter__(self):
         return self
