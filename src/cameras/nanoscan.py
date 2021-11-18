@@ -3,12 +3,23 @@
 # Made 2021, Sun Yudong
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
+import os,sys
+
+base_dir = os.path.dirname(os.path.realpath(__file__))
+root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+sys.path.insert(0, root_dir)
+
+import cameras.camera as cam
+
+import logging
+
 from PyQt5 import QtWidgets, QAxContainer, QtCore
 
-class NanoScan():
+class NanoScan(cam.Camera):
     """Provides interface to the NanoScan 2s Pyro/9/5"""
 
     def __init__(self, devMode: bool = False, *args, **kwargs):
+        cam.Camera.__init__(self, *args, **kwargs)
         self.apertureOpen = False
 
         self.devMode = devMode
