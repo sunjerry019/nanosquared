@@ -3,38 +3,34 @@
 # Made 2021, Sun Yudong
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
-import os,sys
+from PyQt5 import QtWidgets, QAxContainer, QtCore
 
-base_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(base_dir, ".."))
-sys.path.insert(0, root_dir)
+class NanoScan():
+    """Provides interface to the NanoScan 2s Pyro/9/5"""
 
-import cameras.camera as cam
+    def __init__(self, devMode: bool = False, *args, **kwargs):
+        self.apertureOpen = False
 
-import logging
+        self.devMode = devMode
 
-from msl.loadlib import Client64
+        self.dummyapp = QtWidgets.QApplication([''])
 
-class NanoScan(cam.Camera, Client64):
-	"""Provides interface to the NanoScan 2s Pyro/9/5"""
+        # Early Binding: NanoScanII.INanoScanII
+        # We have to use Late Binding
+        self.NS = QAxContainer.QAxWidget("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
 
-	def __init__(self, devMode: bool = False, *args, **kwargs):
-		cam.Camera.__init__(self, *args, **kwargs)
-		Client64.__init__(self, module32='nanoscan_server.py')
+        wahr = QtCore.QVariant(True)
+        self.NS.setProperty("NsAsShowWindow(bool)", wahr)
 
-		self.devMode = devMode
+        numDevices = QtCore.QVariant(-1)
+        x = self.NS.dynamicCall("NsAsGetNumDevices(short&)", numDevices) # https://stackoverflow.com/a/25378588
+        print(numDevices.value())
+    
+    def __enter__(self):
+        return self
 
-		# self.setShowWindow(True)
-		# self.InitNsInterop()
-		print(self.NsInteropGetNumDevices())
-
-	def __getattr__(self, name):
-		def send(*args, **kwargs):
-			return self.request32(name, *args, **kwargs)
-		return send
-
-	def __exit__(self, e_type, e_val, traceback):
-		return super().__exit__(e_type, e_val, traceback)
+    def __exit__(self, e_type, e_val, traceback):
+        pass
 
 if __name__ == '__main__':
     with NanoScan() as n:
