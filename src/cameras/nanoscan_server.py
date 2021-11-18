@@ -17,10 +17,18 @@ class NanoscanServer(Server32):
     """Wrapper around a 32-bit C++ library 'NS2_Interop.dll'."""
 
     def __init__(self, host, port, **kwargs):
-        # Load the 'my_lib' shared-library file using ctypes.CDLL
+        # Load the 'NS2_Interop.dll' shared-library file using ctypes.CDLL
         
         # https://readthedocs.org/projects/msl-loadlib/downloads/pdf/latest/
         # We know that the DLL uses __cdecl calling type -> ctypes
+        # libtype:
+        #     'cdll'              – for a library that uses the __cdecl calling convention
+        #     'windll' or 'oledll'– for a __stdcall calling convention
+        #     'net' or 'clr'      – for Microsoft’s .NET Framework (Common LanguageRuntime)
+        #     'java'              – for a Java archive,.jar, or Java byte code,.class, file
+        #     'com'               – for a COM library
+        #     'activex'           – for an ActiveX library
+
         super(NanoscanServer, self).__init__(os.path.join(os.path.dirname(__file__),'NS2_Interop.dll'), 'cdll', host, port)
     
     def InitNsInterop(self):
