@@ -17,13 +17,26 @@ class NanoScan():
 
         # Early Binding: NanoScanII.INanoScanII
         # We have to use Late Binding
+        # QAxObject for COM object vs. QAxWidget
         self.NS = QAxContainer.QAxObject("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
 
-        numDevices = [-1]
-        x = self.NS.dynamicCall("NsAsGetNumDevices(short&)", numDevices) # https://stackoverflow.com/a/25378588
-        print(numDevices[0])
+    def toggleWindow(self) -> None:
+        """Toggles the GUI Window of the NanoScan program"""
 
-        self.NS.dynamicCall("NsAsShowWindow", True)
+        state = self.NS.dynamicCall("NsAsShowWindow")
+        self.NS.dynamicCall("NsAsShowWindow", not state)
+
+    def getNumDevices(self) -> int:
+        """Gets the number of connected NanoScan devices
+
+        Returns
+        -------
+        numDevices: int
+            Number of NanoScan devices connected.
+        """
+        numDevices = [-1] # Forces pass-by-reference
+        x = self.NS.dynamicCall("NsAsGetNumDevices(short&)", numDevices) # https://stackoverflow.com/a/25378588
+        return numDevices[0]
     
     def __enter__(self):
         return self
