@@ -10,7 +10,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
-from cameras.nanoscan_constants import SelectParameters
+from cameras.nanoscan_constants import SelectParameters, NsAxes
 
 import logging
 
@@ -53,9 +53,23 @@ class NanoScan(cam.Camera):
 			
 		"""
         self.NS.dynamicCall("NsAsAutoFind()")
-        
+        self.NS.dynamicCall("NsAsSelectParameters(long)", 
+            SelectParameters.BEAM_WIDTH_D4SIGMA & SelectParameters.BEAM_CENTROID_POS)
 
-        return (0, 0)
+        # Take sample
+        self.NS.dynamicCall("NsAsAcquireSync1Rev()")
+        self.NS.dynamicCall("NsAsRunComputation()")
+        # NsAsRecompute() for no tracking performed even if setup 'sync1rev
+
+        # Axis, ROI Index, *Beam Width
+        x = [-0.1]
+        y = [-0.1]
+
+        self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.X, 0, x)
+        self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.Y, 0, y)
+        self.log((x, y), loglevel = logging.INFO)
+
+        return (x[0], y[0])
 
     def toggleWindow(self) -> None:
         """Toggles the GUI Window of the NanoScan program"""

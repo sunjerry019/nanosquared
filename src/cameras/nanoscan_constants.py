@@ -2,9 +2,15 @@
 
 """Provides enums for NanoScan"""
 
-from enum import IntFlag, auto
+from enum import IntFlag, IntEnum, auto
+
+class NsAxes(IntEnum):
+    """Enum for Axis Selection"""
+    X = auto()
+    Y = auto()
 
 class SelectParameters(IntFlag):
+    """Enum for NsAsSelectParameters"""
     BEAM_WIDTH_13_5_CLIP         = auto()
     BEAM_WIDTH_FWHM_CLIP         = auto()
     BEAM_WIDTH_USER_CLIP_1       = auto()

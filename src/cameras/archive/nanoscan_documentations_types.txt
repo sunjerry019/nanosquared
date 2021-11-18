@@ -1,1 +1,5 @@
-VTS_PI2 = Short
+https://docs.microsoft.com/en-us/cpp/mfc/reference/dispatch-maps?view=msvc-170#remarks-3
+
+VTS_PI2 = Short*
+VTS_R4  = float
+VTS_I4  = long
