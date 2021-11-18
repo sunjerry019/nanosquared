@@ -10,10 +10,13 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
+from cameras.nanoscan_constants import SelectParameters
 
 import logging
 
 from PyQt5 import QtWidgets, QAxContainer, QtCore
+
+from typing import Tuple
 
 class NanoScan(cam.Camera):
     """Provides interface to the NanoScan 2s Pyro/9/5"""
@@ -29,7 +32,30 @@ class NanoScan(cam.Camera):
         # Early Binding: NanoScanII.INanoScanII
         # We have to use Late Binding
         # QAxObject for COM object vs. QAxWidget
-        self.NS = QAxContainer.QAxObject("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}
+        self.NS = QAxContainer.QAxObject("photon-nanoscan")  # {FAAD0D22-C718-459A-81CA-268CCF188807}\
+
+    def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20) -> Tuple[float, float]:
+        """Get the d4sigma in one `axis` and averages it over `numsamples`.
+		This function opens the camera where necessary, and returns it to the previous state after it is done.
+
+		Parameters
+		----------
+		axis : str
+			May take values 'x' or 'y'
+		numsamples : int, optional
+			Number of samples to average over, by default 20
+
+		Returns
+		-------
+		ret : (double, double)
+			Returns the d4sigma of the given axis in micrometer in the form of (average, stddev)
+			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
+			
+		"""
+        self.NS.dynamicCall("NsAsAutoFind()")
+        
+
+        return (0, 0)
 
     def toggleWindow(self) -> None:
         """Toggles the GUI Window of the NanoScan program"""

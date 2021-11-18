@@ -10,7 +10,7 @@ root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
 import cameras.camera as cam
-from cameras.constants import WCD_Profiles, OCX_Buttons, CLIP_MODES
+from cameras.wincam_constants import WCD_Profiles, OCX_Buttons, CLIP_MODES
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer

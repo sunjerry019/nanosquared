@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Provides reference lookup for WinCamD. 
+Provides reference lookup for WinCamD
 """
 
 from collections import namedtuple
