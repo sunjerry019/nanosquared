@@ -9,6 +9,14 @@ class NsAxes(IntEnum):
     X = auto()
     Y = auto()
 
+class BeamWidthBasis(IntEnum):
+    """Enum for NsAsBeamWidthBasis"""
+    W_13_5    = auto()
+    W_50      = auto()
+    W_D4SIGMA = auto()
+    W_USER_1  = auto()
+    W_USER_2  = auto()
+
 class SelectParameters(IntFlag):
     """Enum for NsAsSelectParameters"""
     BEAM_WIDTH_13_5_CLIP         = auto()

@@ -52,22 +52,32 @@ class NanoScan(cam.Camera):
 			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
 			
 		"""
-        self.NS.dynamicCall("NsAsAutoFind()")
-        self.NS.dynamicCall("NsAsSelectParameters(long)", 
-            SelectParameters.BEAM_WIDTH_D4SIGMA & SelectParameters.BEAM_CENTROID_POS)
+        # self.NS.dynamicCall("NsAsAutoFind()")
+        # self.NS.dynamicCall("NsAsSelectParameters(long)", 
+        #     SelectParameters.BEAM_WIDTH_D4SIGMA & SelectParameters.BEAM_CENTROID_POS)
 
-        # Take sample
-        self.NS.dynamicCall("NsAsAcquireSync1Rev()")
-        self.NS.dynamicCall("NsAsRunComputation()")
-        # NsAsRecompute() for no tracking performed even if setup 'sync1rev
+        # # Take sample
+        # self.NS.dynamicCall("NsAsAcquireSync1Rev()")
+        # self.NS.dynamicCall("NsAsRunComputation()")
+        # # NsAsRecompute() for no tracking performed even if setup 'sync1rev
 
-        # Axis, ROI Index, *Beam Width
+        # # Axis, ROI Index, *Beam Width
+        # x = [-0.1]
+        # y = [-0.1]
+
+        # self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.X, 0, x)
+        # self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.Y, 0, y)
+        # self.log((x, y), loglevel = logging.INFO)
+
+        self.NS.dynamicCall("NsAsDataAcquisition", True)
+
         x = [-0.1]
         y = [-0.1]
 
-        self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.X, 0, x)
-        self.NS.dynamicCall("NsAsGetBeamWidth4Sigma(short, short, float&)", NsAxes.Y, 0, y)
-        self.log((x, y), loglevel = logging.INFO)
+        self.NS.dynamicCall("NsAsGetBeamWidth(short, short, float, float&)", 0, 0, 13.5, x)
+        self.NS.dynamicCall("NsAsGetBeamWidth(short, short, float, float&)", 1, 0, 13.5, y)
+        
+        self.NS.dynamicCall("NsAsDataAcquisition", False)
 
         return (x[0], y[0])
 
