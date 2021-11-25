@@ -7,4 +7,5 @@ for item in dir(net.lib):
         attr = getattr(net.lib, item)
         print('{} {}'.format(item, type(attr)))
 
-print(net.lib.NanoScanLibrary.NanoScan.InitNs())
+x = net.lib.NanoScanLibrary.NanoScan()
+print(x.InitNs())
