@@ -214,14 +214,51 @@ namespace NanoScanLibrary
             return isSignalSaturated;
         }
         public int Recompute() { return NsInteropRecompute(); }
-        public int GetBeamWidthRatio(short roiIndex, float clipLevel, ref float beamWidthRatio) { return NsInteropGetBeamWidthRatio(roiIndex, clipLevel, beamWidthRatio); }
-        public int GetBeamWidth4SigmaRatio(short roiIndex, ref float beamWidth4SigmaRatio) { return NsInteropGetBeamWidth4SigmaRatio(roiIndex, beamWidth4SigmaRatio); }
-        public int GetMaxSamplingResolution(ref float maxSamplingRes) { return NsInteropGetMaxSamplingResolution(maxSamplingRes); }
+        public float GetBeamWidthRatio(short roiIndex, float clipLevel) 
+        {
+            float beamWidthRatio = -0.1F;
+            NsInteropGetBeamWidthRatio(roiIndex, clipLevel, ref beamWidthRatio);
+            return beamWidthRatio;
+        }
+        public float GetBeamWidth4SigmaRatio(short roiIndex) 
+        {
+            float beamWidth4SigmaRatio = -0.1F;
+            NsInteropGetBeamWidth4SigmaRatio(roiIndex, ref beamWidth4SigmaRatio);
+            return beamWidth4SigmaRatio;
+        }
+        public float GetMaxSamplingResolution() 
+        {
+            float maxSamplingRes = -0.1F;
+            NsInteropGetMaxSamplingResolution(ref maxSamplingRes);
+            return maxSamplingRes;
+        }
         public int SetDivergenceMethod(short divMethod, float clipLevel, float distance) { return NsInteropSetDivergenceMethod(divMethod, clipLevel, distance); }
-        public int GetDivergenceMethod(ref short divMethod, ref float clipLevel, ref float distance) { return NsInteropGetDivergenceMethod(divMethod, clipLevel, distance); }
-        public int GetDivergenceParameter(short aperture, short roiIndex, ref float divergence) { return NsInteropGetDivergenceParameter(aperture, roiIndex, divergence); }
+        public float[] GetDivergenceMethod() 
+        {
+            short divMethod = -1;
+            float clipLevel = -0.1F;
+            float distance = -0.1F;
+            NsInteropGetDivergenceMethod(ref divMethod, ref clipLevel, ref distance);
+
+            float[] ret = { (float) divMethod, clipLevel, distance };
+            return ret;
+        }
+        public float GetDivergenceParameter(short aperture, short roiIndex) 
+        {
+            float divergence = -0.1F;
+            NsInteropGetDivergenceParameter(aperture, roiIndex, ref divergence);
+            return divergence;
+        }
         // public int GetDeviceList([In][Out][MarshalAs) { return NsInteropGetDeviceList([In][Out][MarshalAs); }
-        public int GetAveraging(ref short finite, ref short rolling) { return NsInteropGetAveraging(finite, rolling); }
+        public short[] GetAveraging() 
+        {
+            short finite  = -1;
+            short rolling = -1;
+            NsInteropGetAveraging(ref finite, ref rolling);
+
+            short[] ret = { finite, rolling };
+            return ret; 
+        }
         public int SetAveraging(short finite, short rolling) { return NsInteropSetAveraging(finite, rolling); }
         public int RunComputation() { return NsInteropRunComputation(); }
         // public void GetHeadGainTable(long capabilityID, [In][Out][MarshalAs) { NsInteropGetHeadGainTable(capabilityID, [In][Out][MarshalAs); }
