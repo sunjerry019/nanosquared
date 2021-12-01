@@ -16,3 +16,4 @@ dependencies:
         - pyqt5>=5.15
         - matplotlib>=3.4.2
         - msl-loadlib>=0.9.0
+        - pythonnet>=2.5.2
