@@ -15,22 +15,28 @@ import logging
 
 from msl.loadlib import Client64
 
-class NanoScan(cam.Camera, Client64):
+class NanoScan(cam.Camera):
 	"""Provides interface to the NanoScan 2s Pyro/9/5"""
 
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		cam.Camera.__init__(self, *args, **kwargs)
-		Client64.__init__(self, module32='nanoscan_server.py')
 
 		self.devMode = devMode
+		self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
 
-		# print(self.NsInteropGetNumDevices())
-		# self.listClasses()
+class NanoScanDLL(Client64):
+	"""Provides interface to the 32-bit NanoScan C# DLL using msl-loadlib."""
+
+	def __init__(self, *args, **kwargs):
+		Client64.__init__(self, module32='nanoscan_server.py')
 
 	def __getattr__(self, name):
 		def send(*args, **kwargs):
 			return self.request32(name, *args, **kwargs)
 		return send
+
+	def __enter__(self):
+		return self
 
 	def __exit__(self, e_type, e_val, traceback):
 		return super().__exit__(e_type, e_val, traceback)

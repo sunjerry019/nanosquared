@@ -13,12 +13,12 @@ from msl.loadlib import Server32
 
 import ctypes
 
-class NanoscanServer(Server32):
-    """Wrapper around a 32-bit C#.NET library 'NanoScanLibrary.dll'."""
+class NanoScanServer(Server32):
+    """Wrapper around a 32-bit C#.NET library 'NanoScanLibrary.dll'. WARNING: No GUI Features available."""
 
     def __init__(self, host, port, **kwargs):
         # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
-        super(NanoscanServer, self).__init__(
+        super(NanoScanServer, self).__init__(
             # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
             os.path.join(os.path.dirname(__file__),"csharp","NanoScanLibrary","bin","Release","netstandard2.0",'NanoScanLibrary.dll'), 
             'net', host, port
@@ -26,14 +26,15 @@ class NanoscanServer(Server32):
         self.NS = self.lib.NanoScanLibrary.NanoScan()
         self.NS.InitNs()
 
-    # def __getattr__(self, name):
-    #     def send(*args, **kwargs):
-    #         return getattr(self.NS, name)(*args, **kwargs)
-    #     return send
+    def __getattr__(self, name):
+        """Get the functions of self.NS directly. Possibly use python script to generate functions in this file.
+        
+        See NanoScan.cs for functions and documentations
+        """
+        def send(*args, **kwargs):
+            return getattr(self.NS, name)(*args, **kwargs)
+        return send
 
-    def GetNumDevices(self):
-        return self.NS.GetNumDevices()
-    
     def __enter__(self):
         return self
 

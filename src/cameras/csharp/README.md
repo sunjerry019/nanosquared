@@ -25,6 +25,8 @@ This requires that the scanhead be upgraded to the PRO licence. The licence is w
 
 If the scanhead is properly activated with the PRO Licence, then the software will forward the API calls from the ActiveX Endpoint to the scanhead. 
 
+Do note that due to limitations of `msl-loadlib`, no GUI functions seem to be available. 
+
 ## Documentation
 Resources available are:
 - `NanoScan.cs`, which provides the methods
