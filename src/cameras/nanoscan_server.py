@@ -14,30 +14,35 @@ from msl.loadlib import Server32
 import ctypes
 
 class NanoscanServer(Server32):
-    """Wrapper around a 32-bit C++ library 'NS2_Interop.dll'."""
+    """Wrapper around a 32-bit C#.NET library 'NanoScanLibrary.dll'."""
 
     def __init__(self, host, port, **kwargs):
-        # Load the 'NS2_Interop.dll' shared-library file using ctypes.CDLL
-        
-        # https://readthedocs.org/projects/msl-loadlib/downloads/pdf/latest/
-        # We know that the DLL uses __cdecl calling type -> ctypes
-        # libtype:
-        #     'cdll'              – for a library that uses the __cdecl calling convention
-        #     'windll' or 'oledll'– for a __stdcall calling convention
-        #     'net' or 'clr'      – for Microsoft’s .NET Framework (Common LanguageRuntime)
-        #     'java'              – for a Java archive,.jar, or Java byte code,.class, file
-        #     'com'               – for a COM library
-        #     'activex'           – for an ActiveX library
+        # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
+        super(NanoscanServer, self).__init__(
+            # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
+            os.path.join(os.path.dirname(__file__),"csharp","NanoScanLibrary","bin","Release","netstandard2.0",'NanoScanLibrary.dll'), 
+            'net', host, port
+        )
+        # self.NS = self.lib.NanoScanLibrary.NanoScan()
+        # self.NS.initNS()
 
-        super(NanoscanServer, self).__init__(os.path.join(os.path.dirname(__file__),'NS2_Interop.dll'), 'cdll', host, port)
+    def listClasses(self):
+        output = []
+        for item in dir(self.lib):
+            if not item.startswith('_'):
+                attr = getattr(self.lib, item)
+                output.append('{} {}'.format(item, type(attr)))
+        return output
+
+    # def __getattr__(self, name):
+    #     def send(*args, **kwargs):
+    #         return getattr(self.NS, name)(*args, **kwargs)
+    #     return send
     
-    def InitNsInterop(self):
-        return self.lib.InitNsInterop()
+    def __enter__(self):
+        return self
 
-    def NsInteropGetNumDevices(self):
-        x = ctypes.c_short(-1)
-        self.lib.NsInteropGetNumDevices(ctypes.byref(x))
-        return x
-
-    def setShowWindow(self, showGUI):
-        return self.lib.NsInteropSetShowWindow()
+    def __exit__(self, e_type, e_val, traceback):
+        # self.NS.ShutdownNS()
+        return super().__exit__(e_type, e_val, traceback)
+    

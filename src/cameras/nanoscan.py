@@ -24,9 +24,8 @@ class NanoScan(cam.Camera, Client64):
 
 		self.devMode = devMode
 
-		# self.setShowWindow(True)
-		# self.InitNsInterop()
-		print(self.NsInteropGetNumDevices())
+		# print(self.NsInteropGetNumDevices())
+		# self.listClasses()
 
 	def __getattr__(self, name):
 		def send(*args, **kwargs):
