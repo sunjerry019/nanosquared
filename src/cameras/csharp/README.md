@@ -10,6 +10,8 @@ NS2_interop.dll
 ```
 Both of these must be in the same folder. Additionally, the scanhead must be of the PRO Version. 
 
+If the dlls do not work, consider rebuilding the project yourself. 
+
 ## Motivation
 After discussing with the lead software engineering in-charge of maintaining this software at MKS Ophir Optics, we came to the conclusion that many functions just do not work well between that particular ActiveX COM interface and Python. One particular error was an error in `pywin32` that results in by-ref parameters being passed wrongly to the COM interface. This error was only fixed in version `300`, which is not available to us right now.
 
