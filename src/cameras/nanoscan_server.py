@@ -23,26 +23,21 @@ class NanoscanServer(Server32):
             os.path.join(os.path.dirname(__file__),"csharp","NanoScanLibrary","bin","Release","netstandard2.0",'NanoScanLibrary.dll'), 
             'net', host, port
         )
-        # self.NS = self.lib.NanoScanLibrary.NanoScan()
-        # self.NS.initNS()
-
-    def listClasses(self):
-        output = []
-        for item in dir(self.lib):
-            if not item.startswith('_'):
-                attr = getattr(self.lib, item)
-                output.append('{} {}'.format(item, type(attr)))
-        return output
+        self.NS = self.lib.NanoScanLibrary.NanoScan()
+        self.NS.InitNs()
 
     # def __getattr__(self, name):
     #     def send(*args, **kwargs):
     #         return getattr(self.NS, name)(*args, **kwargs)
     #     return send
+
+    def GetNumDevices(self):
+        return self.NS.GetNumDevices()
     
     def __enter__(self):
         return self
 
     def __exit__(self, e_type, e_val, traceback):
-        # self.NS.ShutdownNS()
+        self.NS.ShutdownNS()
         return super().__exit__(e_type, e_val, traceback)
     
