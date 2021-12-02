@@ -24,7 +24,7 @@ class NanoScanServer(Server32):
             'net', host, port
         )
         self.NS = self.lib.NanoScanLibrary.NanoScan()
-        self.NS.InitNs()
+        assert self.NS.InitNs() == 1, "Failed to start NanoScan"
 
     def __getattr__(self, name):
         """Get the functions of self.NS directly. Possibly use python script to generate functions in this file.
