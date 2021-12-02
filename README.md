@@ -25,6 +25,12 @@ If one wants to use the `WinCamD()` module in any script, then the DLL `FTD3XX.d
 ### WinCamD is not giving my any data/no DataReady events are fired
 This could be because there are some limitation on the number of devices that can be plugged into one set of USB ports on the computer. Try plugging the stage and WinCamD to separate sides of the computer/laptop.
 
+### NanoScan is only giving me -0.1 as the beamwidth
+Perhaps the NS software did not close properly. Try running `nanoscan.py` directly and then:
+```python
+n.NS.ShutdownNS()
+```
+
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
 ```json

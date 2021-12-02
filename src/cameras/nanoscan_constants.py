@@ -2,12 +2,21 @@
 
 """Provides enums for NanoScan"""
 
+import os,sys
+
+base_dir = os.path.dirname(os.path.realpath(__file__))
+root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+sys.path.insert(0, root_dir)
+
 from enum import IntFlag, IntEnum, auto
 
-class NsAxes(IntEnum):
+from cameras.all_constants import CameraAxes
+
+class NsAxes(CameraAxes, IntEnum):
     """Enum for Axis Selection"""
-    X = auto()
-    Y = auto()
+    X    = 0
+    Y    = 1
+    BOTH = 2
 
 class BeamWidthBasis(IntEnum):
     """Enum for NsAsBeamWidthBasis"""
