@@ -9,8 +9,10 @@ base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
 
+from typing import Tuple
+
 import cameras.camera as cam
-from cameras.wincamd_constants import WCD_Profiles, OCX_Buttons, CLIP_MODES
+from cameras.wincamd_constants import WinCamAxes, WCD_Profiles, OCX_Buttons, CLIP_MODES
 
 import logging
 from PyQt5 import QtWidgets, QAxContainer
@@ -168,7 +170,7 @@ class WinCamD(cam.Camera):
 		return self.dataCtrl.dynamicCall(f"SetClipLevel({clip}, 0.5, {mode}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
 
 	# Implementations
-	def getAxis_avg_D4Sigma(self, axis, numsamples: int = 20):
+	def getAxis_avg_D4Sigma(self, axis: WinCamAxes, numsamples: int = 20) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
 		This function opens the camera where necessary, and returns it to the previous state after it is done.
 
@@ -185,7 +187,7 @@ class WinCamD(cam.Camera):
 
 		Returns
 		-------
-		ret : (double, double)
+		ret : (float, float)
 			Returns the d4sigma of the given axis in micrometer in the form of (average, stddev)
 			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
 			
@@ -217,7 +219,7 @@ class WinCamD(cam.Camera):
 
 		return (np.average(data), np.std(data))
 
-	def getAxis_D4Sigma(self, axis):
+	def getAxis_D4Sigma(self, axis: WinCamAxes):
 		"""Get the d4sigma in one `axis`, opens the camera if necessary, then restores the previous state that the camera was in.
 
 		IMPT: You should discard the data to the first call to the function, then take some averages. 
@@ -257,7 +259,7 @@ class WinCamD(cam.Camera):
 
 		return self.D4Sigma_data
 
-	def getAxisProfile(self, axis):
+	def getAxisProfile(self, axis: WinCamAxes):
 		"""Get the profile in one `axis` if the camera is running.
 		Note: Does not work, but not important 
 
