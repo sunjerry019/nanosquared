@@ -15,7 +15,7 @@ namespace NanoScanLibrary
          * Signatures of functions will be that of the manual sans all pass-by-reference variables.
          */
 
-        public int InitNs() { return InitNsInterop(); }
+        public int InitNS() { return InitNsInterop(); }
         public void ShutdownNS() { ShutdownNsInterop(); }
         // public int GetHeadCapabilities(long capabilityID, [In][Out][MarshalAs) { return NsInteropGetHeadCapabilities(capabilityID, [In][Out][MarshalAs); }
         public int SetGain(short aperture, short gain) { return NsInteropSetGain(aperture, gain); }
