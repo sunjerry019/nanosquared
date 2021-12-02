@@ -30,6 +30,7 @@ Perhaps the NS software did not close properly. Try running `nanoscan.py` direct
 ```python
 n.NS.ShutdownNS()
 ```
+Then try to restart your original application that makes use of `NanoScan`.
 
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
