@@ -4,6 +4,7 @@
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
 import os,sys
+from typing import Tuple, List
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -44,8 +45,27 @@ class NanoScan(cam.Camera):
 
 		self.NS.SetDataAcquisition(state)
 		self.daqState = state
+	
+	def sync1Rev(self, samples: int = 10) -> List[float]:
+		self.NS.AutoFind()
+		self.NS.SelectParameters(NsSP.BEAM_WIDTH_D4SIGMA)
+		out = []
+		for i in range(samples):
+			out.append(self.oneRev())
 
-	def start(self) -> int:
+		return out
+		
+	def oneRev(self) -> float:
+		self.NS.AcquireSync1Rev()
+		self.NS.RunComputation()
+		x = self.NS.GetBeamWidth4Sigma(self.aperture, self.roiIndex)
+
+		self.log(f"Got 1 Reading: {x}", logging.DEBUG)
+
+		return x
+		
+
+	def freeRunning(self) -> float:
 		# self.NS.SetShowWindow(True)
 		self.SetDAQ(True)
 		self.waitForData()
@@ -61,7 +81,14 @@ class NanoScan(cam.Camera):
 		nature, i.e. usually enabled and not affected by other settings or results.
 
 		Reference: Program.cs from Automation examples folder from NanoScan
+
+		Returns
+		-------
+		success : bool
+			Returns true when data is available
+
 		"""
+
 		if not self.daqState:
 			self.log("Start DAQ before waiting for data. Ignoring function call", logging.WARN)
 			return False
