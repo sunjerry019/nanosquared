@@ -11,18 +11,28 @@ sys.path.insert(0, root_dir)
 
 from msl.loadlib import Server32
 
-import ctypes
+import clr
+import System
 
 class NanoScanServer(Server32):
     """Wrapper around a 32-bit C#.NET library 'NanoScanLibrary.dll'. WARNING: No GUI Features available."""
 
     def __init__(self, host, port, **kwargs):
         # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
-        super(NanoScanServer, self).__init__(
-            # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
-            os.path.join(os.path.dirname(__file__),"csharp","NanoScanLibrary","bin","Release","netstandard2.0",'NanoScanLibrary.dll'), 
-            'net', host, port
-        )
+        try:
+            super(NanoScanServer, self).__init__(
+                # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
+                os.path.join(os.path.dirname(__file__),"csharp","NanoScanLibrary","bin","Release","netstandard2.0",'NanoScanLibrary.dll'), 
+                'net', host, port
+            )
+        except System.NotSupportedException as e:
+            # Likely LoadFromRemoteSources error
+            super(NanoScanServer, self).__init__(
+                # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
+                os.path.join("C:/", "nanosquared_include", 'NanoScanLibrary.dll'), 
+                'net', host, port
+            )
+
         self.NS = self.lib.NanoScanLibrary.NanoScan()
         assert self.NS.InitNS() == 1, "Failed to start NanoScan"
 
