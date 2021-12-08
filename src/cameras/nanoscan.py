@@ -148,11 +148,16 @@ class NanoScan(cam.Camera):
 		daqState = False
 		centroidValue_X = 0
 		centroidValue_Y = 0
+		cnt = 0
 
 		while not daqState:
 			time.sleep(50e-3)
 			centroidValue_X = self.NS.GetCentroidPosition(NsAxes.X, self.roiIndex)
 			centroidValue_Y = self.NS.GetCentroidPosition(NsAxes.Y, self.roiIndex)
+
+			self.log(f"{cnt}: waitStable: ({centroidValue_X}, {centroidValue_Y})", logging.DEBUG, end = "\r")
+
+			cnt += 1
 
 			if (centroidValue_X > 0) and (centroidValue_Y > 0):
 				daqState = True
