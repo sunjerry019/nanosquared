@@ -13,6 +13,7 @@ import common.helpers as h
 from cameras.all_constants import CameraAxes
 
 class Camera(h.LoggerMixIn):
+    AXES = CameraAxes
     def __init__(self):
         self.apertureOpen = False
 

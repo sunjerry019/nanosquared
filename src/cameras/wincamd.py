@@ -24,6 +24,8 @@ import numpy as np
 from collections import namedtuple
 
 class WinCamD(cam.Camera):
+	AXES = WinCamAxes
+	
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 

@@ -25,6 +25,8 @@ class NanoScan(cam.Camera):
 	"""Provides interface to the NanoScan 2s Pyro/9/5. Naive implementation
 	   following the example codes. 
 	"""
+	
+	AXES = NsAxes
 
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		cam.Camera.__init__(self, *args, **kwargs)
