@@ -21,12 +21,24 @@ Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/s
 
 If one wants to use the `WinCamD()` module in any script, then the DLL `FTD3XX.dll` must be in the folder of the Python file that being run. (This is why you see the file in the `measurement` folder as well)
 
+## Installation
+### NanoScan
+To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](https://github.com/sunjerry019/nanosquared/tree/nanoscan/installers) of which lives in this repository for archival purposes.
+
+Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
+
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
 This could be because there are some limitation on the number of devices that can be plugged into one set of USB ports on the computer. Try plugging the stage and WinCamD to separate sides of the computer/laptop.
 
 ### NanoScan is only giving me -0.1 as the beamwidth
-Perhaps the NS software did not close properly. Try running `nanoscan.py` directly and then:
+*Note: This could also manifest as nothing happening after requesting a beam width reading. This is because the software is waiting for sensible data as part of the `waitStable` subroutine.*
+
+There could be many reasons this could be happening. Troubleshoot by opening the NanoScan software provided by Ophir Optics to determine if the NanoScan is even providing any form of data.
+
+If there is no data despite starting data acquisition, then perhaps you need to plug NanoScan into another USB Port.
+
+Another reason could be that the NS software did not close properly. Try running `nanoscan.py` directly and then:
 ```python
 n.NS.ShutdownNS()
 ```
