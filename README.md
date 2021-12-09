@@ -4,7 +4,7 @@ Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 ## Models
 The WinCamD Camera used is the [DataRay WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
 
-The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5).
+The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5). You will need the PRO version instead of the STD Version. The activation code is device-specific and written into the EEPROM of the Scanhead. 
 
 The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
 
@@ -26,11 +26,18 @@ The DataRay Software versions used for the development of this code are as follo
 - 32-bit: iDataRay80D63
 - 64-bit: iDataRay80D62_x64
 
+The NanoScan Software version is: `v2.9.1.28`.
+
 ## Installation
 ### NanoScan
 To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](https://github.com/sunjerry019/nanosquared/tree/combination/installers) of which lives in this repository for archival purposes.
 
 Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
+
+*More to be added*
+
+## WinCamD
+*More to be added*
 
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
