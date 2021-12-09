@@ -19,6 +19,9 @@ class Camera(h.LoggerMixIn):
 
     def getAxis_avg_D4Sigma(self, axis: CameraAxes, numsamples: int = 20):
         raise NotImplementedError
+
+    def wait_stable(self):
+        raise NotImplementedError
     
     def __enter__(self):
         return self

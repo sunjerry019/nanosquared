@@ -68,7 +68,7 @@ class NanoScan(cam.Camera):
 			self.log(f"Invalid axis {axis} selected, expected axis of type {NsAxes}.")
 			return ret
 
-		self.waitStable()
+		self.wait_stable()
 
 		self.NS.AutoFind()
 
@@ -102,7 +102,7 @@ class NanoScan(cam.Camera):
 
 		return (x, y)
 
-	def waitStable(self):
+	def wait_stable(self):
 		self.SetDAQ(True)
 		self.waitForData()
 		self.SetDAQ(False)

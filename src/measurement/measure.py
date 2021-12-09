@@ -19,6 +19,9 @@ sys.path.insert(0, root_dir)
 
 from cameras.camera  import Camera
 from cameras.wincamd import WinCamD
+from cameras.nanoscan import NanoScan
+
+from cameras.all_constants import CameraAxes
 
 from stage.controller import Controller, GSC01
 
@@ -66,7 +69,7 @@ class Measurement(h.LoggerMixIn):
         self.controller = controller
         self.camera     = camera
 
-        self.data   = { 'x' : None, 'y': None }
+        self.data   = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
         self.fitter = None
 
         if not self.devMode:
@@ -119,7 +122,7 @@ class Measurement(h.LoggerMixIn):
             self.controller.homeStage()
         
         # initialization
-        self.data = { 'x' : None, 'y': None }
+        self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
 
         # find params
         _center    = self.find_center()
@@ -142,7 +145,7 @@ class Measurement(h.LoggerMixIn):
             # https://stackoverflow.com/a/25293744
             self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
             
-            for ax in ['x', 'y']:
+            for ax in [self.camera.AXES.X, self.camera.AXES.Y]:
                 y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
                 x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
 
@@ -227,12 +230,12 @@ class Measurement(h.LoggerMixIn):
         f.write("# ====== Data ======\n")
         # NOT SAFE BUT
         # We assume that the x and y axis have the same number of datapoints, with same z-coordinates
-        if self.data['x'].shape == self.data['y'].shape:
+        if self.data[self.camera.AXES.X].shape == self.data[self.camera.AXES.Y].shape:
             f.write(f"# position[mm]\tx_diam[um]\tdx_diam[um]\ty_diam[um]\tdy_diam[um]\n")
-            for i in range(self.data['x'].shape[0]):
-                f.write(f"{self.data['x'][i][0]}\t")
-                f.write(f"{self.data['x'][i][1]}\t{self.data['x'][i][2]}\t")
-                f.write(f"{self.data['y'][i][1]}\t{self.data['y'][i][2]}\n")
+            for i in range(self.data[self.camera.AXES.X].shape[0]):
+                f.write(f"{self.data[self.camera.AXES.X][i][0]}\t")
+                f.write(f"{self.data[self.camera.AXES.X][i][1]}\t{self.data[self.camera.AXES.X][i][2]}\t")
+                f.write(f"{self.data[self.camera.AXES.Y][i][1]}\t{self.data[self.camera.AXES.Y][i][2]}\n")
 
         f.close()
 
@@ -240,13 +243,13 @@ class Measurement(h.LoggerMixIn):
 
         return pfad
 
-    def fit_data(self, axis: str, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None) -> np.ndarray:
+    def fit_data(self, axis: CameraAxes, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None) -> np.ndarray:
         """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time and overwrites the `self.fitter` object. 
 
         Parameters
         ----------
-        axis : str
-            May take values 'x' or 'y'. 
+        axis : CameraAxes
+            Designation according to individual camera
         wavelength : float
             Wavelength to be used
         wavelength_error : float
@@ -274,8 +277,8 @@ class Measurement(h.LoggerMixIn):
             self.log("Please measure data before fitting!", logging.ERROR)
             return np.zeros(shape = (2,))
 
-        if axis not in ['x', 'y']:
-            self.log(f"Unexpected axis {axis}", logging.ERROR)
+        if not isinstance(axis, self.camera.AXES):
+            self.log(f"Unexpected axis {axis}, expected {self.camera.AXES}", logging.ERROR)
             return np.zeros(shape = (2,))
 
         kwargs = {
@@ -304,7 +307,7 @@ class Measurement(h.LoggerMixIn):
         return self.fitter.m_squared     
 
 
-    def find_center(self, axis: str = 'x', left: int = None, right: int = None) -> int:
+    def find_center(self, axis: CameraAxes = None, left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -312,8 +315,9 @@ class Measurement(h.LoggerMixIn):
 
         Parameters
         ----------
-        axis : str
-            Can take 'x' or 'y', by default 'x'
+        axis : Optional[CameraAxes]
+            Must of the type self.camera.AXES, by default None
+            If none, then self.camera.AXES.X is chosen.
         left : int, optional
             The smallest possible position, by default None
         right : int, optional
@@ -327,6 +331,12 @@ class Measurement(h.LoggerMixIn):
 
         if self.devMode:
             return 15
+
+        if axis is None:
+            axis = self.camera.AXES.X
+
+        if not isinstance(axis, self.camera.AXES):
+            return None
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
@@ -360,11 +370,13 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
                     
-    def measure_at(self, axis: str, pos: int, numsamples: int = 10):
+    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
 
         Parameters
         ----------
+        axis : CameraAxes
+            The axis to measure
         pos : int
             Position to measure at
         numsamples: int

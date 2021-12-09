@@ -44,7 +44,7 @@ Due to some security policy, loading a DLL from a network location may be disabl
 This could be because there are some limitation on the number of devices that can be plugged into one set of USB ports on the computer. Try plugging the stage and WinCamD to separate sides of the computer/laptop.
 
 ### NanoScan is only giving me -0.1 as the beamwidth
-*Note: This could also manifest as nothing happening after requesting a beam width reading. This is because the software is waiting for sensible data as part of the `waitStable` subroutine.*
+*Note: This could also manifest as nothing happening after requesting a beam width reading. This is because the software is waiting for sensible data as part of the `wait_stable` subroutine.*
 
 There could be many reasons this could be happening. Troubleshoot by opening the NanoScan software provided by Ophir Optics to determine if the NanoScan is even providing any form of data.
 
