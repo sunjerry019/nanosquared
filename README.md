@@ -28,7 +28,7 @@ The DataRay Software versions used for the development of this code are as follo
 
 ## Installation
 ### NanoScan
-To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](https://github.com/sunjerry019/nanosquared/tree/nanoscan/installers) of which lives in this repository for archival purposes.
+To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](https://github.com/sunjerry019/nanosquared/tree/combination/installers) of which lives in this repository for archival purposes.
 
 Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
 
