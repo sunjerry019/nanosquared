@@ -1,0 +1,25 @@
+Subject Category: Product Technical Support
+Sub Category: I don't know/I'm not sure
+
+Dear Support,
+
+We recently purchased the PRO upgrade to the NanoScan 2s Pyro/9/5 [1] from Ophir Optics in order to implement an automation system involving the abovementioned beam profiler. The PRO upgrade provides an ActiveX automation endpoint which we can use. 
+
+In the process of trying to write the automation code, we faced many roadblocks and are currently finding it difficult to continue. 
+
+While the provided example code works just fine, the way the ActiveX endpoint has been developed has presented some unique challenges when translating the code into Python (64-Bit):
+    - The ActiveX Endpoint uses properties to control many features (such as data acquisition), which for some reason, PyQt5 / QAxBase is unable to properly set.
+    - Many methods provided by the ActiveX Endpoint pass variables by-reference, which due to limitations presented by Python, I seem to only manage to get running in PyQt5 and not wincom32. 
+    - There is a .dll file provided for the C# code, but as it is compiled for a 32-Bit system, it cannot be easily used by our 64-Bit Python code. Unfortunately, due to dependency issues with other systems, our entire codebase is written in 64-Bit Python and a change to 32-Bit is rather difficult. 
+
+We have already contacted the local Ophir engineer here in Germany, but as he is not a software developer, we have not gotten very far in solving this problem. 
+
+Hence, I am approaching you through this channel in hopes of getting some advice on how the difficulties may be overcome. It would be even better if I could talk to someone who knows the intricacies of this particular ActiveX endpoint. I can also share my current attempts at the automation with you. 
+
+Do let me know if there is a better channel through which I should seek support.
+Thank you in advance, and I look forward to hearing from you soon!
+
+Best Regards,
+Yudong Sun
+
+[1] https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5

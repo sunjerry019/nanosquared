@@ -15,7 +15,7 @@ class LoggerMixIn():
 	def __init__(self, *args, **kwargs) -> None:
 		super().__init__(*args, **kwargs)
 
-	def log(self, msg: str, loglevel: int = logging.INFO):
+	def log(self, msg: str, loglevel: int = logging.INFO, end: str = "\n"):
 		"""Handles the logging to easily switch between different ways of handling
 
 		Parameters
@@ -34,11 +34,13 @@ class LoggerMixIn():
 			INFO = 20
 			DEBUG = 10
 			NOTSET = 0
+		end : str
+			Ending passed to `print`, should it print.
 		"""
 
 		logging.log(loglevel, msg)
 		if loglevel >= logging.DEBUG:
-			print(f"{logging.getLevelName(loglevel)}: {msg}")
+			print(f"{logging.getLevelName(loglevel)}: {msg}", end = end)
 
 def ensureInt(x: int):
 	"""Returns `x` if it is an integer, otherwise raises TypeError
