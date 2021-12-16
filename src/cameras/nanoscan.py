@@ -215,7 +215,8 @@ class NanoScanDLL(Client64):
 	"""Provides interface to the 32-bit NanoScan C# DLL using msl-loadlib."""
 
 	def __init__(self, *args, **kwargs):
-		Client64.__init__(self, module32='nanoscan_server.py')
+		serv32 = os.path.join(os.path.dirname(__file__), 'nanoscan_server.py')
+		Client64.__init__(self, module32 = serv32)
 
 	def __getattr__(self, name):
 		def send(*args, **kwargs):
