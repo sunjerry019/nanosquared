@@ -347,7 +347,7 @@ class Measurement(h.LoggerMixIn):
         if right is None and self.controller.stage.ranged:
             right = self.controller.stage.LIMIT_UPPER
 
-        default_abs_pres   = 10
+        default_abs_pres   = 1000
         absolute_precision = default_abs_pres
 
         # We implement the iterative method
