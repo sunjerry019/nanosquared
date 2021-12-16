@@ -36,6 +36,14 @@ class NanoScanServer(Server32):
         self.NS = self.lib.NanoScanLibrary.NanoScan()
         assert self.NS.InitNS() == 1, "Failed to start NanoScan"
 
+    def GetHeadScanRates(self):
+        """Overloads GetHeadScanRates so that we can convert the return values to list.
+        
+        Otherwise it throws an error as it cannot pickle Single[] objects to send to tbe 64-bit program.
+        """
+
+        return list(self.NS.GetHeadScanRates())
+
     def __getattr__(self, name):
         """Get the functions of self.NS directly. Possibly use python script to generate functions in this file.
         

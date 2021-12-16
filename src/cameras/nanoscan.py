@@ -41,13 +41,13 @@ class NanoScan(cam.Camera):
 		self.roiIndex = 0
 
 		self._rotFreq = self.NS.GetRotationFrequency()
-		self.allowedRots = list(self.NS.GetHeadScanRates())
+		self.allowedRots = self.NS.GetHeadScanRates()
 
 	@property
 	def rotationFrequency(self):
 		return self._rotFreq
 	
-	@rotationFrequency.getter
+	@rotationFrequency.setter
 	def rotationFrequency(self, freq):
 		"""Setter for scan head rotation speed in Hz
 
