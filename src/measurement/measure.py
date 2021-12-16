@@ -84,7 +84,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, center: int = -1, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -125,7 +125,7 @@ class Measurement(h.LoggerMixIn):
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
 
         # find params
-        _center    = self.find_center()
+        _center    = self.find_center() if center == -1 else center
         _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
         _within_points    = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 10, dtype = np.integer)        
@@ -306,8 +306,7 @@ class Measurement(h.LoggerMixIn):
 
         return self.fitter.m_squared     
 
-
-    def find_center(self, axis: CameraAxes = None, left: int = None, right: int = None) -> int:
+    def find_center(self, axis: CameraAxes = None, precision: int = 1000, left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -318,6 +317,8 @@ class Measurement(h.LoggerMixIn):
         axis : Optional[CameraAxes]
             Must of the type self.camera.AXES, by default None
             If none, then self.camera.AXES.X is chosen.
+        precision : 
+            The precision of the center in number of pulses, by default 1000
         left : int, optional
             The smallest possible position, by default None
         right : int, optional
@@ -347,8 +348,7 @@ class Measurement(h.LoggerMixIn):
         if right is None and self.controller.stage.ranged:
             right = self.controller.stage.LIMIT_UPPER
 
-        default_abs_pres   = 1000
-        absolute_precision = default_abs_pres
+        absolute_precision = precision
 
         # We implement the iterative method
         while np.abs(right - left) >= absolute_precision:
