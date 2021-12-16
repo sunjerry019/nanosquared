@@ -34,14 +34,19 @@ class NanoScan(cam.Camera):
 		self.devMode = devMode
 		self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
 
-		assert self.NS.GetNumDevices() > 0, "No devices connected"
-		assert self.NS.GetDeviceID() > -1, "All devices in use"
+		if not self.devMode:
+			assert self.NS.GetNumDevices() > 0, "No devices connected"
+			assert self.NS.GetDeviceID() > -1, "All devices in use"
 
 		self.daqState = False
 		self.roiIndex = 0
 
-		self._rotFreq = self.NS.GetRotationFrequency()
-		self.allowedRots = self.NS.GetHeadScanRates()
+		if not self.devMode:
+			self._rotFreq = self.NS.GetRotationFrequency()
+			self.allowedRots = self.NS.GetHeadScanRates()
+		else:
+			self._rotFreq    = 10.0
+			self.allowedRots = [1.25, 2.5, 5.0, 10.0, 20.0]
 
 	@property
 	def rotationFrequency(self):
@@ -62,10 +67,11 @@ class NanoScan(cam.Camera):
 			self.log(f"Ignoring scan freq {freq} Hz (expected {self.allowedRots})", logging.WARN)
 			return
 
-		# Set the freq
-		self.NS.SetRotationFrequency(freq) 
-		# GetMaxSamplingResolution and set it as such
-		self.NS.SetSamplingResolution(self.NS.GetMaxSamplingResolution())
+		if not self.devMode:
+			# Set the freq
+			self.NS.SetRotationFrequency(freq) 
+			# GetMaxSamplingResolution and set it as such
+			self.NS.SetSamplingResolution(self.NS.GetMaxSamplingResolution())
 
 		self._rotFreq = freq
 
@@ -96,6 +102,14 @@ class NanoScan(cam.Camera):
 
 		if not isinstance(axis, NsAxes):
 			self.log(f"Invalid axis {axis} selected, expected axis of type {NsAxes}.")
+			return ret
+
+		if self.devMode:
+			if axis == NsAxes.BOTH:
+				ret = np.array([[500,10], [600,25]])
+			else:
+				ret = (550, 15) 
+
 			return ret
 
 		self.wait_stable()
@@ -132,10 +146,14 @@ class NanoScan(cam.Camera):
 
 		return (x, y)
 
-	def wait_stable(self):
+	def wait_stable(self) -> bool:
+		if self.devMode:
+			return True
+
 		self.SetDAQ(True)
 		self.waitForData()
 		self.SetDAQ(False)
+		return True
 	
 	def SetDAQ(self, state: bool) -> None:
 		"""Sets the DAQ state. Use this instead of directly using `self.NS.SetDataAcquisition`. This helps to keep track of the DAQ State.
@@ -149,7 +167,9 @@ class NanoScan(cam.Camera):
 
 		"""
 
-		self.NS.SetDataAcquisition(state)
+		if not self.devMode:
+			self.NS.SetDataAcquisition(state)
+
 		self.daqState = state
 	
 	def waitForData(self) -> bool:
@@ -170,6 +190,9 @@ class NanoScan(cam.Camera):
 		if not self.daqState:
 			self.log("Start DAQ before waiting for data. Ignoring function call", logging.WARN)
 			return False
+
+		if self.devMode:
+			return True
 
 		originalParams = self.NS.GetSelectedParameters()
 
