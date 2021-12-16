@@ -243,6 +243,39 @@ class Measurement(h.LoggerMixIn):
 
         return pfad
 
+    def read_from_file(self, filename: str):
+        """Read from a file written by `self.write_to_file()`
+
+        Parameters
+        ----------
+        filename : str
+            File to read from
+        """
+        try:
+            f = open(filename, 'r')
+        except OSError as e:
+            self.log(f"Unable to read file: {filename}: OSError {e}", logging.WARN)
+            return 
+        
+        # We assume the format position[mm] x_diam[um] dx_diam[um] y_diam[um] dy_diam[um]
+        for line in f:
+            l = line.strip()
+            if l[0] != "#":
+                pos, x_diam, dx_diam, y_diam, dy_diam = [ float(x) for x in l.split("\t") ]
+                
+                omega   = { self.camera.AXES.X : x_diam,  self.camera.AXES.Y: y_diam  }
+                d_omega = { self.camera.AXES.X : dx_diam, self.camera.AXES.Y: dy_diam }
+
+                for ax in [self.camera.AXES.X, self.camera.AXES.Y]:
+                    dtpt = np.array([pos, omega[ax], d_omega[ax]])
+                    if self.data[ax] is None:
+                        self.data[ax] = dtpt
+                    else:
+                        self.data[ax] = np.vstack((self.data[ax], dtpt))
+
+        f.close()
+
+
     def fit_data(self, axis: CameraAxes, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None) -> np.ndarray:
         """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time and overwrites the `self.fitter` object. 
 
