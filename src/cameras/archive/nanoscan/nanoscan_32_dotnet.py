@@ -17,3 +17,6 @@ for item in dir(net.lib):
 
 x = net.lib.NanoScanLibrary.NanoScan()
 print(x.InitNS())
+x.GetHeadScanRates()
+
+import code; code.interact(local=locals())

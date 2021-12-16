@@ -262,13 +262,20 @@ namespace NanoScanLibrary
         }
         public int SetAveraging(short finite, short rolling) { return NsInteropSetAveraging(finite, rolling); }
         public int RunComputation() { return NsInteropRunComputation(); }
-        // public void GetHeadGainTable(long capabilityID, [In][Out][MarshalAs) { NsInteropGetHeadGainTable(capabilityID, [In][Out][MarshalAs); }
+        //public void GetHeadGainTable() 
+        //{
+        //}
         public float[] GetHeadScanRates()
         {
             object scanRates = new float[5];
 
-            NsInteropGetHeadScanRates(1, ref scanRates);
-            float[] fScanRates = ((float[])((IEnumerable<float>) scanRates));
+            NsInteropGetHeadScanRates(ref scanRates);
+
+            float[] fScanRates = ((float[])((IEnumerable<float>)scanRates));
+
+            Console.WriteLine(@"Values: scanrate");
+            for (var i = 0; i < 5; i++)
+                Console.WriteLine(@"{0}", fScanRates[i]);
 
             return fScanRates;
         }
