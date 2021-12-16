@@ -32,7 +32,11 @@ class NanoScan(cam.Camera):
 		cam.Camera.__init__(self, *args, **kwargs)
 
 		self.devMode = devMode
-		self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
+		if self.devMode:
+			self.log("devmode nanoscan: no NanoScanDLL will be available", logging.WARN)
+			self.NS = None
+		else:
+			self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
 
 		if not self.devMode:
 			assert self.NS.GetNumDevices() > 0, "No devices connected"
