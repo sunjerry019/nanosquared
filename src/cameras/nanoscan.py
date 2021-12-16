@@ -35,14 +35,13 @@ class NanoScan(cam.Camera):
 		self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
 
 		assert self.NS.GetNumDevices() > 0, "No devices connected"
+		assert self.NS.GetDeviceID() > -1, "All devices in use"
 
 		self.daqState = False
 		self.roiIndex = 0
 
 		self._rotFreq = self.NS.GetRotationFrequency()
-
-	def getAvailableRotationFrequency(self):
-		return list(self.NS.GetHeadScanRates())
+		self.allowedRots = list(self.NS.GetHeadScanRates())
 
 	@property
 	def rotationFrequency(self):
@@ -50,7 +49,19 @@ class NanoScan(cam.Camera):
 	
 	@rotationFrequency.getter
 	def rotationFrequency(self, freq):
+		"""Setter for scan head rotation speed in Hz
+
+		Parameters
+		----------
+		freq : float
+			May take any value from all allowed rotation rates. 
+			Use `list(self.NS.GetHeadScanRates())` to obtain available allowed rotation rates. 
+		"""
 		# Check if the freq is allowed
+		if freq not in self.allowedRots:
+			self.log(f"Ignoring scan freq {freq} Hz (expected {self.allowedRots})", logging.WARN)
+			return
+
 		# Set the freq
 		self.NS.SetRotationFrequency(freq) 
 		# GetMaxSamplingResolution and set it as such
