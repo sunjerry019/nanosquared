@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NanoScanLibrary
 {
@@ -262,7 +263,15 @@ namespace NanoScanLibrary
         public int SetAveraging(short finite, short rolling) { return NsInteropSetAveraging(finite, rolling); }
         public int RunComputation() { return NsInteropRunComputation(); }
         // public void GetHeadGainTable(long capabilityID, [In][Out][MarshalAs) { NsInteropGetHeadGainTable(capabilityID, [In][Out][MarshalAs); }
-        // public void GetHeadScanRates(long capabilityID, [In][Out][MarshalAs) { NsInteropGetHeadScanRates(capabilityID, [In][Out][MarshalAs); }
+        public float[] GetHeadScanRates()
+        {
+            object scanRates = new float[5];
+
+            NsInteropGetHeadScanRates(1, ref scanRates);
+            float[] fScanRates = ((float[])((IEnumerable<float>) scanRates));
+
+            return fScanRates;
+        }
         // public void GetPowerCalibrationBreakOut(short indexCalibration, [In][Out][MarshalAs) { NsInteropGetPowerCalibrationBreakOut(indexCalibration, [In][Out][MarshalAs); }
         public bool GetShowWindow() { return NsInteropGetShowWindow(); }
         public void SetShowWindow(bool showGUI) { NsInteropSetShowWindow(showGUI); }
