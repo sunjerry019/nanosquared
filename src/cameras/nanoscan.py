@@ -35,9 +35,39 @@ class NanoScan(cam.Camera):
 		self.NS = NanoScanDLL() # Init and Shutdown is done by the 32-bit server
 
 		assert self.NS.GetNumDevices() > 0, "No devices connected"
+		assert self.NS.GetDeviceID() > -1, "All devices in use"
 
 		self.daqState = False
 		self.roiIndex = 0
+
+		self._rotFreq = self.NS.GetRotationFrequency()
+		self.allowedRots = self.NS.GetHeadScanRates()
+
+	@property
+	def rotationFrequency(self):
+		return self._rotFreq
+	
+	@rotationFrequency.setter
+	def rotationFrequency(self, freq):
+		"""Setter for scan head rotation speed in Hz
+
+		Parameters
+		----------
+		freq : float
+			May take any value from all allowed rotation rates. 
+			Use `list(self.NS.GetHeadScanRates())` to obtain available allowed rotation rates. 
+		"""
+		# Check if the freq is allowed
+		if freq not in self.allowedRots:
+			self.log(f"Ignoring scan freq {freq} Hz (expected {self.allowedRots})", logging.WARN)
+			return
+
+		# Set the freq
+		self.NS.SetRotationFrequency(freq) 
+		# GetMaxSamplingResolution and set it as such
+		self.NS.SetSamplingResolution(self.NS.GetMaxSamplingResolution())
+
+		self._rotFreq = freq
 
 	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples` using the Sync1Rev implementation.

@@ -209,10 +209,10 @@ namespace NanoScanLibrary
         static extern int NsInteropRunComputation();
 
         [DllImport(@"NS2_Interop.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern void NsInteropGetHeadGainTable(long capabilityID, [In][Out][MarshalAs(UnmanagedType.Struct)] ref object gainTableArray);
+        static extern void NsInteropGetHeadGainTable([In][Out][MarshalAs(UnmanagedType.Struct)] ref object gainTableArray);
 
         [DllImport(@"NS2_Interop.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern void NsInteropGetHeadScanRates(long capabilityID, [In][Out][MarshalAs(UnmanagedType.Struct)] ref object scanRateArray);
+        static extern void NsInteropGetHeadScanRates([In][Out][MarshalAs(UnmanagedType.Struct)] ref object scanRateArray);
 
         [DllImport(@"NS2_Interop.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern void NsInteropGetPowerCalibrationBreakOut(short indexCalibration, [In][Out][MarshalAs(UnmanagedType.BStr)] ref string descriptor, ref float refPower, ref float waveLength);
