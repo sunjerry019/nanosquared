@@ -13,6 +13,6 @@ from cameras.nanoscan_constants import NsAxes
 
 n = NanoScan(devMode = False)
 
-with Measurement(devMode = False, camera = n) as M:
+with Measurement(devMode = True, camera = n) as M:
     print("with Measurement() as M")
     import code; code.interact(local=locals())

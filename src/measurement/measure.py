@@ -205,7 +205,7 @@ class Measurement(h.LoggerMixIn):
         elif pfad is None:
             # We create a file in the M2 directory to save the data.
 
-            tempdir = os.path.join(root_dir, "data", "M2")
+            tempdir = os.path.join(root_dir, ".." ,"data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
             fd, pfad = tempfile.mkstemp(suffix = ".dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
