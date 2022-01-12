@@ -15,9 +15,9 @@ The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-
 All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 ## Extending this code
-The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script (currently WIP on branch [combination](https://github.com/sunjerry019/nanosquared/tree/combination)). As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
+The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
 
-Refer to [fitting](https://github.com/sunjerry019/nanosquared/tree/combination/src/fitting) for documentation on the fitting module. 
+Refer to [fitting](./src/fitting) for documentation on the fitting module. 
 
 ## Version Information
 For Python packages used, refer to `conda-environment.yml`. 
@@ -30,7 +30,7 @@ The NanoScan Software version is: `v2.9.1.28`.
 
 ## Installation
 ### NanoScan
-To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](https://github.com/sunjerry019/nanosquared/tree/combination/installers) of which lives in this repository for archival purposes.
+To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
 
 Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
 
