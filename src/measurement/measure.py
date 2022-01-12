@@ -284,7 +284,7 @@ class Measurement(h.LoggerMixIn):
         axis : CameraAxes
             Designation according to individual camera
         wavelength : float
-            Wavelength to be used
+            Wavelength to be used, in nm
         wavelength_error : float
             Error of the wavelength to be taken into account. Only taken into account for M2LAMBDA_MODE and ISO_MODE
         mode : int, optional
@@ -306,7 +306,7 @@ class Measurement(h.LoggerMixIn):
             Returns [0, 0] upon error.
             
         """
-        if self.data[axis] == None:
+        if self.data[axis] is None:
             self.log("Please measure data before fitting!", logging.ERROR)
             return np.zeros(shape = (2,))
 
@@ -318,8 +318,8 @@ class Measurement(h.LoggerMixIn):
             "x"              : self.data[axis][:,0],
             "y"              : self.data[axis][:,1],
             "yerror"         : self.data[axis][:,2],
-            "wavelength"     : wavelength,
-            "wavelength_err" : wavelength_error,
+            "wavelength"     : float(wavelength),
+            "wavelength_err" : float(wavelength_error),
             "mode"           : mode
         }
         
