@@ -275,7 +275,6 @@ class Measurement(h.LoggerMixIn):
 
         f.close()
 
-
     def fit_data(self, axis: CameraAxes, wavelength: float, wavelength_error: float = 0, mode: int = MsqFitter.M2_MODE, useODR: bool = False, xerror: float = None) -> np.ndarray:
         """Fits the data as measured by `self.take_measurements()`. Creates a new fitter object every time and overwrites the `self.fitter` object. 
 
