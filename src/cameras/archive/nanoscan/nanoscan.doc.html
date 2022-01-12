@@ -1,0 +1,681 @@
+<h1 align=center> Reference</h1>
+<p>The  COM object is a QAxWidget with the CLSID {faad0d22-c718-459a-81ca-268ccf188807}.</p>
+<h3>Interfaces</h3>
+<ul>
+</ul>
+<h3>Event Interfaces</h3>
+<ul>
+</ul>
+<h2>Public Slots:</h2>
+<ul>
+</ul>
+<h2>Signals:</h2>
+<ul>
+<li>void <a href="#exception"><b>exception</b></a>(int code, QString source, QString disc, QString help);</li>
+<li>void <a href="#propertyChanged"><b>propertyChanged</b></a>(QString name);</li>
+<li>void <a href="#signal"><b>signal</b></a>(QString name, int argc, void* argv);</li>
+</ul>
+<h2>Properties:</h2>
+<ul>
+<li>QString <a href="#objectName"><b>objectName</b></a>;</li>
+<li>bool <a href="#modal"><b>modal</b></a>;</li>
+<li>Qt::WindowModality <a href="#windowModality"><b>windowModality</b></a>;</li>
+<li>bool <a href="#enabled"><b>enabled</b></a>;</li>
+<li>QRect <a href="#geometry"><b>geometry</b></a>;</li>
+<li>QRect <a href="#frameGeometry"><b>frameGeometry</b></a>;</li>
+<li>QRect <a href="#normalGeometry"><b>normalGeometry</b></a>;</li>
+<li>int <a href="#x"><b>x</b></a>;</li>
+<li>int <a href="#y"><b>y</b></a>;</li>
+<li>QPoint <a href="#pos"><b>pos</b></a>;</li>
+<li>QSize <a href="#frameSize"><b>frameSize</b></a>;</li>
+<li>QSize <a href="#size"><b>size</b></a>;</li>
+<li>int <a href="#width"><b>width</b></a>;</li>
+<li>int <a href="#height"><b>height</b></a>;</li>
+<li>QRect <a href="#rect"><b>rect</b></a>;</li>
+<li>QRect <a href="#childrenRect"><b>childrenRect</b></a>;</li>
+<li>QRegion <a href="#childrenRegion"><b>childrenRegion</b></a>;</li>
+<li>QSizePolicy <a href="#sizePolicy"><b>sizePolicy</b></a>;</li>
+<li>QSize <a href="#minimumSize"><b>minimumSize</b></a>;</li>
+<li>QSize <a href="#maximumSize"><b>maximumSize</b></a>;</li>
+<li>int <a href="#minimumWidth"><b>minimumWidth</b></a>;</li>
+<li>int <a href="#minimumHeight"><b>minimumHeight</b></a>;</li>
+<li>int <a href="#maximumWidth"><b>maximumWidth</b></a>;</li>
+<li>int <a href="#maximumHeight"><b>maximumHeight</b></a>;</li>
+<li>QSize <a href="#sizeIncrement"><b>sizeIncrement</b></a>;</li>
+<li>QSize <a href="#baseSize"><b>baseSize</b></a>;</li>
+<li>QPalette <a href="#palette"><b>palette</b></a>;</li>
+<li>QFont <a href="#font"><b>font</b></a>;</li>
+<li>QCursor <a href="#cursor"><b>cursor</b></a>;</li>
+<li>bool <a href="#mouseTracking"><b>mouseTracking</b></a>;</li>
+<li>bool <a href="#tabletTracking"><b>tabletTracking</b></a>;</li>
+<li>bool <a href="#isActiveWindow"><b>isActiveWindow</b></a>;</li>
+<li>Qt::FocusPolicy <a href="#focusPolicy"><b>focusPolicy</b></a>;</li>
+<li>bool <a href="#focus"><b>focus</b></a>;</li>
+<li>Qt::ContextMenuPolicy <a href="#contextMenuPolicy"><b>contextMenuPolicy</b></a>;</li>
+<li>bool <a href="#updatesEnabled"><b>updatesEnabled</b></a>;</li>
+<li>bool <a href="#visible"><b>visible</b></a>;</li>
+<li>bool <a href="#minimized"><b>minimized</b></a>;</li>
+<li>bool <a href="#maximized"><b>maximized</b></a>;</li>
+<li>bool <a href="#fullScreen"><b>fullScreen</b></a>;</li>
+<li>QSize <a href="#sizeHint"><b>sizeHint</b></a>;</li>
+<li>QSize <a href="#minimumSizeHint"><b>minimumSizeHint</b></a>;</li>
+<li>bool <a href="#acceptDrops"><b>acceptDrops</b></a>;</li>
+<li>QString <a href="#windowTitle"><b>windowTitle</b></a>;</li>
+<li>QIcon <a href="#windowIcon"><b>windowIcon</b></a>;</li>
+<li>QString <a href="#windowIconText"><b>windowIconText</b></a>;</li>
+<li>double <a href="#windowOpacity"><b>windowOpacity</b></a>;</li>
+<li>bool <a href="#windowModified"><b>windowModified</b></a>;</li>
+<li>QString <a href="#toolTip"><b>toolTip</b></a>;</li>
+<li>int <a href="#toolTipDuration"><b>toolTipDuration</b></a>;</li>
+<li>QString <a href="#statusTip"><b>statusTip</b></a>;</li>
+<li>QString <a href="#whatsThis"><b>whatsThis</b></a>;</li>
+<li>QString <a href="#accessibleName"><b>accessibleName</b></a>;</li>
+<li>QString <a href="#accessibleDescription"><b>accessibleDescription</b></a>;</li>
+<li>Qt::LayoutDirection <a href="#layoutDirection"><b>layoutDirection</b></a>;</li>
+<li>bool <a href="#autoFillBackground"><b>autoFillBackground</b></a>;</li>
+<li>QString <a href="#styleSheet"><b>styleSheet</b></a>;</li>
+<li>QLocale <a href="#locale"><b>locale</b></a>;</li>
+<li>QString <a href="#windowFilePath"><b>windowFilePath</b></a>;</li>
+<li>Qt::InputMethodHints <a href="#inputMethodHints"><b>inputMethodHints</b></a>;</li>
+<li>QString <a href="#control"><b>control</b></a>;</li>
+</ul>
+<hr><h2>Member Function Documentation</h2>
+<h3><a name=exception></a>void exception (int code, QString source, QString disc, QString help)<tt> [signal]</tt></h3>
+<p>Connect a slot to this signal:<pre>
+	QObject::connect(object, SIGNAL(exception(int, QString, QString, QString)), receiver, SLOT(someSlot(int, QString, QString, QString)));</pre>
+
+<h3><a name=propertyChanged></a>void propertyChanged (QString name)<tt> [signal]</tt></h3>
+<p>Connect a slot to this signal:<pre>
+	QObject::connect(object, SIGNAL(propertyChanged(QString)), receiver, SLOT(someSlot(QString)));</pre>
+
+<h3><a name=signal></a>void signal (QString name, int argc, void* argv)<tt> [signal]</tt></h3>
+<p>Connect a slot to this signal:<pre>
+	QObject::connect(object, SIGNAL(signal(QString, int, void*)), receiver, SLOT(someSlot(QString, int, void*)));</pre>
+
+<hr><h2>Property Documentation</h2>
+<h3><a name=objectName></a>QString objectName</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("objectName").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("objectName", newValue);
+</pre>
+Or using the <a href="#setObjectName">setObjectName</a> slot.
+
+<h3><a name=modal></a>bool modal</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("modal").toBool();
+</pre>
+
+<h3><a name=windowModality></a>Qt::WindowModality windowModality</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("windowModality").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ... // string representation of values also supported
+	object->setProperty("windowModality", newValue);
+</pre>
+Or using the <a href="#setWindowModality">setWindowModality</a> slot.
+<p>See also <a href="#Qt::WindowModality">Qt::WindowModality</a>.
+
+<h3><a name=enabled></a>bool enabled</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("enabled").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("enabled", newValue);
+</pre>
+Or using the <a href="#setEnabled">setEnabled</a> slot.
+
+<h3><a name=geometry></a>QRect geometry</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRect val = object->property("geometry").toRect();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QRect newValue = ...
+	object->setProperty("geometry", newValue);
+</pre>
+Or using the <a href="#setGeometry">setGeometry</a> slot.
+
+<h3><a name=frameGeometry></a>QRect frameGeometry</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRect val = object->property("frameGeometry").toRect();
+</pre>
+
+<h3><a name=normalGeometry></a>QRect normalGeometry</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRect val = object->property("normalGeometry").toRect();
+</pre>
+
+<h3><a name=x></a>int x</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("x").toInt();
+</pre>
+
+<h3><a name=y></a>int y</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("y").toInt();
+</pre>
+
+<h3><a name=pos></a>QPoint pos</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QPoint val = object->property("pos").toPoint();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QPoint newValue = ...
+	object->setProperty("pos", newValue);
+</pre>
+Or using the <a href="#setPos">setPos</a> slot.
+
+<h3><a name=frameSize></a>QSize frameSize</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("frameSize").toSize();
+</pre>
+
+<h3><a name=size></a>QSize size</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("size").toSize();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSize newValue = ...
+	object->setProperty("size", newValue);
+</pre>
+Or using the <a href="#setSize">setSize</a> slot.
+
+<h3><a name=width></a>int width</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("width").toInt();
+</pre>
+
+<h3><a name=height></a>int height</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("height").toInt();
+</pre>
+
+<h3><a name=rect></a>QRect rect</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRect val = object->property("rect").toRect();
+</pre>
+
+<h3><a name=childrenRect></a>QRect childrenRect</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRect val = object->property("childrenRect").toRect();
+</pre>
+
+<h3><a name=childrenRegion></a>QRegion childrenRegion</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QRegion val = object->property("childrenRegion").toRegion();
+</pre>
+
+<h3><a name=sizePolicy></a>QSizePolicy sizePolicy</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSizePolicy val = object->property("sizePolicy").toSizePolicy();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSizePolicy newValue = ...
+	object->setProperty("sizePolicy", newValue);
+</pre>
+Or using the <a href="#setSizePolicy">setSizePolicy</a> slot.
+
+<h3><a name=minimumSize></a>QSize minimumSize</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("minimumSize").toSize();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSize newValue = ...
+	object->setProperty("minimumSize", newValue);
+</pre>
+Or using the <a href="#setMinimumSize">setMinimumSize</a> slot.
+
+<h3><a name=maximumSize></a>QSize maximumSize</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("maximumSize").toSize();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSize newValue = ...
+	object->setProperty("maximumSize", newValue);
+</pre>
+Or using the <a href="#setMaximumSize">setMaximumSize</a> slot.
+
+<h3><a name=minimumWidth></a>int minimumWidth</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("minimumWidth").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ...
+	object->setProperty("minimumWidth", newValue);
+</pre>
+Or using the <a href="#setMinimumWidth">setMinimumWidth</a> slot.
+
+<h3><a name=minimumHeight></a>int minimumHeight</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("minimumHeight").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ...
+	object->setProperty("minimumHeight", newValue);
+</pre>
+Or using the <a href="#setMinimumHeight">setMinimumHeight</a> slot.
+
+<h3><a name=maximumWidth></a>int maximumWidth</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("maximumWidth").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ...
+	object->setProperty("maximumWidth", newValue);
+</pre>
+Or using the <a href="#setMaximumWidth">setMaximumWidth</a> slot.
+
+<h3><a name=maximumHeight></a>int maximumHeight</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("maximumHeight").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ...
+	object->setProperty("maximumHeight", newValue);
+</pre>
+Or using the <a href="#setMaximumHeight">setMaximumHeight</a> slot.
+
+<h3><a name=sizeIncrement></a>QSize sizeIncrement</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("sizeIncrement").toSize();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSize newValue = ...
+	object->setProperty("sizeIncrement", newValue);
+</pre>
+Or using the <a href="#setSizeIncrement">setSizeIncrement</a> slot.
+
+<h3><a name=baseSize></a>QSize baseSize</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("baseSize").toSize();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QSize newValue = ...
+	object->setProperty("baseSize", newValue);
+</pre>
+Or using the <a href="#setBaseSize">setBaseSize</a> slot.
+
+<h3><a name=palette></a>QPalette palette</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QPalette val = object->property("palette").toPalette();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QPalette newValue = ...
+	object->setProperty("palette", newValue);
+</pre>
+Or using the <a href="#setPalette">setPalette</a> slot.
+
+<h3><a name=font></a>QFont font</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QFont val = object->property("font").toFont();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QFont newValue = ...
+	object->setProperty("font", newValue);
+</pre>
+Or using the <a href="#setFont">setFont</a> slot.
+
+<h3><a name=cursor></a>QCursor cursor</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QCursor val = object->property("cursor").toCursor();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QCursor newValue = ...
+	object->setProperty("cursor", newValue);
+</pre>
+Or using the <a href="#setCursor">setCursor</a> slot.
+
+<h3><a name=mouseTracking></a>bool mouseTracking</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("mouseTracking").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("mouseTracking", newValue);
+</pre>
+Or using the <a href="#setMouseTracking">setMouseTracking</a> slot.
+
+<h3><a name=tabletTracking></a>bool tabletTracking</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("tabletTracking").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("tabletTracking", newValue);
+</pre>
+Or using the <a href="#setTabletTracking">setTabletTracking</a> slot.
+
+<h3><a name=isActiveWindow></a>bool isActiveWindow</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("isActiveWindow").toBool();
+</pre>
+
+<h3><a name=focusPolicy></a>Qt::FocusPolicy focusPolicy</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("focusPolicy").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ... // string representation of values also supported
+	object->setProperty("focusPolicy", newValue);
+</pre>
+Or using the <a href="#setFocusPolicy">setFocusPolicy</a> slot.
+<p>See also <a href="#Qt::FocusPolicy">Qt::FocusPolicy</a>.
+
+<h3><a name=focus></a>bool focus</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("focus").toBool();
+</pre>
+
+<h3><a name=contextMenuPolicy></a>Qt::ContextMenuPolicy contextMenuPolicy</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("contextMenuPolicy").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ... // string representation of values also supported
+	object->setProperty("contextMenuPolicy", newValue);
+</pre>
+Or using the <a href="#setContextMenuPolicy">setContextMenuPolicy</a> slot.
+<p>See also <a href="#Qt::ContextMenuPolicy">Qt::ContextMenuPolicy</a>.
+
+<h3><a name=updatesEnabled></a>bool updatesEnabled</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("updatesEnabled").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("updatesEnabled", newValue);
+</pre>
+Or using the <a href="#setUpdatesEnabled">setUpdatesEnabled</a> slot.
+
+<h3><a name=visible></a>bool visible</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("visible").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("visible", newValue);
+</pre>
+Or using the <a href="#setVisible">setVisible</a> slot.
+
+<h3><a name=minimized></a>bool minimized</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("minimized").toBool();
+</pre>
+
+<h3><a name=maximized></a>bool maximized</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("maximized").toBool();
+</pre>
+
+<h3><a name=fullScreen></a>bool fullScreen</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("fullScreen").toBool();
+</pre>
+
+<h3><a name=sizeHint></a>QSize sizeHint</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("sizeHint").toSize();
+</pre>
+
+<h3><a name=minimumSizeHint></a>QSize minimumSizeHint</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QSize val = object->property("minimumSizeHint").toSize();
+</pre>
+
+<h3><a name=acceptDrops></a>bool acceptDrops</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("acceptDrops").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("acceptDrops", newValue);
+</pre>
+Or using the <a href="#setAcceptDrops">setAcceptDrops</a> slot.
+
+<h3><a name=windowTitle></a>QString windowTitle</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("windowTitle").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("windowTitle", newValue);
+</pre>
+Or using the <a href="#setWindowTitle">setWindowTitle</a> slot.
+
+<h3><a name=windowIcon></a>QIcon windowIcon</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QIcon val = object->property("windowIcon").toIcon();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QIcon newValue = ...
+	object->setProperty("windowIcon", newValue);
+</pre>
+Or using the <a href="#setWindowIcon">setWindowIcon</a> slot.
+
+<h3><a name=windowIconText></a>QString windowIconText</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("windowIconText").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("windowIconText", newValue);
+</pre>
+Or using the <a href="#setWindowIconText">setWindowIconText</a> slot.
+
+<h3><a name=windowOpacity></a>double windowOpacity</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	double val = object->property("windowOpacity").toDouble();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	double newValue = ...
+	object->setProperty("windowOpacity", newValue);
+</pre>
+Or using the <a href="#setWindowOpacity">setWindowOpacity</a> slot.
+
+<h3><a name=windowModified></a>bool windowModified</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("windowModified").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("windowModified", newValue);
+</pre>
+Or using the <a href="#setWindowModified">setWindowModified</a> slot.
+
+<h3><a name=toolTip></a>QString toolTip</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("toolTip").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("toolTip", newValue);
+</pre>
+Or using the <a href="#setToolTip">setToolTip</a> slot.
+
+<h3><a name=toolTipDuration></a>int toolTipDuration</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("toolTipDuration").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ...
+	object->setProperty("toolTipDuration", newValue);
+</pre>
+Or using the <a href="#setToolTipDuration">setToolTipDuration</a> slot.
+
+<h3><a name=statusTip></a>QString statusTip</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("statusTip").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("statusTip", newValue);
+</pre>
+Or using the <a href="#setStatusTip">setStatusTip</a> slot.
+
+<h3><a name=whatsThis></a>QString whatsThis</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("whatsThis").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("whatsThis", newValue);
+</pre>
+Or using the <a href="#setWhatsThis">setWhatsThis</a> slot.
+
+<h3><a name=accessibleName></a>QString accessibleName</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("accessibleName").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("accessibleName", newValue);
+</pre>
+Or using the <a href="#setAccessibleName">setAccessibleName</a> slot.
+
+<h3><a name=accessibleDescription></a>QString accessibleDescription</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("accessibleDescription").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("accessibleDescription", newValue);
+</pre>
+Or using the <a href="#setAccessibleDescription">setAccessibleDescription</a> slot.
+
+<h3><a name=layoutDirection></a>Qt::LayoutDirection layoutDirection</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("layoutDirection").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ... // string representation of values also supported
+	object->setProperty("layoutDirection", newValue);
+</pre>
+Or using the <a href="#setLayoutDirection">setLayoutDirection</a> slot.
+<p>See also <a href="#Qt::LayoutDirection">Qt::LayoutDirection</a>.
+
+<h3><a name=autoFillBackground></a>bool autoFillBackground</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	bool val = object->property("autoFillBackground").toBool();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	bool newValue = ...
+	object->setProperty("autoFillBackground", newValue);
+</pre>
+Or using the <a href="#setAutoFillBackground">setAutoFillBackground</a> slot.
+
+<h3><a name=styleSheet></a>QString styleSheet</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("styleSheet").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("styleSheet", newValue);
+</pre>
+Or using the <a href="#setStyleSheet">setStyleSheet</a> slot.
+
+<h3><a name=locale></a>QLocale locale</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QLocale val = object->property("locale").toLocale();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QLocale newValue = ...
+	object->setProperty("locale", newValue);
+</pre>
+Or using the <a href="#setLocale">setLocale</a> slot.
+
+<h3><a name=windowFilePath></a>QString windowFilePath</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("windowFilePath").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("windowFilePath", newValue);
+</pre>
+Or using the <a href="#setWindowFilePath">setWindowFilePath</a> slot.
+
+<h3><a name=inputMethodHints></a>Qt::InputMethodHints inputMethodHints</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	int val = object->property("inputMethodHints").toInt();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	int newValue = ... // string representation of values also supported
+	object->setProperty("inputMethodHints", newValue);
+</pre>
+Or using the <a href="#setInputMethodHints">setInputMethodHints</a> slot.
+<p>See also <a href="#Qt::InputMethodHints">Qt::InputMethodHints</a>.
+
+<h3><a name=control></a>QString control</h3>
+<p>
+<p>Read this property's value using QObject::property:<pre>
+	QString val = object->property("control").toString();
+</pre>
+Set this property' value using QObject::setProperty:<pre>
+	QString newValue = ...
+	object->setProperty("control", newValue);
+</pre>
+Or using the <a href="#setControl">setControl</a> slot.
+

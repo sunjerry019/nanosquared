@@ -1,0 +1,7 @@
+# Add back the necessary compiled .dll file
+Debug
+Release/*
+!Release/netstandard2.0/
+Release/netstandard2.0/*
+!Release/netstandard2.0/NanoScanLibrary.dll
+!Release/netstandard2.0/NS2_Interop.dll

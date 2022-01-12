@@ -1,6 +1,6 @@
 # Custom
 data/
-NanoScan
+src/data/
 .vscode
 *.ignore.*
 

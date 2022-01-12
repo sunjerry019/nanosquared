@@ -1,0 +1,10 @@
+name: nanoscan-32bit
+channels:
+    - conda-forge/win-32
+    - defaults/win-32
+dependencies:
+    - python
+    - pip
+    - pip:
+        - msl-loadlib
+        - pythonnet

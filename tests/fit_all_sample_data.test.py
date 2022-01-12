@@ -3,7 +3,7 @@
 import sys, os
 from matplotlib import pyplot
 base_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(base_dir, ".."))
+root_dir = os.path.abspath(os.path.join(base_dir, "..", "src"))
 sys.path.insert(0, root_dir)
 
 import pandas as pd
@@ -47,7 +47,7 @@ for i in range(len(labels)):
 		yerror         = corr_y * ys_e[i],
 		wavelength     = wvs[i],
 		wavelength_err = wvs_err[i],
-		mode           = fitting.fitter.MsqFitter.M2_MODE
+		mode           = fitting.fitter.MsqFitter.ISO_MODE
 	)
 
 	f.estimateAndFit()
@@ -62,3 +62,5 @@ for i in range(len(labels)):
 	fig.suptitle(labels[i])
 	
 	pyplot.show()
+
+	break

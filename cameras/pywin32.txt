@@ -1,4 +1,0 @@
-python "C:\Users\Yudong.Sun\.conda\envs\nanosquared\Lib\site-packages\win32com\client\makepy.py" .\DataRayOcx.ocx
-
-File is then generated in "C:\Users\Yudong.Sun\AppData\Local\Temp\gen_py\3.8\43555BA2-3FE0-11D6-9F4A-00A0CC40A4D2x0x1x1.py"
-Then everything works the same as comtypes
