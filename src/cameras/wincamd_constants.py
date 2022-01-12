@@ -9,6 +9,7 @@ from collections import namedtuple
 import os,sys
 
 from cameras.camera import Camera
+from enum import Enum
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -16,11 +17,47 @@ sys.path.insert(0, root_dir)
 
 from cameras.all_constants import CameraAxes
 
-class WinCamAxes(CameraAxes):
+class StrEnum(str, Enum):
+    """
+    Enum where members are also (and must be) strings
+
+    Copied from https://github.com/python/cpython/blob/817a6bc9f7b802511c4d42273a621c556a48870b/Lib/enum.py#L1114
+    """
+
+    def __new__(cls, *values):
+        if len(values) > 3:
+            raise TypeError('too many arguments for str(): %r' % (values, ))
+        if len(values) == 1:
+            # it must be a string
+            if not isinstance(values[0], str):
+                raise TypeError('%r is not a string' % (values[0], ))
+        if len(values) >= 2:
+            # check that encoding argument is a string
+            if not isinstance(values[1], str):
+                raise TypeError('encoding must be a string, not %r' % (values[1], ))
+        if len(values) == 3:
+            # check that errors argument is a string
+            if not isinstance(values[2], str):
+                raise TypeError('errors must be a string, not %r' % (values[2]))
+        value = str(*values)
+        member = str.__new__(cls, value)
+        member._value_ = value
+        return member
+
+    __str__ = str.__str__
+
+    __format__ = str.__format__
+
+    def _generate_next_value_(name, start, count, last_values):
+        """
+        Return the lower-cased version of the member name.
+        """
+        return name.lower()
+
+class WinCamAxes(CameraAxes, StrEnum):
     X    = 'x'
     Y    = 'y'
     BOTH = 'xy'
-
 
 # For the ProfileID Values, look at dataray-profiles-enum.pdf
 _profiles = [
