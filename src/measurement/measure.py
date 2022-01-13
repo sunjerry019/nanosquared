@@ -144,17 +144,18 @@ class Measurement(h.LoggerMixIn):
         for n, pt in enumerate(points):
             # https://stackoverflow.com/a/25293744
             self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
-            
-            for ax in [self.camera.AXES.X, self.camera.AXES.Y]:
-                y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
-                x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
 
-                dtpt = np.array([x, y[0], y[1]])
-                
-                if self.data[ax] is None:
-                    self.data[ax] = dtpt
-                else:
-                    self.data[ax] = np.vstack((self.data[ax], dtpt))
+            (y_x, y_y) = self.measure_at(pos = pt, numsamples = numsamples, axis = self.camera.AXES.BOTH)
+            x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
+
+            dtpt_x = np.array([x, y_x[0], y_x[1]])
+            dtpt_y = np.array([x, y_y[0], y_y[1]])
+
+            self.data[self.camera.AXES.X] = dtpt_x if self.data[self.camera.AXES.X] is None else np.vstack((self.data[self.camera.AXES.X], dtpt_x))
+            self.data[self.camera.AXES.Y] = dtpt_y if self.data[self.camera.AXES.Y] is None else np.vstack((self.data[self.camera.AXES.Y], dtpt_y))
+            
+            # for ax in [self.camera.AXES.X, self.camera.AXES.Y]:
+            #     y = self.measure_at(pos = pt, numsamples = numsamples, axis = ax)
 
         # self.data has the format
         # self.data = {'x': xdata, 'y': ydata }
@@ -424,7 +425,7 @@ class Measurement(h.LoggerMixIn):
         self.controller.waitClear()
 
         if self.camera.devMode:
-            return self.simulate_beam(pos = pos)
+            return (self.simulate_beam(pos = pos), self.simulate_beam(pos = pos)) if axis == self.camera.AXES.BOTH else self.simulate_beam(pos = pos)
 
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
