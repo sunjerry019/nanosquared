@@ -34,9 +34,7 @@ There are 2 different fitters available (see above). See [fitting](./src/fitting
 The default fitting method is `scipy.optimize.curve_fit`. 
 
 By default, we do not use the fit equation described in ISO 11146-1:2021 Section 9 due its large errors. Instead, we use the *M² Mode*, which fits the obtained caustic to the guassian beam equation:
-$$
-	\omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}
-$$
+<p align="center"><img src="https://latex.codecogs.com/svg.image?\bg_white&space;\omega(z)&space;=&space;\omega_0&space;\sqrt{1&space;&plus;&space;(z&space;-&space;z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" title="\bg_white \omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" /></p>
 This obtains the M² parameter as one of the fit parameters. 
 
 ### Logging
