@@ -21,7 +21,7 @@ In this mode, the fit is done according to the method described in ISO 11146-1:2
 
 In the program, the modes are 0-indexed (i.e. Mode 0 is M²λ, etc.). Constants are provided in the class `MsqFitter` that map to each of these modes.
 
-Under `/tests/` there are parallelized code that runs on the LMU Physics CIP Pool Cluster for parameter-sweep purposes. These jobs are to be sent using the command:
+Under [`/tests/`](../../tests) there are parallelized code that runs on the LMU Physics CIP Pool Cluster for parameter-sweep purposes. These jobs are to be sent using the command:
 ```bash
 sbatch slurm_proc.sh
 ```
