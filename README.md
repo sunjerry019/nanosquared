@@ -4,7 +4,7 @@ Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 ## Important Note
 This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M² Measurement code.
 
-See below for more information on how to use it.
+See [below](#independent-modules) for more information on how to use it.
 
 ## Supported Models
 The WinCamD Camera used is the [DataRay WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
@@ -14,6 +14,51 @@ The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophirop
 The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
 
 Due to software compability issues, device-interfacing code for the beam profilers in this repository can only run on Windows. 
+
+## Version Information
+For Python packages used, refer to [`conda-environment.yml`](./conda-environment.yml). 
+
+The DataRay Software versions used for the development of this code are as follows:
+- 32-bit: [iDataRay80D63](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D63.zip)
+- 64-bit: [iDataRay80D62_x64](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D62_x64.zip)
+
+The NanoScan Software version is: `v2.9.1.28`.
+
+## Installation
+### Python Modules
+To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
+```bat
+conda env create -f conda-environment.yml
+conda activate nanosquared
+```
+Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
+```bat
+conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
+conda activate nanoscan-32bit
+```
+This might be necessary as not all function calls exposed by the ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp/README.md) for more information.
+
+### NanoScan
+To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
+
+Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
+
+*More to be added*
+
+### WinCamD
+To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. 
+
+Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information, or [see above](#version-information) for the links to the versions used during the development of this code.  
+
+*More to be added*
+
+## Independent Modules
+*more to be added, describing which modules may be used independently*
+
+## Extending this code
+The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
+
+Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
 ## How it works
 ### Measuring Beam-Width Data
@@ -39,51 +84,6 @@ This obtains the M² parameter as one of the fit parameters.
 
 ### Logging
 All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
-
-## Extending this code
-The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
-
-Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
-
-## Version Information
-For Python packages used, refer to [`conda-environment.yml`](./conda-environment.yml). 
-
-The DataRay Software versions used for the development of this code are as follows:
-- 32-bit: [iDataRay80D63](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D63.zip)
-- 64-bit: [iDataRay80D62_x64](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D62_x64.zip)
-
-The NanoScan Software version is: `v2.9.1.28`.
-
-## Installation
-### NanoScan
-To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
-
-Due to some security policy, loading a DLL from a network location may be disabled on certain computers. In this case, copy `NanoScanLibrary.dll` and `NS2_Interop.dll` to `C:\nanosquared_include\` and it should load fine. The scripts are written in such a way as to fall back to that location (This behaviour may change in the future).
-
-*More to be added*
-
-### WinCamD
-To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. 
-
-Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information, or [see above](#version-information) for the links to the versions used during the development of this code. 
-
-### Python Modules
-To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
-```bat
-conda env create -f conda-environment.yml
-conda activate nanosquared
-```
-Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
-```bat
-conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
-conda activate nanoscan-32bit
-```
-This might be necessary as not all function calls exposed by the ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp/README.md) for more information. 
-
-*More to be added*
-
-## Independent Modules
-*more to be added, describing which modules may be used independently*
 
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
