@@ -36,4 +36,4 @@ Resources available are:
 - The C\# Code Example in the NanoScan Automation Folder (especially if you want to change the C\# code itself)
 
 ## Testing
-To test if the DLL loads properly in Python, you will need a 32-bit Python environment. An example Anaconda environment file is provided as [nanoscan_32.yml](../archive/nanoscan_32.yml).
+To test if the DLL loads properly in Python, you will need a 32-bit Python environment. An example Anaconda environment file is provided as [nanoscan_32.yml](../archive/nanoscan/nanoscan_32.yml).
