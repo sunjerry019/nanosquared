@@ -46,7 +46,7 @@ The code responsible for communicating with each component are separated into di
 Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
 ## Version Information
-For Python packages used, refer to `conda-environment.yml`. 
+For Python packages used, refer to [`conda-environment.yml`](./conda-environment.yml). 
 
 The DataRay Software versions used for the development of this code are as follows:
 - 32-bit: [iDataRay80D63](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D63.zip)
@@ -63,8 +63,11 @@ Due to some security policy, loading a DLL from a network location may be disabl
 *More to be added*
 
 ### WinCamD
-To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information. 
+To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. 
 
+Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information, or [see above](#version-information) for the links to the versions used during the development of this code. 
+
+### Python Modules
 *More to be added*
 
 ## Independent Modules
