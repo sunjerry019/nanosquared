@@ -36,7 +36,7 @@ Should you need to directly debug the NanoScan interfacing C# code, prepare a 32
 conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
 conda activate nanoscan-32bit
 ```
-This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp/README.md) for more information.
+This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp) for more information.
 
 ### NanoScan
 To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
