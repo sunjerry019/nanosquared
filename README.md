@@ -7,11 +7,11 @@ This repository also contains code to interact with the WinCamD and Nanoscan Bea
 See [below](#independent-modules) for more information on how to use it.
 
 ## Supported Models
-The WinCamD Camera used is the [DataRay WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
+- The WinCamD Camera used is the [DataRay WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
 
-The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5). You will need the PRO version instead of the STD Version. The activation code is device-specific and written into the EEPROM of the Scanhead. 
+- The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5). You will need the PRO version instead of the STD Version. The activation code is device-specific and written into the EEPROM of the Scanhead. The NanoScan vendor software then checks the activation status of the Scanhead before marshalling the function calls to it. 
 
-The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
+- The stage controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
 
 Due to software compability issues, device-interfacing code for the beam profilers in this repository can only run on Windows. 
 
@@ -36,7 +36,7 @@ Should you need to directly debug the NanoScan interfacing C# code, prepare a 32
 conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
 conda activate nanoscan-32bit
 ```
-This might be necessary as not all function calls exposed by the ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp/README.md) for more information.
+This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp/README.md) for more information.
 
 ### NanoScan
 To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
