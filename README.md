@@ -60,6 +60,26 @@ The code responsible for communicating with each component are separated into di
 
 Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
+### Logging
+All logging is provided by the `LoggerMixIn` class under `src/common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
+
+If you are adding modules to the codebase, it is recommended to inherit the `LoggerMixIn` class.
+
+## Usage
+We have plans to package the entire repository into an installable Python package. But in the meantime, to write your own macros, add the following to the top of your script:
+```python
+import os,sys
+src_dir = os.path.join("full\path\to\repo","src")
+sys.path.insert(0, src_dir)
+```
+You can then import and use the modules, for example:
+```python
+from cameras.nanoscan import NanoScan
+n = NanoScan(devMode = False)
+print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
+```
+*More to be added, or even separate README.*
+
 ## How it works
 ### Measuring Beam-Width Data
 ### Fitting the Data
@@ -81,9 +101,6 @@ The default fitting method is `scipy.optimize.curve_fit`.
 By default, we do not use the fit equation described in ISO 11146-1:2021 Section 9 due its large errors. Instead, we use the *M² Mode*, which fits the obtained caustic to the guassian beam equation:
 <p align="center"><img src="https://latex.codecogs.com/svg.image?\bg_white&space;\omega(z)&space;=&space;\omega_0&space;\sqrt{1&space;&plus;&space;(z&space;-&space;z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" title="\bg_white \omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" /></p>
 This obtains the M² parameter as one of the fit parameters. 
-
-### Logging
-All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired

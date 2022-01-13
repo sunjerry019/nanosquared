@@ -20,7 +20,7 @@ In this mode, a temporary function is created from the original beam equation wi
 
 3. **ISO mode**.
 In this mode, the fit is done according to the method described in ISO 11146-1:2021 Section 9, and Gaussian error propagation is used to find the error of M². Here we assume that the beam is either stigmatic or simple astigmatic. This method somehow creates really big errors with the data that I have tested on. The fit-equation is: <p align="center"><img src="https://latex.codecogs.com/svg.image?\bg_white&space;\frac{1}{2}\sqrt{a&space;&plus;&space;bz&space;&plus;&space;cz^2}" title="\bg_white \frac{1}{2}\sqrt{a + bz + cz^2}" /></p>
-**Note**: the ISO standard says that "It is common to perform the fit by minimizing the sum of the squared relative deviations of the diameters." → i.e. only y-error is minimized. 
+_**Note**_: the ISO standard says that "It is common to perform the fit by minimizing the sum of the squared relative deviations of the diameters." → i.e. only y-error is minimized. 
 
 In the program, the modes are 0-indexed (i.e. Mode 0 is M²λ, etc.). Constants are provided in the class `MsqFitter` that map to each of these modes.
 
