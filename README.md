@@ -1,12 +1,19 @@
 # M-Squared Automation
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
-## Models
+## Important Note
+This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M<sup>2</sup> Measurement code.
+
+See below for more information on how to use it.
+
+## Supported Models
 The WinCamD Camera used is the [DataRay WinCamD-IR-BB](https://dataray.com/collections/beam-profiling-cameras/products/wincamd-ir-bb-broadband-2-to-16-%C2%B5m-mwir-fir-beam-profiler). 
 
 The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5). You will need the PRO version instead of the STD Version. The activation code is device-specific and written into the EEPROM of the Scanhead. 
 
 The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
+
+Due to software compability issues, device-interfacing code in this repository may only run on Windows. 
 
 ## How it works
 ### Measuring Beam-Width Data
@@ -23,8 +30,8 @@ Refer to [fitting](./src/fitting) for documentation on the fitting module.
 For Python packages used, refer to `conda-environment.yml`. 
 
 The DataRay Software versions used for the development of this code are as follows:
-- 32-bit: iDataRay80D63
-- 64-bit: iDataRay80D62_x64
+- 32-bit: [iDataRay80D63](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D63.zip)
+- 64-bit: [iDataRay80D62_x64](https://dataray-web.s3.amazonaws.com/sw/iDataRay80D62_x64.zip)
 
 The NanoScan Software version is: `v2.9.1.28`.
 
@@ -36,7 +43,9 @@ Due to some security policy, loading a DLL from a network location may be disabl
 
 *More to be added*
 
-## WinCamD
+### WinCamD
+To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information. 
+
 *More to be added*
 
 ## Troubleshooting
