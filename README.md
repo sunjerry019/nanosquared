@@ -2,7 +2,7 @@
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
 ## Important Note
-This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M<sup>2</sup> Measurement code.
+This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M² Measurement code.
 
 See below for more information on how to use it.
 
@@ -18,13 +18,34 @@ Due to software compability issues, device-interfacing code in this repository m
 ## How it works
 ### Measuring Beam-Width Data
 ### Fitting the Data
+The `Fitter` module under [fitting](./src/fitting) is used to fit the data obtained. 
+```
+Fitter ┬─> ODRFitter (scipy.odr):                optimizes x and y-error
+       ├─> OCFFitter (scipy.optimize.curve_fit): optimizes y-error
+       │
+    ┌──┴───> MsqODRFitter / MsqOCFFitter: Provides all functionalities
+    │                                     and fitting using the selected 
+    │                                     fitting method
+    │
+MsqFitter: Provides functionalities common to all fitting methods
+```
+There are 2 different fitters available (see above). See [fitting](./src/fitting) for more details on the fitting modes available to obtain M² (M²λ, M² and ISO modes). 
+
+The default fitting method is `scipy.optimize.curve_fit`. 
+
+By default, we do not use the fit equation described in ISO 11146-1:2021 Section 9 due its large errors. Instead, we use the *M² Mode*, which fits the obtained caustic to the guassian beam equation:
+$$
+	\omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}
+$$
+This obtains the M² parameter as one of the fit parameters. 
+
 ### Logging
 All logging is provided by the `LoggerMixIn` class under `common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
 
-Refer to [fitting](./src/fitting) for documentation on the fitting module. 
+Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
 ## Version Information
 For Python packages used, refer to `conda-environment.yml`. 
@@ -47,6 +68,9 @@ Due to some security policy, loading a DLL from a network location may be disabl
 To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information. 
 
 *More to be added*
+
+## Independent Modules
+*more to be added, describing which modules may be used independently*
 
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
