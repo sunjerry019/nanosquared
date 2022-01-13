@@ -12,11 +12,15 @@ MsqFitter: Provides functionalities common to all fitting methods
 
 On top of the 2 fitting methods there are 3 fitting modes to fit for M²:
 1. M²λ mode. 
-In this mode, the function that is fitted combines the M²λ term as these 2 are heavily correlated (this means that that M² and λ cannot be fitted individually as fit parameters). Using Gaussian error propagation methods, the error in the wavelength can then be taken into account. 
+In this mode, the function that is fitted combines the M²λ term as these 2 are heavily correlated (this means that that M² and λ cannot be fitted individually as fit parameters). Using Gaussian error propagation methods, the error in the wavelength can then be taken into account. The fit equation is: $$\omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{\tilde{M}}{\pi\omega_0^2}\right)^2}$$ where $\tilde{M} = M^2\lambda$
+
 2. M² mode. 
-In this mode, a temporary function is created from the original beam equation with the wavelength hard-coded. The data is then fitted to this temporary function. This allows M² to be fitted directly as a fit-parameter. Due to the hard-coded nature of the wavelength, the error in the wavelength cannot be taken into account. 
+In this mode, a temporary function is created from the original beam equation with the wavelength hard-coded. The data is then fitted to this temporary function. This allows M² to be fitted directly as a fit-parameter. Due to the hard-coded nature of the wavelength, the error in the wavelength cannot be taken into account. The fit equation is: 
+$$
+	\omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}
+$$
 3. ISO mode.
-In this mode, the fit is done according to the method described in ISO 11146-1:2021 Section 9, and Gaussian error propagation is used to find the error of M². Here we assume that the beam is either stigmatic or simple astigmatic. This method somehow creates really big errors with the data that I have tested on. 
+In this mode, the fit is done according to the method described in ISO 11146-1:2021 Section 9, and Gaussian error propagation is used to find the error of M². Here we assume that the beam is either stigmatic or simple astigmatic. This method somehow creates really big errors with the data that I have tested on. The fit-equation is: $$\frac{1}{2}\sqrt{a + bz + cz^2}$$
 **Note**: the ISO standard says that "It is common to perform the fit by minimizing the sum of the squared relative deviations of the diameters." → i.e. only y-error is minimized. 
 
 In the program, the modes are 0-indexed (i.e. Mode 0 is M²λ, etc.). Constants are provided in the class `MsqFitter` that map to each of these modes.
