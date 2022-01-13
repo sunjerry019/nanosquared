@@ -98,6 +98,8 @@ class Measurement(h.LoggerMixIn):
 
         Parameters
         ----------
+        center : int, optional
+            The position of the beam-waist in pulses. When set to -1, the code auto finds the center. 
         rayleighLength : float, optional
             Rayleigh Length (z_0) in millimeter, by default 15
         numsamples : int, optional
