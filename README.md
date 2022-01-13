@@ -13,7 +13,7 @@ The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophirop
 
 The controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
 
-Due to software compability issues, device-interfacing code in this repository may only run on Windows. 
+Due to software compability issues, device-interfacing code for the beam profilers in this repository can only run on Windows. 
 
 ## How it works
 ### Measuring Beam-Width Data
