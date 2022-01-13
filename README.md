@@ -36,7 +36,7 @@ Should you need to directly debug the NanoScan interfacing C# code, prepare a 32
 conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
 conda activate nanoscan-32bit
 ```
-This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# Directory](./src/cameras/csharp) for more information.
+This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# directory](./src/cameras/csharp) for more information.
 
 ### NanoScan
 To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
@@ -46,7 +46,7 @@ Due to some security policy, loading a DLL from a network location may be disabl
 *More to be added*
 
 ### WinCamD
-To use the `WinCamD` Python Interface, you first need to the install `DataRay` software. 
+To use the `WinCamD` Python Interface, you first need to the install [DataRay](https://dataray.com/blogs/software/downloads) software. 
 
 Please install the version that corresponds to your Python installation (i.e. 64-bit DataRay for 64-bit Python). As DataRay is regularly putting out updates for their devices, we have decided not to include the installer in this repository. Please visit their website for more information, or [see above](#version-information) for the links to the versions used during the development of this code.  
 
