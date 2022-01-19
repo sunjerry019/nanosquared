@@ -447,6 +447,10 @@ class Measurement(h.LoggerMixIn):
             self.log(f"Reft {left}, Right {right} invalid", logging.WARN)
             return (0, 0)
 
+        if(precision < 2):
+            self.log(f"Precision {precision} too small. Ignoring and using precision = 2", logging.WARN)
+            precision = 2
+
         absolute_precision = precision
 
         # left and right has the format [x, y]
@@ -455,18 +459,22 @@ class Measurement(h.LoggerMixIn):
 
         self.log(f"L,R: {left}, {right}")
 
+        step = 0
+
         # We implement the iterative method
         while remaining_axes: # Loop while remaining_axes not empty
             # We first do ternary search on the x-axis, but keep track of the bounds of the y-axis
             # once the x-center is found, it does ternary search on the y-axis using the limits already found
 
+            step += 1
             current_axis = remaining_axes[0] # front of deque is the last element?
             
-            one_third   = (right[current_axis] - left[current_axis]) / 3
+            one_third   = np.abs(right[current_axis] - left[current_axis]) / 3
             left_third  = np.around(left[current_axis]  + one_third).astype(int)
             right_third = np.around(right[current_axis] - one_third).astype(int)
 
-            self.log(f"Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}")
+            self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}")
+            self.log(f"Search between [f{left[current_axis]}, {right[current_axis]}]")
             l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
             self.log(f"=== LEFT  POINT: [{left_third}]\t{l}")
             r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
@@ -477,9 +485,14 @@ class Measurement(h.LoggerMixIn):
                 if l[axis][0] > r[axis][0]:
                     left[axis]  = left_third
                 else:
+                    # if axis != current_axis and np.abs(l[axis][0] - r[axis][0]) <= np.max(l[axis][1], r[axis][1]):
+                    #     # if not the current axis, and l and r are within error of each other, assume there is a problem and we do nothing
+                    #     pass
+                    # else:
+                    #     # Under normal circumstances
                     right[axis] = right_third
 
-            if np.abs(right[current_axis] - left[current_axis]) < absolute_precision:
+            if np.abs(right[current_axis] - left[current_axis]) <= absolute_precision:
                 remaining_axes.popleft()
                 # we have found that center, remove from the list
 
