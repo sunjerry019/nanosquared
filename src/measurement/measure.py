@@ -318,8 +318,8 @@ class Measurement(h.LoggerMixIn):
 
         kwargs = {
             "x"              : self.data[axis][:,0],
-            "y"              : self.data[axis][:,1],
-            "yerror"         : self.data[axis][:,2],
+            "y"              : self.data[axis][:,1] / 2,
+            "yerror"         : self.data[axis][:,2] / 2,
             "wavelength"     : float(wavelength),
             "wavelength_err" : float(wavelength_error),
             "mode"           : mode
