@@ -82,7 +82,7 @@ print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 
 ## How it works
 ### Measuring Beam-Width Data
-The measurement of the M² data is carried out by the [Measurement](./src/measurement) module.
+The measurement of the M² data is carried out by the [Measurement](./src/measurement/measure.py) module.
 
 If no center is given, the code uses the [ternary search algorithm](https://en.wikipedia.org/wiki/Ternary_search) will be used on each axis to find the center. 
 
