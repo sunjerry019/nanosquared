@@ -11,17 +11,20 @@ from measurement.measure import Measurement
 from cameras.nanoscan import NanoScan
 from stage.controller import GSC01
 
-n = NanoScan(devMode = False)
-c = GSC01(devMode = False)
+global_devMode = True
 
-if not c.stage.permDirty:
-    c.syncPosition()
-    c.stage.ranged = True
-else:
-    c.homeStage()
-    c.findRange()
+n = NanoScan(devMode = global_devMode)
+c = GSC01(devMode = global_devMode)
 
-with Measurement(devMode = False, camera = n, controller = c) as M:
+if not global_devMode:
+    if not c.stage.permDirty:
+        c.syncPosition()
+        c.stage.ranged = True
+    else:
+        c.homeStage()
+        c.findRange()
+
+with Measurement(devMode = global_devMode, camera = n, controller = c) as M:
     print("with Measurement() as M")
     import code; code.interact(local=locals())
 

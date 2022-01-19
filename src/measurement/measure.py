@@ -9,6 +9,8 @@ import os,sys
 from typing import Optional, Tuple, Union
 import numpy as np
 
+from collections import deque
+
 import tempfile
 from pathlib import Path
 from datetime import datetime
@@ -341,7 +343,7 @@ class Measurement(h.LoggerMixIn):
 
         return self.fitter.m_squared     
 
-    def find_center(self, axis: CameraAxes = None, precision: int = 1000, left: int = None, right: int = None) -> int:
+    def find_center(self, axis: CameraAxes = None, precision: int = 100, left: int = None, right: int = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -405,7 +407,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_center_xy(self, precision: int = 1000, left: Tuple[int, int] = None, right: Tuple[int, int] = None) -> Tuple[int, int]:
+    def find_center_xy(self, precision: int = 100, left: Tuple[int, int] = None, right: Tuple[int, int] = None) -> Tuple[int, int]:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -429,44 +431,62 @@ class Measurement(h.LoggerMixIn):
             The approximate beam-waist position
         """
 
-        if self.devMode:
-            return (15, 15)
+        # if self.devMode:
+        #     return (15, 15)
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
 
         if left is None and self.controller.stage.ranged:
-            left = (self.controller.stage.LIMIT_LOWER, self.controller.stage.LIMIT_LOWER)
+            left  = [self.controller.stage.LIMIT_LOWER, self.controller.stage.LIMIT_LOWER]
         
         if right is None and self.controller.stage.ranged:
-            right = (self.controller.stage.LIMIT_UPPER, self.controller.stage.LIMIT_UPPER)
+            right = [self.controller.stage.LIMIT_UPPER, self.controller.stage.LIMIT_UPPER]
 
-        if left is None or right is None:
-            self.log(f"left {left}, Right {right} invalid", logging.WARN)
+        if any(not isinstance(item, int) for item in left) or any(not isinstance(item, int) for item in right):
+            self.log(f"Reft {left}, Right {right} invalid", logging.WARN)
             return (0, 0)
 
         absolute_precision = precision
 
-        visited = []
+        # left and right has the format [x, y]
+        #                 x, y
+        remaining_axes = deque([0, 1])
 
-        while True:
-            # We first do ternary search on the x-axis, but keep track of the bounds of the y-axis
-            # once the x-center is found, it does ternary search on the y-axis using the limits alr found
+        self.log(f"L,R: {left}, {right}")
 
         # We implement the iterative method
-        while np.abs(right - left) >= absolute_precision:
-            left_third  = np.around(left  + (right - left) / 3).astype(int)
-            right_third = np.around(right - (right - left) / 3).astype(int)
+        while remaining_axes: # Loop while remaining_axes not empty
+            # We first do ternary search on the x-axis, but keep track of the bounds of the y-axis
+            # once the x-center is found, it does ternary search on the y-axis using the limits already found
+
+            current_axis = remaining_axes[0] # front of deque is the last element?
             
-            l = self.measure_at(axis = axis, pos = left_third)
-            r = self.measure_at(axis = axis, pos = right_third)
-            # absolute_precision = np.max([l[1], r[1], default_abs_pres])
+            one_third   = (right[current_axis] - left[current_axis]) / 3
+            left_third  = np.around(left[current_axis]  + one_third).astype(int)
+            right_third = np.around(right[current_axis] - one_third).astype(int)
 
-            if l[0] > r[0]:
-                left = left_third
-            else:
-                right = right_third
+            self.log(f"Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}")
+            l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
+            self.log(f"=== LEFT  POINT: [{left_third}]\t{l}")
+            r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
+            self.log(f"=== RIGHT POINT: [{right_third}]\t{r}")
+            self.log("")
 
+            for axis in remaining_axes:
+                if l[axis][0] > r[axis][0]:
+                    left[axis]  = left_third
+                else:
+                    right[axis] = right_third
+
+            if np.abs(right[current_axis] - left[current_axis]) < absolute_precision:
+                remaining_axes.popleft()
+                # we have found that center, remove from the list
+
+        # convert the left and right into numpy arrays
+        left  = np.array(left)
+        right = np.array(right)
+            
         # Left and right are the current bounds; the maximum is between them
         cen = np.around((left + right) / 2).astype(int)
         self.log(f"Center at {cen}")
@@ -480,7 +500,7 @@ class Measurement(h.LoggerMixIn):
         axis : CameraAxes
             The axis to measure
         pos : int
-            Position to measure at
+            Position to measure at in pps
         numsamples: int
             Number of samples to take, by default 10
 
@@ -494,7 +514,7 @@ class Measurement(h.LoggerMixIn):
         self.controller.waitClear()
 
         if self.camera.devMode:
-            return (self.simulate_beam(pos = pos), self.simulate_beam(pos = pos)) if axis == self.camera.AXES.BOTH else self.simulate_beam(pos = pos)
+            return (self.simulate_beam(pos = pos), self.simulate_beam(pos = (pos - 100))) if axis == self.camera.AXES.BOTH else self.simulate_beam(pos = pos)
 
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
