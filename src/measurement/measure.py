@@ -436,12 +436,22 @@ class Measurement(h.LoggerMixIn):
             self.controller.findRange()
 
         if left is None and self.controller.stage.ranged:
-            left = self.controller.stage.LIMIT_LOWER
+            left = (self.controller.stage.LIMIT_LOWER, self.controller.stage.LIMIT_LOWER)
         
         if right is None and self.controller.stage.ranged:
-            right = self.controller.stage.LIMIT_UPPER
+            right = (self.controller.stage.LIMIT_UPPER, self.controller.stage.LIMIT_UPPER)
+
+        if left is None or right is None:
+            self.log(f"left {left}, Right {right} invalid", logging.WARN)
+            return (0, 0)
 
         absolute_precision = precision
+
+        visited = []
+
+        while True:
+            # We first do ternary search on the x-axis, but keep track of the bounds of the y-axis
+            # once the x-center is found, it does ternary search on the y-axis using the limits alr found
 
         # We implement the iterative method
         while np.abs(right - left) >= absolute_precision:
@@ -450,7 +460,6 @@ class Measurement(h.LoggerMixIn):
             
             l = self.measure_at(axis = axis, pos = left_third)
             r = self.measure_at(axis = axis, pos = right_third)
-
             # absolute_precision = np.max([l[1], r[1], default_abs_pres])
 
             if l[0] > r[0]:

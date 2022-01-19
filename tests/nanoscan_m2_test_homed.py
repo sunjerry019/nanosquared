@@ -30,6 +30,8 @@ with Measurement(devMode = False, camera = n, controller = c) as M:
 
     # M.take_measurements()
     # M.fit_data()
+    # fig, ax = M.fitter.getPlotOfFit()
+    # fig.show()
 
 
 
