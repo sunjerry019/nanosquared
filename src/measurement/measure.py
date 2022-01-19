@@ -404,6 +404,64 @@ class Measurement(h.LoggerMixIn):
         cen = np.around((left + right) / 2).astype(int)
         self.log(f"Center at {cen}")
         return cen
+
+    def find_center_xy(self, precision: int = 1000, left: Tuple[int, int] = None, right: Tuple[int, int] = None) -> Tuple[int, int]:
+        """Finds the approximate position of the beam waist using ternary search. 
+        If `left` or `right` is set to None, the limits of the stage are taken
+
+        Code Reference: https://en.wikipedia.org/wiki/Ternary_search
+
+        Parameters
+        ----------
+        axis : Optional[CameraAxes]
+            Must of the type self.camera.AXES, by default None
+            If none, then self.camera.AXES.X is chosen.
+        precision : 
+            The precision of the center in number of pulses, by default 1000
+        left : int, optional
+            The smallest possible position, by default None
+        right : int, optional
+            The biggest possible position, by default None
+
+        Returns
+        -------
+        center: int
+            The approximate beam-waist position
+        """
+
+        if self.devMode:
+            return (15, 15)
+
+        if not self.controller.stage.ranged and (left is None or right is None):
+            self.controller.findRange()
+
+        if left is None and self.controller.stage.ranged:
+            left = self.controller.stage.LIMIT_LOWER
+        
+        if right is None and self.controller.stage.ranged:
+            right = self.controller.stage.LIMIT_UPPER
+
+        absolute_precision = precision
+
+        # We implement the iterative method
+        while np.abs(right - left) >= absolute_precision:
+            left_third  = np.around(left  + (right - left) / 3).astype(int)
+            right_third = np.around(right - (right - left) / 3).astype(int)
+            
+            l = self.measure_at(axis = axis, pos = left_third)
+            r = self.measure_at(axis = axis, pos = right_third)
+
+            # absolute_precision = np.max([l[1], r[1], default_abs_pres])
+
+            if l[0] > r[0]:
+                left = left_third
+            else:
+                right = right_third
+
+        # Left and right are the current bounds; the maximum is between them
+        cen = np.around((left + right) / 2).astype(int)
+        self.log(f"Center at {cen}")
+        return cen
                     
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
