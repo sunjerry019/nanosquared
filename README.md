@@ -125,6 +125,17 @@ n.NS.ShutdownNS()
 ```
 Then try to restart your original application that makes use of `NanoScan`.
 
+### NanoScan signal too weak/strong, or scan head rotation not suitable
+In this case, you can try to use an attenuator, or adjust the scan head rotation frequency:
+```python
+n = NanoScan()
+n.rotationFrequency = 2.5
+```
+You can get the allowed rotation frequencies through `n.allowedRots` or `n.NS.GetHeadScanRates()`. For the NanoScan 2s Pyro/9/5 used in the development of this script, the allowed rotations (in Hz) are:
+```
+[1.25, 2.5, 5.0, 10.0, 20.0]
+```
+
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
 ```json
