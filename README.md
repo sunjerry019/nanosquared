@@ -82,6 +82,12 @@ print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 
 ## How it works
 ### Measuring Beam-Width Data
+The measurement of the M² data is carried out by the [Measurement](./src/measurement) module.
+
+If no center is given, the code uses the [ternary search algorithm](https://en.wikipedia.org/wiki/Ternary_search) will be used on each axis to find the center. 
+
+From the center, 10 equidistant points will be symmetrically chosen around the center within the [Rayleigh Length](https://en.wikipedia.org/wiki/Rayleigh_length) and 10 between 2 and 3 times the Rayleigh Length. In total, 21 points will be taken (10 + 10 + 1), including the center.
+
 ### Fitting the Data
 The `Fitter` module under [fitting](./src/fitting) is used to fit the data obtained. 
 ```
