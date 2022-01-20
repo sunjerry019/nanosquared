@@ -32,7 +32,7 @@ with Measurement(devMode = global_devMode, camera = n, controller = c) as M:
     # M.read_from_file(fn)
 
     # M.take_measurements()
-    # M.fit_data()
+    # M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
     # fig, ax = M.fitter.getPlotOfFit()
     # fig.show()
 
