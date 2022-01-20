@@ -566,6 +566,12 @@ class Measurement(h.LoggerMixIn):
         else:
             omega_0 = np.array(self.measure_at(axis = axis, pos = center))
 
+        sqrt2_omega = np.sqrt(2) * omega_0
+
+        def evaluate(pos = pos):
+            data = self.measure_at(axis = axis, pos = pos)
+            return data - sqrt2_omega
+
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
 
         # TODO: Quit if Z_R not in range
