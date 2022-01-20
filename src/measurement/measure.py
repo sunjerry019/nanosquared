@@ -530,8 +530,10 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center, axis: Camera.AXES) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center, axis: Camera.AXES, precision: int = 10) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
+
+        IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
 
         Parameters
         ----------
@@ -539,19 +541,40 @@ class Measurement(h.LoggerMixIn):
             The position in pulses of the center of the caustic
         axis : Camera.AXES
             The axis to search for Z_r
+        precision: int
+            How precise should we be when searching for the z_R. 
+            If the precision is too small, the code may never converge.
+            By default 10 pps.
 
         Returns
         -------
         rayleighLength : int or (int, int)
             The rayleigh length in pulses
         """
+
+        BOTH = (axis == self.camera.AXES.BOTH)
+
         if self.devMode:
-            return (100, 200) if axis == self.camera.AXES.BOTH else 100
-            
-        if axis == self.camera.AXES.BOTH:
-            return (10, 12)
+            return (100, 200) if BOTH else 100
+
+        # We first get the beam width at the center
+        if BOTH:
+            omega_0 = np.array([
+                    self.measure_at(axis = self.camera.AXES.X, pos = center[0]),
+                    self.measure_at(axis = self.camera.AXES.Y, pos = center[1])
+                ])
         else:
-            return 10
+            omega_0 = np.array(self.measure_at(axis = axis, pos = center))
+
+        # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
+
+        # TODO: Quit if Z_R not in range
+
+            
+        # if axis == self.camera.AXES.BOTH:
+        #     return (10, 12)
+        # else:
+        #     return 10
         
 
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
