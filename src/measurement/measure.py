@@ -151,6 +151,17 @@ class Measurement(h.LoggerMixIn):
 
         points = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
         points = points + _center[:, np.newaxis] # https://numpy.org/doc/stable/user/basics.broadcasting.html
+        # If the center is [x, y], we make it such that it is:
+        # [[x]   => numpy autobroadcasting => [[x, x, x]
+        #  [y]]                                [y, y, y]]
+        #                                          +
+        # [a, b, c] =>                     => [[a, b, c]
+        #                                      [a, b, c]]
+        #                                          =
+        #                                  [[x+a, x+b, x+c]
+        #                                   [y+a, y+b, y+c]]
+        # This is for when the rayleigh length is the same and therefore we just have to add 
+        # the same numbers to both centers
 
         # Now we have all the points in a 1D or 2D array depending on number of axes.
         points = np.unique(points.flatten())          # We flatten and get the unique points we need to measure
