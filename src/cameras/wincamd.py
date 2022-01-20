@@ -184,15 +184,17 @@ class WinCamD(cam.Camera):
 
 		Returns
 		-------
-		ret : (float, float)
+		ret : (float, float) or [[float, float], [float, float]]
 			Returns the d4sigma of the given axis in micrometer in the form of (average, stddev)
 			If the given `axis` is not 'x' or 'y', then (`None`, `None`)
+
+			For both axes: [x, y] where each axis is given in the form of [average, stddev]
 			
 		"""
 
 		frames_needed_for_stable = 8  # Empirical Data
 		
-		if axis not in ['x', 'y']:
+		if axis not in ['x', 'y', 'xy']:
 			return (None, None)
 
 		if self.devMode:
@@ -214,9 +216,14 @@ class WinCamD(cam.Camera):
 		if not _originalState:
 			self.stopDevice()
 		
-		self.log(f"Getting average of {len(data)} data points: \n{data}", logging.INFO)
+		self.log(f"Getting average of {np.shape(data)} data points: \n{data}", logging.INFO)
 
-		return (np.average(data), np.std(data))
+		if axis == self.AXES.BOTH:
+			average = np.average(data, axis = 0)
+			stddev  = np.std(data, axis = 0)
+			return np.vstack((average, stddev)).T
+		else:
+			return (np.average(data), np.std(data))
 
 	def getAxis_D4Sigma(self, axis: WinCamAxes):
 		"""Get the d4sigma in one `axis`, opens the camera if necessary, then restores the previous state that the camera was in.
@@ -227,13 +234,13 @@ class WinCamD(cam.Camera):
 		Parameters
 		----------
 		axis : str
-			May take values 'x' or 'y'
+			May take values 'x' or 'y' or 'xy'
 
 		Returns
 		-------
-		ret : double
+		ret : double or (double, double)
 			Returns the d4sigma of the given axis in micrometer. 
-			If the given `axis` is not 'x' or 'y', then `None`.
+			If the given `axis` is not 'x' or 'y' or 'xy', then `None`.
 
 		"""
 		_originalState = self.apertureOpen
@@ -242,8 +249,12 @@ class WinCamD(cam.Camera):
 			assert self.startDevice()
 
 		d4Sigma = {
-			"x"  : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})"),
-			"y"  : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})")
+			self.AXES.X    : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})"),
+			self.AXES.Y    : self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})"),
+			self.AXES.BOTH : (
+				self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.u_WinCamD_Width_at_Clip_1})"),
+				self.dataCtrl.dynamicCall(f"GetOCXResult({OCX_Buttons.v_WinCamD_Width_at_Clip_1})")
+			)
 		}
 
 		self.D4Sigma_data = None
