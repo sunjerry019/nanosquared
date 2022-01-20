@@ -86,7 +86,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, center: int = -1, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = -1, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -100,10 +100,12 @@ class Measurement(h.LoggerMixIn):
 
         Parameters
         ----------
+        axis : Camera.AXES, optional
+            The axis to take the measurement. If set to None, self.camera.AXES.BOTH is taken. By default, None.
         center : int, optional
-            The position of the beam-waist in pulses. When set to -1, the code auto finds the center. 
+            The position of the beam-waist in pulses. When set to None, the code auto finds the center. 
         rayleighLength : float, optional
-            Rayleigh Length (z_0) in millimeter, by default 15
+            Rayleigh Length (z_0) in millimeter. When set to -1, the code auto finds the z_R. By default -1.
         numsamples : int, optional
             Number of samples to take at each point, by default 50
         writeToFile : Optional[str], optional
@@ -117,29 +119,42 @@ class Measurement(h.LoggerMixIn):
             By default, empty `dict()`
         """
 
-        # Check if the rayleigh length fits the stage being used. 
-
-        if ((self.controller.stage.travel - 10) / 2) < 3*rayleighLength:
-            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Usable travel = {self.controller.stage.travel - 10} , z_R = {rayleighLength})")
-
         if not self.devMode and self.controller.stage.dirty:
             self.controller.homeStage()
         
+        if axis is None or not isinstance(axis, self.camera.AXES):
+            axis = self.camera.AXES.BOTH
+            self.log(f"Defaulting to {axis}")
+            
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
 
         # find params
-        _center    = self.find_center() if center == -1 else center
+        # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
+        if axis == self.camera.AXES.BOTH:
+            _center    = self.find_center_xy()          if center is None else center
+        else:
+            _center    = np.array([self.find_center()]) if center is None else center
+
+        if rayleighLength < 0:
+            rayleighLength = 15
+
+        # Check if the rayleigh length fits the stage being used. 
+        if ((self.controller.stage.travel - 10) / 2) < 3*rayleighLength:
+            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Usable travel = {self.controller.stage.travel - 10} , z_R = {rayleighLength})")
+
         _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
         _within_points    = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 10, dtype = np.integer)        
         _without_points_1 = np.linspace(start=2*_z_R_pulse, stop=3*_z_R_pulse, endpoint = True, num = 5, dtype = np.integer) 
         _without_points_2 = -_without_points_1
 
-        points  = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
-        points += _center
+        points = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
+        points = points + _center[:, np.newaxis] # https://numpy.org/doc/stable/user/basics.broadcasting.html
 
-        points = np.sort(points, kind = 'stable')
+        # Now we have all the points in a 1D or 2D array depending on number of axes.
+        points = np.unique(points.flatten())          # We flatten and get the unique points we need to measure
+        points = np.sort(points, kind = 'stable')     # Sort the points
 
         totalpts = len(points)
         digits   = len(str(totalpts))
@@ -504,7 +519,10 @@ class Measurement(h.LoggerMixIn):
         cen = np.around((left + right) / 2).astype(int)
         self.log(f"Center at {cen}")
         return cen
-                    
+
+    def find_zR(self, center, axis: Camera.AXES):
+        raise NotImplementedError()
+
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
 
