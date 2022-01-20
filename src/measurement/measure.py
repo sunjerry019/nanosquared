@@ -530,7 +530,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center, axis: Camera.AXES):
+    def find_zR_pps(self, center, axis: Camera.AXES) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         Parameters
@@ -547,7 +547,7 @@ class Measurement(h.LoggerMixIn):
         """
         if self.devMode:
             return (100, 200) if axis == self.camera.AXES.BOTH else 100
-
+            
         if axis == self.camera.AXES.BOTH:
             return (10, 12)
         else:
