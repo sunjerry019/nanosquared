@@ -305,7 +305,8 @@ class GSC01(SerialController):
             self.stage.permDirty = True
 
     # Helper Functions
-    def pulse_to_um(self, pps: float):
+    # technically works with numpy arrays
+    def pulse_to_um(self, pps: int):
         return self.stage.um_per_pulse * pps
     def um_to_pulse(self, um: float):
         return um / self.stage.um_per_pulse

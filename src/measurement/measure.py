@@ -86,7 +86,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = -1, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -105,7 +105,10 @@ class Measurement(h.LoggerMixIn):
         center : int, optional
             The position of the beam-waist in pulses. When set to None, the code auto finds the center. 
         rayleighLength : float, optional
-            Rayleigh Length (z_0) in millimeter. When set to -1, the code auto finds the z_R. By default -1.
+            Rayleigh Length (z_0) in millimeter. When set to None, the code auto finds the z_R. By default None.
+
+            If axis == self.camera.AXES.BOTH, then rayleighLength should be given as [x, y]
+            else, rayleightLength should be as a positive float. 
         numsamples : int, optional
             Number of samples to take at each point, by default 50
         writeToFile : Optional[str], optional
@@ -131,41 +134,37 @@ class Measurement(h.LoggerMixIn):
 
         # find params
         # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
+        # TODO: Check if rayleigh length is correct size for axis chosen
         if axis == self.camera.AXES.BOTH:
             _center    = self.find_center_xy()          if center is None else center
         else:
             _center    = np.array([self.find_center()]) if center is None else center
 
-        if rayleighLength < 0:
-            rayleighLength = 15
+        if rayleighLength is None:
+            rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis))
+        else:
+            rayleighLength = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
-        # Check if the rayleigh length fits the stage being used. 
-        if ((self.controller.stage.travel - 10) / 2) < 3*rayleighLength:
-            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Usable travel = {self.controller.stage.travel - 10} , z_R = {rayleighLength})")
+            if np.shape(_center) != np.shape(rayleighLength):
+                rayleighLength = np.broadcast_to(rayleighLength, np.shape(_center))
 
-        _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
-
-        _within_points    = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 10, dtype = np.integer)        
-        _without_points_1 = np.linspace(start=2*_z_R_pulse, stop=3*_z_R_pulse, endpoint = True, num = 5, dtype = np.integer) 
+        _within_points    = np.linspace(start=-rayleighLength, stop=rayleighLength, endpoint = True, num = 10, dtype = np.integer)        
+        _without_points_1 = np.linspace(start=2*rayleighLength, stop=3*rayleighLength, endpoint = True, num = 5, dtype = np.integer) 
         _without_points_2 = -_without_points_1
 
-        points = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
-        points = points + _center[:, np.newaxis] # https://numpy.org/doc/stable/user/basics.broadcasting.html
-        # If the center is [x, y], we make it such that it is:
-        # [[x]   => numpy autobroadcasting => [[x, x, x]
-        #  [y]]                                [y, y, y]]
-        #                                          +
-        # [a, b, c] =>                     => [[a, b, c]
-        #                                      [a, b, c]]
-        #                                          =
-        #                                  [[x+a, x+b, x+c]
-        #                                   [y+a, y+b, y+c]]
-        # This is for when the rayleigh length is the same and therefore we just have to add 
-        # the same numbers to both centers
+        #                                                                              v the center
+        points = np.concatenate([_within_points, _without_points_1, _without_points_2, np.zeros_like(_within_points[0:1])])
+        points = points + _center
 
         # Now we have all the points in a 1D or 2D array depending on number of axes.
         points = np.unique(points.flatten())          # We flatten and get the unique points we need to measure
         points = np.sort(points, kind = 'stable')     # Sort the points
+
+        self.log(points)
+
+        # Check if the rayleigh length fits the stage being used by using the min and max
+        if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration: Travel Range = [{self.controller.stage.LIMIT_LOWER}, {self.controller.stage.LIMIT_UPPER}], Points = [{points[0]}, {points[-1]}]")
 
         totalpts = len(points)
         digits   = len(str(totalpts))
@@ -192,7 +191,7 @@ class Measurement(h.LoggerMixIn):
         # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
 
         default_meta = {
-            "Rayleigh Length": f"{rayleighLength} mm"
+            "Rayleigh Length": f"{self.controller.pulse_to_um(pps = rayleighLength) / 1000} mm"
         }
 
         metadata = {**default_meta, **metadata}
@@ -238,7 +237,7 @@ class Measurement(h.LoggerMixIn):
 
             tempdir = os.path.join(root_dir, ".." ,"data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
-            fd, pfad = tempfile.mkstemp(suffix = ".dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
+            fd, pfad = tempfile.mkstemp(suffix = ".dat" if not self.devMode else ".dev.dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
 
             f = os.fdopen(fd, 'w')
@@ -499,13 +498,13 @@ class Measurement(h.LoggerMixIn):
             left_third  = np.around(left[current_axis]  + one_third).astype(int)
             right_third = np.around(right[current_axis] - one_third).astype(int)
 
-            self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}")
-            self.log(f"Search between [f{left[current_axis]}, {right[current_axis]}]")
+            self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}", loglevel = logging.DEBUG)
+            self.log(f"Search between [{left[current_axis]}, {right[current_axis]}]", loglevel = logging.DEBUG)
             l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
-            self.log(f"=== LEFT  POINT: [{left_third}]\t{l}")
+            self.log(f"=== LEFT  POINT: [{left_third}]\t{l}", loglevel = logging.DEBUG)
             r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
-            self.log(f"=== RIGHT POINT: [{right_third}]\t{r}")
-            self.log("")
+            self.log(f"=== RIGHT POINT: [{right_third}]\t{r}", loglevel = logging.DEBUG)
+            self.log("", loglevel = logging.DEBUG)
 
             for axis in remaining_axes:
                 if l[axis][0] > r[axis][0]:
@@ -531,8 +530,29 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR(self, center, axis: Camera.AXES):
-        raise NotImplementedError()
+    def find_zR_pps(self, center, axis: Camera.AXES):
+        """Using the center, automatically finds the approximate Rayleigh Length
+
+        Parameters
+        ----------
+        center : int or (int, int)
+            The position in pulses of the center of the caustic
+        axis : Camera.AXES
+            The axis to search for Z_r
+
+        Returns
+        -------
+        rayleighLength : int or (int, int)
+            The rayleigh length in pulses
+        """
+        if self.devMode:
+            return (100, 200) if axis == self.camera.AXES.BOTH else 100
+
+        if axis == self.camera.AXES.BOTH:
+            return (10, 12)
+        else:
+            return 10
+        
 
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
