@@ -530,7 +530,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center, axis: Camera.AXES, precision: int = 10) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center, axis: Camera.AXES, precision: int = 10, right: int = None) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -541,10 +541,14 @@ class Measurement(h.LoggerMixIn):
             The position in pulses of the center of the caustic
         axis : Camera.AXES
             The axis to search for Z_r
-        precision: int
+        precision: optional, int
             How precise should we be when searching for the z_R. 
             If the precision is too small, the code may never converge.
             By default 10 pps.
+        right: optional, int
+            Rightmost point to search for. If None, self.controller.stage.LIMIT_UPPER. By default None.
+
+            # TODO: Check if its LIMIT_UPPER or LIMIT_LOWER
 
         Returns
         -------
@@ -573,14 +577,91 @@ class Measurement(h.LoggerMixIn):
             return data - sqrt2_omega
 
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
-
+        # https://en.wikipedia.org/wiki/ITP_method#The_method
         # TODO: Quit if Z_R not in range
 
-            
-        # if axis == self.camera.AXES.BOTH:
-        #     return (10, 12)
-        # else:
-        #     return 10
+        # Implement for 1 axis first (x-axis):
+        # We always find towards the right
+
+        result = (None, None) if BOTH else None
+
+        if not BOTH:
+            if right is None:
+                right = self.controller.stage.LIMIT_UPPER
+
+            x_a = _center
+            y_a = omega_0 - sqrt2_omega
+
+            # Initialize
+            left = x_a
+            y_b  = -1   # Force a negative first
+            x_b  = x_a
+
+            while True:
+                # We first search for a point that is positive
+                x_b = np.around(right - (right - left) / 2).astype(int)
+                y_b = evaluate(pos = x_b)
+                if y_b > 0:
+                    break
+                elif y_b == 0: # unlikely but just in case
+                    return x_b
+                else:
+                    left = x_b
+
+            # TODO: Account for x_b being on the other side
+
+            kappa_1 = 1 # (0, inf)
+            kappa_2 = 1 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
+            n_0     = 5 # [0, inf) slack variable 
+
+            n_half = np.ceil(np.log2((x_b - x_a)/(2*precision)))
+            n_max  = n_half + n_0
+            j = 0
+
+            while(x_b - x_a > 2*precision):
+                # Calculating Parameters
+                x_half = (x_a + x_b) / 2
+                r = precision * np.power(2, n_max - j) - ((x_b - x_a) / 2)
+                delta = kappa_1*np.power((x_b - x_a), kappa_2)
+
+                # 1) Interpolation
+                #    Calculate the Regula Falsi
+                x_f = (y_b*x_a - y_a*x_b)/(y_b - y_a) 
+
+                # 2) Truncation
+                #    Perturb the estimator x_t towards x_half 
+                #    (but maximally to x_half)
+                distance = x_half - x_f
+                sigma    = np.sign(distance)
+                x_t      = x_f + sigma*delta if delta <= np.abs(distance) else x_half
+                # Alternativ:
+                #    delta = np.min([delta, np.abs(distance)])
+                #    x_t = x_f + sigma*delta
+
+                # 3) Projection
+                #    Project the estimator to minmax interval (?)
+                distance = x_t    - x_half 
+                x_itp    = x_half - sigma*r if r < np.abs(distance) else x_t
+                # Alternativ:
+                #    r = np.min([r, distance])
+                #    x_itp = x_half - sigma*r
+
+                x_itp = np.around(x_itp).astype(int)
+
+                # 4) Updating Interval
+                y_itp = evaluate(pos = x_itp)
+                if y_itp < 0:
+                    x_b = x_itp; y_b = y_itp
+                elif y_itp > 0: 
+                    x_a = x_itp; y_a = y_itp
+                else:
+                    # Unlikely but alright
+                    x_a = x_itp; x_b = x_itp
+                j += 1
+
+            result = (x_a + x_b)/2 
+
+        return result
         
 
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
