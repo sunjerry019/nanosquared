@@ -693,7 +693,9 @@ class Measurement(h.LoggerMixIn):
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
     def simulate_beam(self, pos: int):
-        """Simulates a beam with center at 0
+        """Simulates a beam with:
+            z_0 = 0 mm, w_0 = 100 um, lambda = 2300 nm
+            z_R = 0.013659 m = 13.659 mm = 13659 um
 
         Parameters
         ----------
