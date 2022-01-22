@@ -530,7 +530,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center, axis: Camera.AXES, precision: int = 10, right: int = None) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, right: int = None) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -559,7 +559,8 @@ class Measurement(h.LoggerMixIn):
         BOTH = (axis == self.camera.AXES.BOTH)
 
         if self.devMode:
-            return (100, 200) if BOTH else 100
+            pass
+            # return (100, 200) if BOTH else 100
 
         # We first get the beam width at the center
         if BOTH:
@@ -572,9 +573,9 @@ class Measurement(h.LoggerMixIn):
 
         sqrt2_omega = np.sqrt(2) * omega_0
 
-        def evaluate(pos = pos):
+        def evaluate(pos: int):
             data = self.measure_at(axis = axis, pos = pos)
-            return data - sqrt2_omega
+            return data - sqrt2_omega if BOTH else (data - sqrt2_omega)[0]
 
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
         # https://en.wikipedia.org/wiki/ITP_method#The_method
@@ -589,8 +590,8 @@ class Measurement(h.LoggerMixIn):
             if right is None:
                 right = self.controller.stage.LIMIT_UPPER
 
-            x_a = _center
-            y_a = omega_0 - sqrt2_omega
+            x_a = center
+            y_a = (omega_0 - sqrt2_omega)[0]
 
             # Initialize
             left = x_a
@@ -619,6 +620,7 @@ class Measurement(h.LoggerMixIn):
             j = 0
 
             while(x_b - x_a > 2*precision):
+                self.log(f"[{j + 1}]: \tf({x_a}) = {y_a} \t<-->\t f({x_b}) = {y_b}")
                 # Calculating Parameters
                 x_half = (x_a + x_b) / 2
                 r = precision * np.power(2, n_max - j) - ((x_b - x_a) / 2)
@@ -659,7 +661,7 @@ class Measurement(h.LoggerMixIn):
                     x_a = x_itp; x_b = x_itp
                 j += 1
 
-            result = (x_a + x_b)/2 
+            result = np.around((x_a + x_b)/2).astype(int)
 
         return result
         
