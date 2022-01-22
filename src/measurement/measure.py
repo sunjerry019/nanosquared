@@ -559,7 +559,7 @@ class Measurement(h.LoggerMixIn):
         BOTH = (axis == self.camera.AXES.BOTH)
 
         if self.devMode:
-            pass
+            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = 13659.09849, asint = True)}")
             # return (100, 200) if BOTH else 100
 
         # We first get the beam width at the center
