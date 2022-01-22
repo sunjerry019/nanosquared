@@ -15,6 +15,8 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 
+import scipy
+
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, root_dir)
@@ -598,10 +600,16 @@ class Measurement(h.LoggerMixIn):
             y_b  = -1   # Force a negative first
             x_b  = x_a
 
+            it = 0
             while True:
+                it += 1
+
                 # We first search for a point that is positive
-                x_b = np.around(right - (right - left) / 2).astype(int)
+                x_b = np.around(right - np.abs(right - left) / 2).astype(int)
                 y_b = evaluate(pos = x_b)
+
+                self.log(f"Center [{it}]: \t[{left}, {right}] \t==> f({x_b}) = {y_b}")
+
                 if y_b > 0:
                     break
                 elif y_b == 0: # unlikely but just in case
@@ -609,11 +617,13 @@ class Measurement(h.LoggerMixIn):
                 else:
                     left = x_b
 
+            self.log(f"Initial Values: f({x_a}) = {y_a}, f({x_b}) = {y_b}")
+
             # TODO: Account for x_b being on the other side
 
             kappa_1 = 1 # (0, inf)
             kappa_2 = 1 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
-            n_0     = 5 # [0, inf) slack variable 
+            n_0     = 0 # [0, inf) slack variable 
 
             n_half = np.ceil(np.log2((x_b - x_a)/(2*precision)))
             n_max  = n_half + n_0
