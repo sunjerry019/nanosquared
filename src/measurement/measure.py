@@ -8,6 +8,7 @@
 import os,sys
 from typing import Optional, Tuple, Union
 import numpy as np
+import scipy
 
 from collections import deque
 
@@ -593,7 +594,7 @@ class Measurement(h.LoggerMixIn):
                 right = self.controller.stage.LIMIT_UPPER
 
             x_a = center
-            y_a = (omega_0 - sqrt2_omega)[0]
+            y_a = (omega_0 - sqrt2_omega)[0] if not self.devMode else evaluate(x_a)
 
             # Initialize
             left = x_a
@@ -605,7 +606,8 @@ class Measurement(h.LoggerMixIn):
                 it += 1
 
                 # We first search for a point that is positive
-                x_b = np.around(right - np.abs(right - left) / 2).astype(int)
+                # Search from the center
+                x_b = np.around(left + np.abs(right - left) / 3).astype(int)
                 y_b = evaluate(pos = x_b)
 
                 self.log(f"Center [{it}]: \t[{left}, {right}] \t==> f({x_b}) = {y_b}")
@@ -621,24 +623,27 @@ class Measurement(h.LoggerMixIn):
 
             # TODO: Account for x_b being on the other side
 
-            kappa_1 = 1 # (0, inf)
-            kappa_2 = 1 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
+            kappa_1 = 0 # (0, inf)
+            kappa_2 = scipy.constants.golden # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
             n_0     = 0 # [0, inf) slack variable 
 
             n_half = np.ceil(np.log2((x_b - x_a)/(2*precision)))
+            self.log(f"nhalf = {n_half}", loglevel = logging.DEBUG)
             n_max  = n_half + n_0
             j = 0
 
             while(x_b - x_a > 2*precision):
-                self.log(f"[{j + 1}]: \tf({x_a}) = {y_a} \t<-->\t f({x_b}) = {y_b}")
+                self.log(f"[{j + 1}]: \tf({x_a}) = {y_a} \t<-->\t f({x_b}) = {y_b}", loglevel = logging.INFO)
                 # Calculating Parameters
                 x_half = (x_a + x_b) / 2
                 r = precision * np.power(2, n_max - j) - ((x_b - x_a) / 2)
                 delta = kappa_1*np.power((x_b - x_a), kappa_2)
+                self.log(f"\t\t|| Calculating Params: x_half = {x_half}, r = {r}, delta = {delta}", loglevel = logging.DEBUG)
 
                 # 1) Interpolation
                 #    Calculate the Regula Falsi
                 x_f = (y_b*x_a - y_a*x_b)/(y_b - y_a) 
+                self.log(f"\t\t|| falsi = {x_f}", loglevel = logging.DEBUG)
 
                 # 2) Truncation
                 #    Perturb the estimator x_t towards x_half 
@@ -646,6 +651,8 @@ class Measurement(h.LoggerMixIn):
                 distance = x_half - x_f
                 sigma    = np.sign(distance)
                 x_t      = x_f + sigma*delta if delta <= np.abs(distance) else x_half
+                self.log(f"\t\t|| sigma = {sigma}, x_t = {x_t}", loglevel = logging.DEBUG)
+
                 # Alternativ:
                 #    delta = np.min([delta, np.abs(distance)])
                 #    x_t = x_f + sigma*delta
@@ -654,6 +661,7 @@ class Measurement(h.LoggerMixIn):
                 #    Project the estimator to minmax interval (?)
                 distance = x_t    - x_half 
                 x_itp    = x_half - sigma*r if r < np.abs(distance) else x_t
+                self.log(f"\t\t|| x_itp = {x_itp}", loglevel = logging.DEBUG)
                 # Alternativ:
                 #    r = np.min([r, distance])
                 #    x_itp = x_half - sigma*r
@@ -662,9 +670,9 @@ class Measurement(h.LoggerMixIn):
 
                 # 4) Updating Interval
                 y_itp = evaluate(pos = x_itp)
-                if y_itp < 0:
+                if y_itp > 0:
                     x_b = x_itp; y_b = y_itp
-                elif y_itp > 0: 
+                elif y_itp < 0: 
                     x_a = x_itp; y_a = y_itp
                 else:
                     # Unlikely but alright
@@ -672,6 +680,8 @@ class Measurement(h.LoggerMixIn):
                 j += 1
 
             result = np.around((x_a + x_b)/2).astype(int)
+        
+        self.log(f"z_R = {self.controller.pulse_to_um(result)/1000} mm")
 
         return result
         
