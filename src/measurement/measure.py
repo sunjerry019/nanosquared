@@ -144,7 +144,10 @@ class Measurement(h.LoggerMixIn):
             _center    = np.array([self.find_center()]) if center is None else center
 
         if rayleighLength is None:
-            rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis))
+            try:
+                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis))
+            except me.StageOutOfRangeError as e:
+                raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
         else:
             rayleighLength = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
 
@@ -618,6 +621,12 @@ class Measurement(h.LoggerMixIn):
                     return x_b
                 else:
                     left = x_b
+
+                if np.abs(left - right) <= precision:
+                    # We have not found it
+                    err = f"Unable to find a point > z_R! Search Range [{center}, {right}]"
+                    self.log(err, logging.ERROR)
+                    raise me.StageOutOfRangeError(err)
 
             self.log(f"Initial Values: f({x_a}) = {y_a}, f({x_b}) = {y_b}")
 
