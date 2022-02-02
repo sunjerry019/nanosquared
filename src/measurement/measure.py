@@ -689,10 +689,12 @@ class Measurement(h.LoggerMixIn):
                 j += 1
 
             result = np.around((x_a + x_b)/2).astype(int)
-        
-        self.log(f"z_R = {self.controller.pulse_to_um(result)/1000} mm")
 
-        return result
+        z_R = np.abs(result - center)
+        
+        self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
+
+        return z_R
         
 
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
