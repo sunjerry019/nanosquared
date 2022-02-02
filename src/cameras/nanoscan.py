@@ -31,6 +31,8 @@ class NanoScan(cam.Camera):
 	def __init__(self, devMode: bool = False, *args, **kwargs):
 		cam.Camera.__init__(self, *args, **kwargs)
 
+		self.log("Initializing NanoScan...", end="\r")
+
 		self.devMode = devMode
 		if self.devMode:
 			self.log("devmode nanoscan: no NanoScanDLL will be available", logging.WARN)
@@ -51,6 +53,8 @@ class NanoScan(cam.Camera):
 		else:
 			self._rotFreq    = 10.0
 			self.allowedRots = [1.25, 2.5, 5.0, 10.0, 20.0]
+		
+		self.log("Initializing NanoScan...Done")
 
 	@property
 	def rotationFrequency(self):
