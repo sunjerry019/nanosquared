@@ -536,7 +536,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, right: int = None) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, right: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -555,6 +555,15 @@ class Measurement(h.LoggerMixIn):
             Rightmost point to search for. If None, self.controller.stage.LIMIT_UPPER. By default None.
 
             # TODO: Check if its LIMIT_UPPER or LIMIT_LOWER
+        kappa1: optional, float
+            Should be in the range (0, inf)
+            For use in the ITP Method
+            By default 0 -> Using the Regula Falsi to find the root
+        kappa2: optional, float
+            Should be in the range [1, 1+\phi) where \phi is the golden ratio (scipy.constants.golden)
+            For use in the ITP Method
+            By default scipy.constants.golden
+
 
         Returns
         -------
@@ -632,8 +641,8 @@ class Measurement(h.LoggerMixIn):
 
             # TODO: Account for x_b being on the other side
 
-            kappa_1 = 0 # (0, inf)
-            kappa_2 = scipy.constants.golden # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
+            kappa_1 = kappa1 # (0, inf)
+            kappa_2 = kappa2 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
             n_0     = 0 # [0, inf) slack variable 
 
             n_half = np.ceil(np.log2((x_b - x_a)/(2*precision)))
