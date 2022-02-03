@@ -127,6 +127,9 @@ By default, we do not use the fit equation described in ISO 11146-1:2021 Section
 <p align="center"><img src="https://latex.codecogs.com/svg.image?\bg_white&space;\omega(z)&space;=&space;\omega_0&space;\sqrt{1&space;&plus;&space;(z&space;-&space;z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" title="\bg_white \omega(z) = \omega_0 \sqrt{1 + (z - z_0)^2\left(\frac{M^2\lambda}{\pi\omega_0^2}\right)^2}" /></p>
 This obtains the M² parameter as one of the fit parameters. 
 
+## Demo
+<p align="center"><img src="images/2022-02-03_142823_yp3mclnr.png"></p>
+
 ## Troubleshooting
 ### WinCamD is not giving my any data/no DataReady events are fired
 This could be because there are some limitation on the number of devices that can be plugged into one set of USB ports on the computer. Try plugging the stage and WinCamD to separate sides of the computer/laptop.
