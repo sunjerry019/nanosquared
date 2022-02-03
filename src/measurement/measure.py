@@ -737,7 +737,6 @@ class Measurement(h.LoggerMixIn):
 
         return z_R
         
-
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
 
