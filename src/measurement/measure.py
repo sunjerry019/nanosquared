@@ -8,12 +8,15 @@
 import os,sys
 from typing import Optional, Tuple, Union
 import numpy as np
+import scipy
 
 from collections import deque
 
 import tempfile
 from pathlib import Path
 from datetime import datetime
+
+import scipy
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -86,7 +89,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, center: int = -1, rayleighLength: float = 15, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -100,10 +103,18 @@ class Measurement(h.LoggerMixIn):
 
         Parameters
         ----------
+        axis : Camera.AXES, optional
+            The axis to take the measurement. If set to None, self.camera.AXES.BOTH is taken. By default, None.
         center : int, optional
-            The position of the beam-waist in pulses. When set to -1, the code auto finds the center. 
+            The position of the beam-waist in pulses. When set to None, the code auto finds the center. 
         rayleighLength : float, optional
-            Rayleigh Length (z_0) in millimeter, by default 15
+            Rayleigh Length (z_0) in millimeter. When set to None, the code auto finds the z_R. By default None.
+
+            If axis == self.camera.AXES.BOTH, then rayleighLength should be given as [x, y]
+            else, rayleightLength should be as a positive float. 
+        precision: int, optional
+            Precision to pass to find_center and find_zR_pps
+            by default 100
         numsamples : int, optional
             Number of samples to take at each point, by default 50
         writeToFile : Optional[str], optional
@@ -117,29 +128,71 @@ class Measurement(h.LoggerMixIn):
             By default, empty `dict()`
         """
 
-        # Check if the rayleigh length fits the stage being used. 
-
-        if ((self.controller.stage.travel - 10) / 2) < 3*rayleighLength:
-            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration (Usable travel = {self.controller.stage.travel - 10} , z_R = {rayleighLength})")
-
         if not self.devMode and self.controller.stage.dirty:
             self.controller.homeStage()
         
+        if axis is None or not isinstance(axis, self.camera.AXES):
+            axis = self.camera.AXES.BOTH
+            self.log(f"Defaulting to {axis}")
+            
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
 
         # find params
-        _center    = self.find_center() if center == -1 else center
-        _z_R_pulse = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
+        # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
+        # TODO: Check if rayleigh length is correct size for axis chosen
+        if axis == self.camera.AXES.BOTH:
+            _center    = self.find_center_xy(precision = precision)          if center is None else center
+        else:
+            _center    = np.array([self.find_center(precision = precision)]) if center is None else center
 
-        _within_points    = np.linspace(start=-_z_R_pulse, stop=_z_R_pulse, endpoint = True, num = 10, dtype = np.integer)        
-        _without_points_1 = np.linspace(start=2*_z_R_pulse, stop=3*_z_R_pulse, endpoint = True, num = 5, dtype = np.integer) 
+        if rayleighLength is None:
+            try:
+                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision))
+            except me.StageOutOfRangeError as e:
+                raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
+        else:
+            rayleighLength = np.around(self.controller.um_to_pulse(um = rayleighLength * 1000)).astype(int)
+
+            if np.shape(_center) != np.shape(rayleighLength):
+                rayleighLength = np.broadcast_to(rayleighLength, np.shape(_center))
+
+        _within_points    = np.linspace(start=-rayleighLength, stop=rayleighLength, endpoint = True, num = 10, dtype = np.integer)        
+        _without_points_1 = np.linspace(start=2*rayleighLength, stop=3*rayleighLength, endpoint = True, num = 5, dtype = np.integer) 
         _without_points_2 = -_without_points_1
 
-        points  = np.concatenate([_within_points, _without_points_1, _without_points_2, [0]])
-        points += _center
+        #                                                                              v the center
+        points = np.concatenate([_within_points, _without_points_1, _without_points_2, np.zeros_like(_within_points[0:1])])
+        points = points + _center
 
-        points = np.sort(points, kind = 'stable')
+        # Now we have all the points in a 1D or 2D array depending on number of axes.
+        points = np.unique(points.flatten())          # We flatten and get the unique points we need to measure
+        points = np.sort(points, kind = 'stable')     # Sort the points
+
+        self.log(points)
+
+        # Check if the rayleigh length fits the stage being used by using the min and max
+        if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+            # Check if it supports asymmetrical
+            self.log("Trying asymmetrical...")
+            asym_without_points = np.linspace(start=2*rayleighLength, stop=3*rayleighLength, endpoint = True, num = 10, dtype = np.integer) 
+            
+            points = np.concatenate([_within_points, asym_without_points, np.zeros_like(_within_points[0:1])])
+            points = points + _center
+
+            points = np.unique(points.flatten())
+            points = np.sort(points, kind = 'stable')
+
+            if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+                self.log("Trying inverted asymmetrical...")
+                # We try inverting the points
+                points = np.flip(-points)
+
+            if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+                # if that still doesnt work
+                raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration: Travel Range = [{self.controller.stage.LIMIT_LOWER}, {self.controller.stage.LIMIT_UPPER}], Points = [{points[0]}, {points[-1]}]")   
+                
+        self.log(points)
 
         totalpts = len(points)
         digits   = len(str(totalpts))
@@ -166,7 +219,7 @@ class Measurement(h.LoggerMixIn):
         # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
 
         default_meta = {
-            "Rayleigh Length": f"{rayleighLength} mm"
+            "Rayleigh Length": f"{self.controller.pulse_to_um(pps = rayleighLength) / 1000} mm"
         }
 
         metadata = {**default_meta, **metadata}
@@ -212,7 +265,7 @@ class Measurement(h.LoggerMixIn):
 
             tempdir = os.path.join(root_dir, ".." ,"data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
-            fd, pfad = tempfile.mkstemp(suffix = ".dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
+            fd, pfad = tempfile.mkstemp(suffix = ".dat" if not self.devMode else ".dev.dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
 
             f = os.fdopen(fd, 'w')
@@ -375,6 +428,11 @@ class Measurement(h.LoggerMixIn):
 
         if not isinstance(axis, self.camera.AXES):
             return None
+        
+        #### USE XY if XY
+        if axis == self.camera.AXES.BOTH:
+            return self.find_center_xy(precision = precision, left = left, right = right)
+        #################
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
@@ -473,13 +531,13 @@ class Measurement(h.LoggerMixIn):
             left_third  = np.around(left[current_axis]  + one_third).astype(int)
             right_third = np.around(right[current_axis] - one_third).astype(int)
 
-            self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}")
-            self.log(f"Search between [f{left[current_axis]}, {right[current_axis]}]")
+            self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}", loglevel = logging.DEBUG)
+            self.log(f"Search between [{left[current_axis]}, {right[current_axis]}]", loglevel = logging.DEBUG)
             l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
-            self.log(f"=== LEFT  POINT: [{left_third}]\t{l}")
+            self.log(f"=== LEFT  POINT: [{left_third}]\t{l}", loglevel = logging.DEBUG)
             r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
-            self.log(f"=== RIGHT POINT: [{right_third}]\t{r}")
-            self.log("")
+            self.log(f"=== RIGHT POINT: [{right_third}]\t{r}", loglevel = logging.DEBUG)
+            self.log("", loglevel = logging.DEBUG)
 
             for axis in remaining_axes:
                 if l[axis][0] > r[axis][0]:
@@ -504,9 +562,197 @@ class Measurement(h.LoggerMixIn):
         cen = np.around((left + right) / 2).astype(int)
         self.log(f"Center at {cen}")
         return cen
-                    
+
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, right: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
+        """Using the center, automatically finds the approximate Rayleigh Length
+
+        IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
+
+        Parameters
+        ----------
+        center : int or (int, int)
+            The position in pulses of the center of the caustic
+        axis : Camera.AXES
+            The axis to search for Z_r
+        precision: optional, int
+            How precise should we be when searching for the z_R. 
+            If the precision is too small, the code may never converge.
+            By default 10 pps.
+        right: optional, int
+            Rightmost point to search for. If None, self.controller.stage.LIMIT_UPPER. By default None.
+
+            # TODO: Check if its LIMIT_UPPER or LIMIT_LOWER
+        kappa1: optional, float
+            Should be in the range (0, inf)
+            For use in the ITP Method
+            By default 0 -> Using the Regula Falsi to find the root
+        kappa2: optional, float
+            Should be in the range [1, 1+\phi) where \phi is the golden ratio (scipy.constants.golden)
+            For use in the ITP Method
+            By default scipy.constants.golden
+
+
+        Returns
+        -------
+        rayleighLength : int or (int, int)
+            The rayleigh length in pulses
+        """
+
+        BOTH = (axis == self.camera.AXES.BOTH)
+
+        if self.devMode:
+            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = 13659.09849, asint = True)}")
+            # return (100, 200) if BOTH else 100
+
+        # We first get the beam width at the center
+        if BOTH:
+            # omega_0 = np.array([
+            #         self.measure_at(axis = self.camera.AXES.X, pos = center[0]),
+            #         self.measure_at(axis = self.camera.AXES.Y, pos = center[1])
+            #     ])
+            omega_0 = None
+        else:
+            omega_0 = np.array(self.measure_at(axis = axis, pos = center))
+
+        if omega_0 is not None:
+            sqrt2_omega = np.sqrt(2) * omega_0
+
+        def evaluate(pos: int):
+            data = self.measure_at(axis = axis, pos = pos)
+            return data - sqrt2_omega if BOTH else (data - sqrt2_omega)[0]
+
+        # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
+        # https://en.wikipedia.org/wiki/ITP_method#The_method
+
+        # Implement for 1 axis first (x-axis):
+        # We always find towards the right
+
+        ## TODO Check if the center is the correct size
+
+        result = (None, None) if BOTH else None
+
+        if not BOTH:
+            if right is None:
+                right = self.controller.stage.LIMIT_UPPER
+
+            x_a = center
+            y_a = (omega_0 - sqrt2_omega)[0] if not self.devMode else evaluate(x_a)
+
+            # Initialize
+            left = x_a
+            y_b  = -1   # Force a negative first
+            x_b  = x_a
+
+            it = 0
+            while True:
+                it += 1
+
+                # We first search for a point that is positive
+                # Search from the center
+                x_b = np.around(left + np.abs(right - left) / 3).astype(int)
+                y_b = evaluate(pos = x_b)
+
+                self.log(f"Center [{it}]: \t[{left}, {right}] \t==> f({x_b}) = {y_b}")
+
+                if y_b > 0:
+                    break
+                elif y_b == 0: # unlikely but just in case
+                    return x_b
+                else:
+                    left = x_b
+
+                if np.abs(left - right) <= precision:
+                    # We have not found it
+                    err = f"Unable to find a point > z_R! Search Range [{center}, {right}]"
+                    self.log(err, logging.ERROR)
+                    raise me.StageOutOfRangeError(err)
+
+            self.log(f"Initial Values: f({x_a}) = {y_a}, f({x_b}) = {y_b}")
+
+            # TODO: Account for x_b being on the other side
+
+            kappa_1 = kappa1 # (0, inf)
+            kappa_2 = kappa2 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
+            n_0     = 0 # [0, inf) slack variable 
+
+            n_half = np.ceil(np.log2((x_b - x_a)/(2*precision)))
+            self.log(f"nhalf = {n_half}", loglevel = logging.DEBUG)
+            n_max  = n_half + n_0
+            j = 0
+
+            while(x_b - x_a > 2*precision):
+                self.log(f"[{j + 1}]: \tf({x_a}) = {y_a} \t<-->\t f({x_b}) = {y_b}", loglevel = logging.INFO)
+                # Calculating Parameters
+                x_half = (x_a + x_b) / 2
+                r = precision * np.power(2, n_max - j) - ((x_b - x_a) / 2)
+                delta = kappa_1*np.power((x_b - x_a), kappa_2)
+                self.log(f"\t\t|| Calculating Params: x_half = {x_half}, r = {r}, delta = {delta}", loglevel = logging.DEBUG)
+
+                # 1) Interpolation
+                #    Calculate the Regula Falsi
+                x_f = (y_b*x_a - y_a*x_b)/(y_b - y_a) 
+                self.log(f"\t\t|| falsi = {x_f}", loglevel = logging.DEBUG)
+
+                # 2) Truncation
+                #    Perturb the estimator x_t towards x_half 
+                #    (but maximally to x_half)
+                distance = x_half - x_f
+                sigma    = np.sign(distance)
+                x_t      = x_f + sigma*delta if delta <= np.abs(distance) else x_half
+                self.log(f"\t\t|| sigma = {sigma}, x_t = {x_t}", loglevel = logging.DEBUG)
+
+                # Alternativ:
+                #    delta = np.min([delta, np.abs(distance)])
+                #    x_t = x_f + sigma*delta
+
+                # 3) Projection
+                #    Project the estimator to minmax interval (?)
+                distance = x_t    - x_half 
+                x_itp    = x_half - sigma*r if r < np.abs(distance) else x_t
+                self.log(f"\t\t|| x_itp = {x_itp}", loglevel = logging.DEBUG)
+                # Alternativ:
+                #    r = np.min([r, distance])
+                #    x_itp = x_half - sigma*r
+
+                x_itp = np.around(x_itp).astype(int)
+
+                # 4) Updating Interval
+                y_itp = evaluate(pos = x_itp)
+                if y_itp > 0:
+                    x_b = x_itp; y_b = y_itp
+                elif y_itp < 0: 
+                    x_a = x_itp; y_a = y_itp
+                else:
+                    # Unlikely but alright
+                    x_a = x_itp; x_b = x_itp
+                j += 1
+
+            result = np.around((x_a + x_b)/2).astype(int)
+
+        if BOTH:
+            # Dirty way: we just run this function twice
+            x_axis = self.find_zR_pps(center = center[0], axis = self.camera.AXES.X, precision = precision)
+            y_axis = self.find_zR_pps(center = center[1], axis = self.camera.AXES.Y, precision = precision)
+            self.log(f"BOTH: X-Axis {x_axis}, Y-axis {y_axis}")
+            
+            center = np.array(center)
+            result = np.array([x_axis, y_axis])
+
+        try:
+            if not BOTH: 
+                # Since for BOTH, we already have the correct z_R and not the position
+                z_R = np.abs(result - center)
+
+            self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
+        except Exception as e:
+            z_R = result
+
+        return z_R
+        
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
+
+        If both axis: X: center = 0, Y: center = 100
 
         Parameters
         ----------
@@ -532,7 +778,9 @@ class Measurement(h.LoggerMixIn):
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
     def simulate_beam(self, pos: int):
-        """Simulates a beam with center at 0
+        """Simulates a beam with:
+            z_0 = 0 mm, w_0 = 100 um, lambda = 2300 nm
+            z_R = 0.013659 m = 13.659 mm = 13659 um
 
         Parameters
         ----------

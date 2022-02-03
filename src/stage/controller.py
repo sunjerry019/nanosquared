@@ -22,6 +22,8 @@ import warnings
 import time
 from collections import namedtuple
 
+import numpy as np
+
 from typing import Union, Optional
 import traceback
 import platform  	# for auto windows/linux detection
@@ -305,10 +307,12 @@ class GSC01(SerialController):
             self.stage.permDirty = True
 
     # Helper Functions
-    def pulse_to_um(self, pps: float):
+    # technically works with numpy arrays
+    def pulse_to_um(self, pps: int):
         return self.stage.um_per_pulse * pps
-    def um_to_pulse(self, um: float):
-        return um / self.stage.um_per_pulse
+    def um_to_pulse(self, um: float, asint: bool = False):
+        pps = um / self.stage.um_per_pulse
+        return pps if not asint else np.around(pps).astype(int)
 
     # Property functions here
     @property
