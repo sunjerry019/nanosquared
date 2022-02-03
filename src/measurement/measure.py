@@ -170,7 +170,26 @@ class Measurement(h.LoggerMixIn):
 
         # Check if the rayleigh length fits the stage being used by using the min and max
         if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
-            raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration: Travel Range = [{self.controller.stage.LIMIT_LOWER}, {self.controller.stage.LIMIT_UPPER}], Points = [{points[0]}, {points[-1]}]")
+            # Check if it supports asymmetrical
+            self.log("Trying asymmetrical...")
+            asym_without_points = np.linspace(start=2*rayleighLength, stop=3*rayleighLength, endpoint = True, num = 10, dtype = np.integer) 
+            
+            points = np.concatenate([_within_points, asym_without_points, np.zeros_like(_within_points[0:1])])
+            points = points + _center
+
+            points = np.unique(points.flatten())
+            points = np.sort(points, kind = 'stable')
+
+            if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+                self.log("Trying inverted asymmetrical...")
+                # We try inverting the points
+                points = np.flip(-points)
+
+            if (points[0] < (self.controller.stage.LIMIT_LOWER + 10)) or (points[-1] > (self.controller.stage.LIMIT_UPPER - 10)):
+                # if that still doesnt work
+                raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration: Travel Range = [{self.controller.stage.LIMIT_LOWER}, {self.controller.stage.LIMIT_UPPER}], Points = [{points[0]}, {points[-1]}]")   
+                
+        self.log(points)
 
         totalpts = len(points)
         digits   = len(str(totalpts))
