@@ -598,14 +598,16 @@ class Measurement(h.LoggerMixIn):
 
         # We first get the beam width at the center
         if BOTH:
-            omega_0 = np.array([
-                    self.measure_at(axis = self.camera.AXES.X, pos = center[0]),
-                    self.measure_at(axis = self.camera.AXES.Y, pos = center[1])
-                ])
+            # omega_0 = np.array([
+            #         self.measure_at(axis = self.camera.AXES.X, pos = center[0]),
+            #         self.measure_at(axis = self.camera.AXES.Y, pos = center[1])
+            #     ])
+            omega_0 = None
         else:
             omega_0 = np.array(self.measure_at(axis = axis, pos = center))
 
-        sqrt2_omega = np.sqrt(2) * omega_0
+        if omega_0 is not None:
+            sqrt2_omega = np.sqrt(2) * omega_0
 
         def evaluate(pos: int):
             data = self.measure_at(axis = axis, pos = pos)
@@ -613,10 +615,11 @@ class Measurement(h.LoggerMixIn):
 
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
         # https://en.wikipedia.org/wiki/ITP_method#The_method
-        # TODO: Quit if Z_R not in range
 
         # Implement for 1 axis first (x-axis):
         # We always find towards the right
+
+        ## TODO Check if the center is the correct size
 
         result = (None, None) if BOTH else None
 
@@ -718,17 +721,27 @@ class Measurement(h.LoggerMixIn):
 
             result = np.around((x_a + x_b)/2).astype(int)
 
-        if result is not None and result is not (None, None):
+        if BOTH:
+            # Dirty way: we just run this function twice
+            x_axis = self.find_zR_pps(center = center[0], axis = self.camera.AXES.X, precision = precision)
+            y_axis = self.find_zR_pps(center = center[1], axis = self.camera.AXES.X, precision = precision)
+            
+            center = np.array(center)
+            result = np.array([x_axis, y_axis])
+
+        if (result is not None) and (result != (None, None)):
             z_R = np.abs(result - center)
             self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
         else:
             z_R = result
-            
+
         return z_R
         
 
     def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
         """Moves the stage to that position and takes a measurement for the diameter
+
+        If both axis: X: center = 0, Y: center = 100
 
         Parameters
         ----------
