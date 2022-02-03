@@ -100,9 +100,10 @@ n_0     = 0
 This way all parameters of the beam may be determined experimentally.
 #### Measuring the caustic
 The code will measure 10 points with +/- z_R around the center, and then based on the situation, try to measure:
-- 5 points from +2z_R to +3z_R and 5 points from -3z_R to -2z_R (symmetrical case)
-- 10 points from +2z_R to +3z_R (asymmetrical case)
-- 10 points from -3z_R to -2z_R (inverted asymmetrical case)
+- [symmetrical case] 5 points from +2z_R to +3z_R and 5 points from -3z_R to -2z_R
+- [asymmetrical case] 10 points from +2z_R to +3z_R
+- [inverted asymmetrical case] 10 points from -3z_R to -2z_R 
+
 in that order.
 
 If using all 3 methods does not allow all points to fit within the travel range of the stage, then the function ends and refuses to continue. The setup is therefore not suitable for this stage. Change the setup so that the full measurement process may fit within the travel range of the stage. 
