@@ -84,9 +84,20 @@ print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 ### Measuring Beam-Width Data
 The measurement of the M² data is carried out by the [Measurement](./src/measurement/measure.py) module.
 
+#### Preparation
 If no center is given, the code uses the [ternary search algorithm](https://en.wikipedia.org/wiki/Ternary_search) will be used on each axis to find the center. 
 
 From the center, 10 equidistant points will be symmetrically chosen around the center within the [Rayleigh Length](https://en.wikipedia.org/wiki/Rayleigh_length) and 10 between 2 and 3 times the Rayleigh Length. In total, 21 points will be taken (10 + 10 + 1), including the center.
+
+If no Rayleigh Length is given, the code uses the [ITP Method](https://en.wikipedia.org/wiki/ITP_method) to find an approximation for it. This works by shifting all beam width data downwards by √2*`w0`, where `w0` is measured the beam width as measured at the center found by the ternary search algorithm. The default parameters used for the ITP method are as follows:
+```
+kappa_1 = 0                     
+kappa_2 = golden ratio = 1.618
+n_0     = 0 
+```
+`kappa_1 = 0` is not technically allowed, but experimentally it helps the algorithm to converge faster in certain cases. 
+
+This way all parameters of the beam may be determined experimentally.
 
 ### Fitting the Data
 The `Fitter` module under [fitting](./src/fitting) is used to fit the data obtained. 
