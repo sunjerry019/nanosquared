@@ -699,10 +699,12 @@ class Measurement(h.LoggerMixIn):
 
             result = np.around((x_a + x_b)/2).astype(int)
 
-        z_R = np.abs(result - center)
-        
-        self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
-
+        if result is not None and result is not (None, None):
+            z_R = np.abs(result - center)
+            self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
+        else:
+            z_R = result
+            
         return z_R
         
 
