@@ -12,7 +12,7 @@ from cameras.nanoscan import NanoScan
 from stage.controller import GSC01
 
 cfg = {
-    "port" : "COM11",
+    "port" : "COM13",
 }
 
 with NanoScan(devMode = False) as n:

@@ -734,10 +734,10 @@ class Measurement(h.LoggerMixIn):
             center = np.array(center)
             result = np.array([x_axis, y_axis])
 
-        if (result is not None) and (result != (None, None)):
+        try:
             z_R = np.abs(result - center)
             self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
-        else:
+        except Exception as e:
             z_R = result
 
         return z_R
