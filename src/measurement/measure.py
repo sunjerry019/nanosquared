@@ -425,6 +425,11 @@ class Measurement(h.LoggerMixIn):
 
         if not isinstance(axis, self.camera.AXES):
             return None
+        
+        #### USE XY if XY
+        if axis == self.camera.AXES.BOTH:
+            return self.find_center_xy(precision = precision, left = left, right = right)
+        #################
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
