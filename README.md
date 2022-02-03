@@ -136,6 +136,9 @@ You can get the allowed rotation frequencies through `n.allowedRots` or `n.NS.Ge
 [1.25, 2.5, 5.0, 10.0, 20.0]
 ```
 
+### NanoScan is taking very long to initialize
+Sometimes this problem could be caused by the system taking very long to read from a network drive. In this case, try to connect the laptop to a Ethernet/LAN connection and try again.
+
 ## Code Linting in VS Code
 Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, you can do:
 ```json
