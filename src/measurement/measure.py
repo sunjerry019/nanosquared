@@ -732,13 +732,17 @@ class Measurement(h.LoggerMixIn):
         if BOTH:
             # Dirty way: we just run this function twice
             x_axis = self.find_zR_pps(center = center[0], axis = self.camera.AXES.X, precision = precision)
-            y_axis = self.find_zR_pps(center = center[1], axis = self.camera.AXES.X, precision = precision)
+            y_axis = self.find_zR_pps(center = center[1], axis = self.camera.AXES.Y, precision = precision)
+            self.log(f"BOTH: X-Axis {x_axis}, Y-axis {y_axis}")
             
             center = np.array(center)
             result = np.array([x_axis, y_axis])
 
         try:
-            z_R = np.abs(result - center)
+            if not BOTH: 
+                # Since for BOTH, we already have the correct z_R and not the position
+                z_R = np.abs(result - center)
+
             self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
         except Exception as e:
             z_R = result
