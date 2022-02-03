@@ -89,7 +89,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -112,6 +112,9 @@ class Measurement(h.LoggerMixIn):
 
             If axis == self.camera.AXES.BOTH, then rayleighLength should be given as [x, y]
             else, rayleightLength should be as a positive float. 
+        precision: int, optional
+            Precision to pass to find_center and find_zR_pps
+            by default 100
         numsamples : int, optional
             Number of samples to take at each point, by default 50
         writeToFile : Optional[str], optional
@@ -139,13 +142,13 @@ class Measurement(h.LoggerMixIn):
         # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
         # TODO: Check if rayleigh length is correct size for axis chosen
         if axis == self.camera.AXES.BOTH:
-            _center    = self.find_center_xy()          if center is None else center
+            _center    = self.find_center_xy(precision = precision)          if center is None else center
         else:
-            _center    = np.array([self.find_center()]) if center is None else center
+            _center    = np.array([self.find_center(precision = precision)]) if center is None else center
 
         if rayleighLength is None:
             try:
-                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis))
+                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision))
             except me.StageOutOfRangeError as e:
                 raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
         else:
