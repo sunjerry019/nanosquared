@@ -1,6 +1,36 @@
 # M-Squared Automation
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
+**Table of Content**
+- [M-Squared Automation](#m-squared-automation)
+  * [Important Note](#important-note)
+  * [Supported Models](#supported-models)
+  * [Version Information](#version-information)
+  * [Installation](#installation)
+    + [Python Modules](#python-modules)
+    + [NanoScan](#nanoscan)
+    + [WinCamD](#wincamd)
+  * [Independent Modules](#independent-modules)
+  * [Extending this code](#extending-this-code)
+    + [Logging](#logging)
+  * [Usage](#usage)
+  * [How it works](#how-it-works)
+    + [Measuring Beam-Width Data](#measuring-beam-width-data)
+      - [Preparation](#preparation)
+      - [Measuring the caustic](#measuring-the-caustic)
+    + [Fitting the Data](#fitting-the-data)
+  * [Demo](#demo)
+  * [Troubleshooting](#troubleshooting)
+    + [WinCamD is not giving my any data/no DataReady events are fired](#wincamd-is-not-giving-my-any-data-no-dataready-events-are-fired)
+    + [NanoScan reports "All devices in use"](#nanoscan-reports--all-devices-in-use-)
+    + [NanoScan is only giving me -0.1 as the beamwidth](#nanoscan-is-only-giving-me--01-as-the-beamwidth)
+    + [NanoScan signal too weak/strong, or scan head rotation not suitable](#nanoscan-signal-too-weak-strong--or-scan-head-rotation-not-suitable)
+    + [NanoScan is taking very long to initialize](#nanoscan-is-taking-very-long-to-initialize)
+  * [Code Linting in VS Code](#code-linting-in-vs-code)
+  * [References](#references)
+
+  <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 ## Important Note
 This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M² Measurement code.
 
