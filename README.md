@@ -85,6 +85,58 @@ Please install the version that corresponds to your Python installation (i.e. 64
 ## Independent Modules
 *more to be added, describing which modules may be used independently*
 
+### Beam-Profilers
+You may use the `NanoScan` and `WinCamD` modules independent of the rest of the code in the repository to manage and use the respective beam-profilers (here loosely referred to as cameras). For that, follow the instructions detailed in the above sections ([NanoScan](#NanoScan) and [WinCamD](#WinCamD)) to install the necessary support software. Then follow the instructions under [Usage](#Usage) to import the necessary packages:
+```python
+# For NanoScan
+from cameras.nanoscan import NanoScan
+cam = NanoScan(devMode = False)
+
+# For WinCamD
+from cameras.wincamd import WinCamD
+cam = WinCamD(devMode = False)
+```
+These 2 modules may be packaged into seperate packages should someone find the time to do it. It would be a meaningful endeavour in providing Python support for these 2 devices. 
+
+If you do not wish to download the entire repository to interface with these beam profilers, a list of necessary files may be found under [cameras/README](./src/cameras/README.md)
+
+Both of these modules inherit the `Camera` class, which guarantees the existence of the following:
+```python
+x, y, both = cam.AXES.X, cam.AXES.Y, cam.AXES.BOTH  # Enum for the different axes
+cam.getAxis_avg_D4Sigma(axis = x, numsamples = 20)  # Obtains an average D4Sigma diameter
+cam.wait_stable()                                   # Function returns when beam-profiler is stable
+cam.log()
+```
+See the specific source code for more detailed documentation of the functions.
+
+#### NanoScan
+In addition to the above functions, `NanoScan` also provides the `cam.rotationFrequency` property to set the rotation speed of the scan head. 
+
+Most other functions exposed by the ActiveX Endpoint may be accessed using:
+```python
+cam.NS.<func>
+```
+where `<func>` is the function you want to call. Refer to [the c# source code](./src/cameras/csharp/NanoScanLibrary/DllImports.cs) for a list of implemented function calls. The documentation for each of the ActiveX function can be (normally) found under:
+```
+C:\Program Files (x86)\Photon\NanoScan v2\Documentation\50318-001 NanoScan v2 Automation Developer Guide.pdf
+```
+where usually the `NsAs` part of the function name has been removed in the C# function.
+
+See [./src/cameras/csharp/README.md](csharp/README.md) for more information on why such an implementation was used. 
+
+#### WinCamD
+In addition to the above functions, `WinCamD` also provides:
+```python
+cam.startDevice(); cam.stopDevice()
+cam.setClipMode(mode = CLIP_MODES.CLIP_LEVEL_METHOD, clip: float = 50) # Sets the clipping mode for the width data
+cam.getAxis_D4Sigma(axis = cam.AXES.X)   # Gets a single reading of the D4Sigma beam width
+cam.getWinCamData(axis = cam.AXES.X)     # Gets an array of pixel data
+cam.getCameraIndex()                     # Gets the index of the camera, esp if more than one camera is attached
+```
+
+### Stage
+
+
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
 
