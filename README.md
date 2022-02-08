@@ -2,22 +2,25 @@
 Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 
 **Table of Content**
-- [M-Squared Automation](#m-squared-automation)
-  * [Important Note](#important-note)
-  * [Supported Models](#supported-models)
-  * [Version Information](#version-information)
-  * [Installation](#installation)
+* [Important Note](#important-note)
+* [Supported Models](#supported-models)
+* [Version Information](#version-information)
+* [Installation](#installation)
     + [Python Modules](#python-modules)
     + [NanoScan](#nanoscan)
     + [WinCamD](#wincamd)
   * [Independent Modules](#independent-modules)
+    + [Beam-Profilers](#beam-profilers)
+        - [NanoScan](#nanoscan-1)
+        - [WinCamD](#wincamd-1)
+    + [Stage](#stage)
   * [Extending this code](#extending-this-code)
     + [Logging](#logging)
   * [Usage](#usage)
   * [How it works](#how-it-works)
     + [Measuring Beam-Width Data](#measuring-beam-width-data)
-      - [Preparation](#preparation)
-      - [Measuring the caustic](#measuring-the-caustic)
+        - [Preparation](#preparation)
+        - [Measuring the caustic](#measuring-the-caustic)
     + [Fitting the Data](#fitting-the-data)
   * [Demo](#demo)
   * [Troubleshooting](#troubleshooting)
@@ -29,7 +32,7 @@ Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
   * [Code Linting in VS Code](#code-linting-in-vs-code)
   * [References](#references)
 
-  <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 ## Important Note
 This repository also contains code to interact with the WinCamD and Nanoscan Beam Profiler. These functions may be used independent of the M² Measurement code.
