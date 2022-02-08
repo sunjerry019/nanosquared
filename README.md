@@ -225,7 +225,7 @@ This could be because there are some limitation on the number of devices that ca
 ### NanoScan reports "All devices in use"
 Go into the Task Manager (Ctrl + Shift + Esc), then click on the *"Processes"* Tab, find *NanoScanII.exe* and end the process.This is likely caused by an improper shutdown, in which the NanoScan Program was not closed properly.
 
-Ensure that no instances of *NanoScanII.exe* before restarting the program. 
+Ensure that no instances of *NanoScanII.exe* are running before restarting the program. 
 
 ### NanoScan is only giving me -0.1 as the beamwidth
 *Note: This could also manifest as nothing happening after requesting a beam width reading. This is because the software is waiting for sensible data as part of the `wait_stable` subroutine.*
