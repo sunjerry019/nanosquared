@@ -135,7 +135,7 @@ cam.getCameraIndex()                     # Gets the index of the camera, esp if 
 ```
 
 ### Stage
-The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from (src/stage)[./src/stage].
+The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/stage](./src/stage).
 
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
