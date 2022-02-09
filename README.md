@@ -180,7 +180,11 @@ with NanoScan(devMode = False) as n:
                 "Wavelength": "2300 nm",
                 "Lens": "f = 250mm CaF2 lens"
             }
-            M.take_measurements(precision = 10, writeToFile) # auto find beam waist and rayleigh length
+            M.take_measurements(precision = 10, metadata = meta) 
+            # incl. auto find beam waist and rayleigh length
+            # Measurement data will be saved under 
+            #   ``repo/data/M2/<datetime>_<random string>.dat``
+            # together with the metadata
 
             res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
             print(f"X-Axis")
