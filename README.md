@@ -171,6 +171,8 @@ from measurement.measure import Measurement
 from cameras.nanoscan import NanoScan
 from stage.controller import GSC01
 
+from fitting.fitter import MsqFitter
+
 cfg = { "port" : "COM13" } # Check with "Device Manager" for port number
 
 with NanoScan(devMode = False) as n:
@@ -186,14 +188,15 @@ with NanoScan(devMode = False) as n:
             #   ``repo/data/M2/<datetime>_<random string>.dat``
             # together with the metadata
 
-            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
+            # Explicit options
+            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300, mode = MsqFitter.M2_MODE, useODR = False, xerror = None)
             print(f"X-Axis")
             print(f"Fit Result:\t{res}")
             print(f"M-squared:\t{M.fitter.m_squared}")
             fig, ax = M.fitter.getPlotOfFit()
             fig.show()
 
-            M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300)
+            res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300) # Use defaults (same as above)
             print(f"Y-Axis")
             print(f"Fit Result:\t{res}")
             print(f"M-squared:\t{M.fitter.m_squared}")
