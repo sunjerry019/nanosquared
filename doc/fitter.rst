@@ -1,5 +1,0 @@
-.. automodule:: fit_functions
-   :members:
-
-.. automodule:: fitter
-   :members:

@@ -12,6 +12,9 @@ Welcome to Nanoscan M-Squared Automation's documentation!
 
    fitter
    stage
+   nanoscan
+   wincamd
+   measurement
 
 
 

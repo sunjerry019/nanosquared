@@ -1,0 +1,2 @@
+.. automodule:: cameras.nanoscan
+   :members:

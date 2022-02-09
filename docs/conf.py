@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', 'src')))
 # -- Project information -----------------------------------------------------
 
 project = 'M-Squared Automation'
-copyright = '2021, Yudong Sun'
+copyright = '2022, Yudong Sun'
 author = 'Yudong Sun'
 
 
@@ -34,6 +34,7 @@ extensions = [
     "sphinx_autodoc_typehints",  # Automatically document param types (less noise in class signature)
     "numpydoc"
 ]
+numpydoc_show_class_members = False  # https://stackoverflow.com/a/66139873
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
