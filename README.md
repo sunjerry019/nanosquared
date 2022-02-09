@@ -165,7 +165,7 @@ from cameras.nanoscan import NanoScan
 n = NanoScan(devMode = False)
 print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 ```
-To measure the M² of a beam:
+Example on how to measure the M² of a beam:
 ```python
 from measurement.measure import Measurement
 from cameras.nanoscan import NanoScan
@@ -189,7 +189,8 @@ with NanoScan(devMode = False) as n:
             # together with the metadata
 
             # Explicit options
-            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300, mode = MsqFitter.M2_MODE, useODR = False, xerror = None)
+            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300, \
+                mode = MsqFitter.M2_MODE, useODR = False, xerror = None)
             print(f"X-Axis")
             print(f"Fit Result:\t{res}")
             print(f"M-squared:\t{M.fitter.m_squared}")
@@ -222,6 +223,8 @@ kappa_2 = golden ratio = 1.618
 n_0     = 0 
 ```
 `kappa_1 = 0` is not technically allowed, but experimentally it helps the algorithm to converge faster in certain cases. 
+
+**NOTE**: As of now, only one direction of z_R searching is supported: in the direction of beam propagation when the beam is coming in from the dial side of the stage.
 
 This way all parameters of the beam may be determined experimentally.
 #### Measuring the caustic
