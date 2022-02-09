@@ -44,7 +44,7 @@ See [below](#independent-modules) for more information on how to use it.
 
 - The NanoScan Camera used is the [Ophir NanoScan 2s Pyro/9/5](https://www.ophiropt.com/laser--measurement/beam-profilers/products/Scanning-Slit-Beam-Profiling-with-NanoScan/NanoScan-2s-Pyro-9-5). You will need the PRO version instead of the STD Version. The activation code is device-specific and written into the EEPROM of the Scanhead. The NanoScan vendor software then checks the activation status of the Scanhead before marshalling the function calls to it. 
 
-- The stage controller used for this project is the SIGMAKOKI/OptoSigma Controller `GSC-01` with the accompanying stage `SGSP26-200`.
+- The stage controller used for this project is the [SIGMAKOKI/OptoSigma Controller `GSC-01`](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) with the accompanying stage `SGSP26-200`.
 
 Due to software compability issues, device-interfacing code for the beam profilers in this repository can only run on Windows. 
 
@@ -140,7 +140,7 @@ cam.getCameraIndex()                     # Gets the index of the camera, esp if 
 ```
 
 ### Stage
-The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/stage](./src/stage).
+The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/stage](./src/stage). Currently, only the accompanying stage `SGSP26-200` has been implemented. To use another stage, make a copy of that class and modify the parameters accordingly. Theoretically,any stage that works with the `GSC01` controller should work with the code. See the [the manual](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) for more information.
 
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
