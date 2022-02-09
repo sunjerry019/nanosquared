@@ -133,7 +133,7 @@ See [csharp/README.md](./src/cameras/csharp/README.md) for more information on w
 In addition to the above functions, `WinCamD` also provides:
 ```python
 cam.startDevice(); cam.stopDevice()
-cam.setClipMode(mode = CLIP_MODES.CLIP_LEVEL_METHOD, clip: float = 50) # Sets the clipping mode for the width data
+cam.setClipMode(mode = CLIP_MODES.CLIP_LEVEL_METHOD, clip = 50) # Sets the clipping mode for the width data
 cam.getAxis_D4Sigma(axis = cam.AXES.X)   # Gets a single reading of the D4Sigma beam width
 cam.getWinCamData(axis = cam.AXES.X)     # Gets an array of pixel data
 cam.getCameraIndex()                     # Gets the index of the camera, esp if more than one camera is attached
