@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>&lt;no title&gt; &#8212; M-Squared Automation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="wincamd.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="stage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-cameras.nanoscan"></span><dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScan">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan.</span></span><span class="sig-name descname"><span class="pre">NanoScan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devMode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides interface to the NanoScan 2s Pyro/9/5. Naive implementation
+following the example codes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScan.AXES">
+<span class="sig-name descname"><span class="pre">AXES</span></span><a class="headerlink" href="#cameras.nanoscan.NanoScan.AXES" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">cameras.nanoscan_constants.NsAxes</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScan.SetDAQ">
+<span class="sig-name descname"><span class="pre">SetDAQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScan.SetDAQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the DAQ state. Use this instead of directly using <cite>self.NS.SetDataAcquisition</cite>. This helps to keep track of the DAQ State.</p>
+<p>Do not use in conjunction with Sync1Rev, it will be useless.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>state</strong><span class="classifier">bool</span></dt><dd><p>Sets the Data Acquisition to <cite>state</cite></p>
+</dd>
+<dt><strong>:rtype:</strong><span class="classifier">py:obj:<cite>None</cite></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScan.getAxis_avg_D4Sigma">
+<span class="sig-name descname"><span class="pre">getAxis_avg_D4Sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numsamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScan.getAxis_avg_D4Sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the d4sigma in one <cite>axis</cite> and averages it over <cite>numsamples</cite> using the Sync1Rev implementation.</p>
+<p>Using NsAxes somewhat changes the signature of this function in a strict sense, but at this point I think would make easier for me to check.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>axis</strong><span class="classifier">NsAxes</span></dt><dd><p>Either <cite>NsAxes.X</cite> or <cite>NsAxes.Y</cite>, or <cite>NsAxes.BOTH</cite>.</p>
+<p>Arguably using <cite>NsAxes.BOTH</cite> is more efficient but leads to 
+spaghetti code in that the return type is no longer consistent.</p>
+<p>This is a compromise I am willing to take.</p>
+</dd>
+<dt><strong>numsamples</strong><span class="classifier">int, optional</span></dt><dd><p>Number of samples to average over, by default 20</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>ret</strong><span class="classifier">(float, float) or array_like of form [[float, float], [float, float]]</span></dt><dd><p>Returns the d4sigma of the given axis in micrometer in the form of (average, stddev) or (x, y) where each axis is given in the form of (average, stddev)
+If the given <cite>axis</cite> is not <cite>NsAxes.X</cite> or <cite>NsAxes.Y</cite> or <cite>NsAxes.XY</cite>, then (<cite>None</cite>, <cite>None</cite>)</p>
+</dd>
+<dt><strong>:rtype:</strong><span class="classifier">py:data:<cite>~typing.Tuple</cite>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScan.waitForData">
+<span class="sig-name descname"><span class="pre">waitForData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScan.waitForData" title="Permalink to this definition">¶</a></dt>
+<dd><p>A valid method of determining whether data has been processed yet is
+to evaluate whether any Results (Parameters per NS1) have yet been computed.
+In this example the Centroid position result is used due to its benign
+nature, i.e. usually enabled and not affected by other settings or results.</p>
+<p>Reference: Program.cs from Automation examples folder from NanoScan</p>
+<dl class="field-list">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl>
+<dt><strong>success</strong><span class="classifier">bool</span></dt><dd><p>Returns true when data is available</p>
+</dd>
+<dt><strong>:rtype:</strong><span class="classifier">py:class:<cite>bool</cite></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan.NanoScanDLL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan.</span></span><span class="sig-name descname"><span class="pre">NanoScanDLL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScanDLL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides interface to the 32-bit NanoScan C# DLL using msl-loadlib.</p>
+</dd></dl>
+
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">M-Squared Automation</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="stage.html" title="previous chapter">&lt;no title&gt;</a></li>
+      <li>Next: <a href="wincamd.html" title="next chapter">&lt;no title&gt;</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Yudong Sun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/nanoscan.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

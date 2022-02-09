@@ -1,0 +1,643 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>&lt;no title&gt; &#8212; M-Squared Automation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="nanoscan.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="fitter.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-stage.controller"></span><dl class="py class">
+<dt class="sig sig-object py" id="stage.controller.Controller">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devMode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">implementation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.Controller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract Base Class for a controller</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.Controller.KeyboardInterruptHandler">
+<span class="sig-name descname"><span class="pre">KeyboardInterruptHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.Controller.KeyboardInterruptHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abort and close the serial port if interrupted. 
+Handles a SIGINT according to <a class="reference external" href="https://docs.python.org/3/library/signal.html#signal.signal">https://docs.python.org/3/library/signal.html#signal.signal</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>signal</strong><span class="classifier">int</span></dt><dd><p>signal number</p>
+</dd>
+<dt><strong>frame</strong><span class="classifier">signal Frame object</span></dt><dd><p>Frame objects represent execution frames. They may occur in traceback objects (see below), and are also passed to registered trace functions.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.Controller.move">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.Controller.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative Move, to be implemented</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pos</strong><span class="classifier">number</span></dt><dd><p>Position to move to</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.Controller.rmove">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rmove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.Controller.rmove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative Move, to be implemented</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>delta</strong><span class="classifier">number</span></dt><dd><p>Number of steps to move</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.Controller.startSignalHandlers">
+<span class="sig-name descname"><span class="pre">startSignalHandlers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.Controller.startSignalHandlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts appropriate signal handlers to handle e.g. keyboard interrupts. 
+Ensures safe exit and disconnecting of controller.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stage.controller.GSC01">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.controller.</span></span><span class="sig-name descname"><span class="pre">GSC01</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage=&lt;stage._stage.SGSP26_200</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for the GSC-01 Controller
+Microcontroller Model: OptoSigma GSC-01</p>
+<p>Currently the device is to CENTRAL HOME, i.e. the origin is the center of the stage.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.abort">
+<span class="sig-name descname"><span class="pre">abort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of abort as specified in the parent class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.closeDevice">
+<span class="sig-name descname"><span class="pre">closeDevice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.closeDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the serial device connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.findRange">
+<span class="sig-name descname"><span class="pre">findRange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.findRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the range of the stage in number of pulses. Updates <cite>self.stage.pulseRange</cite> directly and returns the pulseRange.</p>
+<p>The <cite>self.stage.um_per_pulse</cite> is also recalculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>`self.stage.pulseRange`</strong><span class="classifier">int</span></dt><dd><p>The obtained pulse range.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.getPositionReadOut">
+<span class="sig-name descname"><span class="pre">getPositionReadOut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.getPositionReadOut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the position from the controller. 
+Only for the first run, defer others to using self.stage.position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>position: integer</dt><dd><p>Position in integer</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.getStatus1">
+<span class="sig-name descname"><span class="pre">getStatus1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.getStatus1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks Status1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ret: array of strings</dt><dd><p>Coordinate, ACK1, ACK2, ACK3
+- Coordinate: Fixed Length of 10 digits including symbols. Symbols are left-aligned, coord are right aligned, the extra spaces are removed by read
+- ACK1: X = Command Error, K = Command Accepted normally
+- ACK2: L = LS Stop, K = Normal Stop
+- ACK3: B = Busy Status, R = Ready Status</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.homeStage">
+<span class="sig-name descname"><span class="pre">homeStage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.homeStage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Home the stage</p>
+<p>Speeds: 
+- minSpeed = 500  PPS 
+- maxSpeed = 5000 PPS 
+- acdcTime = 200  ms
+The above cannot be changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.isBusy">
+<span class="sig-name descname"><span class="pre">isBusy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.isBusy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets operating status, labelled as status2 (B = Busy Status, R = Ready Status)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ret: bool</dt><dd><p>True if Busy, False if Ready, None if output is self.read returns None</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.jog">
+<span class="sig-name descname"><span class="pre">jog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.jog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the stage jogging.</p>
+<p>The stage moves continousely at a preset jog speed without acceleration/deceleration until stopped
+Use <cite>self.setspeed(speed, jog = True)</cite> to set the speed. 
+Use <cite>self.stop(emergency = False)</cite> to stop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>positive</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to move in the positive direction, by default True</p>
+</dd>
+<dt><strong>secs</strong><span class="classifier">float, optional</span></dt><dd><p>If given, the amount of time in seconds to jog, by default None
+Uses the system time, so not very accurate, use at own risk.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ret</strong><span class="classifier">Status</span></dt><dd><p>See GSC01.safesend()</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Absolution move to coordinate <cite>pos</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pos</strong><span class="classifier">int</span></dt><dd><p>Absolute coordinate to move to (in units of pulses). Positive for moving in the positive direction, and viceversa.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ret</strong><span class="classifier">Status</span></dt><dd><p>See GSC01.safesend()</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>stage.errors.PositionOutOfBoundsError</dt><dd><p>If proposed move moves stage out of range</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.rmove">
+<span class="sig-name descname"><span class="pre">rmove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.rmove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative move by <cite>delta</cite> pulses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>delta</strong><span class="classifier">int</span></dt><dd><p>Number of pulses to move. Positive for moving in the positive direction, and viceversa.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ret</strong><span class="classifier">Status</span></dt><dd><p>See GSC01.safesend()</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>stage.errors.PositionOutOfBoundsError</dt><dd><p>If proposed relative move moves stage out of range</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitClear</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waitTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a command to the GSC-01 Controller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cmd</strong><span class="classifier">Union[bytearray, str]</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">`raw</span> <span class="pre">=</span> <span class="pre">True`</span></code> then cmd is a <code class="docutils literal notranslate"><span class="pre">`bytearray`</span></code> that is directly sent to the controller.
+Otherwise, cmd is a string command that is encoded into ASCII before being sent to the controller.</p>
+</dd>
+<dt><strong>waitClear</strong><span class="classifier">bool, optional</span></dt><dd><p>[description], by default False</p>
+</dd>
+<dt><strong>raw</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag for whether the input command is a bytearray or string, by default False</p>
+</dd>
+<dt><strong>waitTime</strong><span class="classifier">float, optional</span></dt><dd><p>Waiting time in seconds before writing to the device, by default 0.
+Can be used to cool down.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>output</strong><span class="classifier">Union[bytearray,int]</span></dt><dd><p>Returns 0 if <code class="docutils literal notranslate"><span class="pre">`self.devMode</span> <span class="pre">=</span> <span class="pre">True`</span></code> else returns the results from <code class="docutils literal notranslate"><span class="pre">`self.read()`</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.setSpeed">
+<span class="sig-name descname"><span class="pre">setSpeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jogSpeed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minSpeed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxSpeed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acdcTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.setSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the driving speed of the stage.</p>
+<p>Set speed in units of 100 PPS. Values less than 100 PPS are rounded down.
+If negative values are given, the absolute values will be taken.
+If any illegal values are given, the original values are taken. If this results in maxspeed &lt; minspeed, then they will be switched.</p>
+<p>Initial Values:
+- jogSpeed = 500  PPS (Restart initializes this)
+- minSpeed = 500  PPS 
+- maxSpeed = 5000 PPS 
+- acdcTime = 200  ms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>jogSpeed</strong><span class="classifier">Optional[int], optional</span></dt><dd><p>The jogging speed of the stage in Pulse Per Seconds, by default None
+If set to None, current speed is used. 
+Acceptables values are 100 - 20000 PPS.</p>
+</dd>
+<dt><strong>minSpeed</strong><span class="classifier">Optional[int], optional</span></dt><dd><p>The minimum speed of the stage in Pulse Per Seconds, by default None
+If set to None, current speed is used. 
+Acceptables values are 100 - 20000 PPS.</p>
+</dd>
+<dt><strong>maxSpeed</strong><span class="classifier">Optional[int], optional</span></dt><dd><p>The maximum speed of the stage in Pulse Per Seconds, by default None
+If set to None, current speed is used. 
+Acceptables values are 100 - 20000 PPS.</p>
+</dd>
+<dt><strong>acdcTime</strong><span class="classifier">Optional[int], optional</span></dt><dd><p>The acceleration and deceleration time of the stage in milliseconds, by default None
+Acceptables values are 0 to 1000 ms.
+If set to None, current acceleration and deceleration time is used.</p>
+</dd>
+<dt><strong>init</strong><span class="classifier">Optional[bool], optional</span></dt><dd><p>Resets the speeds to the initial values. If set to True, other parameters are ignored.
+By default False.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>(retSpeed, retJog)</strong><span class="classifier">Statuses</span></dt><dd><p>See GSC01.safesend()</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>AssertionError</dt><dd><p>If <cite>minSpeed</cite> is more than <cite>maxSpeed</cite>, or if <cite>maxSpeed</cite> is 0</p>
+</dd>
+<dt>TypeError</dt><dd><p>If any of the values are not integers.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">emergency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decelerates the stage and stops it</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>emergency</strong><span class="classifier">bool, optional</span></dt><dd><p>Set to True to use immediate stop instead of decelerate and stop, by default False</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.syncPosition">
+<span class="sig-name descname"><span class="pre">syncPosition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.syncPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the position from the controller and syncs it to <cite>stage.position</cite>.
+To calibrate in the other direction (using the software as the source), use <cite>self.move</cite>.</p>
+<p>If the stage is powered, also clears the dirty state of the stage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>pos: int</dt><dd><p>Current Position of the stage</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.GSC01.waitClear">
+<span class="sig-name descname"><span class="pre">waitClear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.GSC01.waitClear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Waits for the device to be ready.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>True</dt><dd><p>Returns True once the controller is ready</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>RuntimeError</dt><dd><p>If the controller does not respond</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stage.controller.SerialController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.controller.</span></span><span class="sig-name descname"><span class="pre">SerialController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devConfig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.SerialController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract Base Class for a serial controller</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.SerialController.closeDevice">
+<span class="sig-name descname"><span class="pre">closeDevice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.SerialController.closeDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the serial device connection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.SerialController.initializeDevice">
+<span class="sig-name descname"><span class="pre">initializeDevice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.SerialController.initializeDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the serial devices and saves it into self.dev</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>RuntimeError</dt><dd><p>Raised if unable to establish serial communication</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage.controller.SerialController.loadConfig">
+<span class="sig-name descname"><span class="pre">loadConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">devConfig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage.controller.SerialController.loadConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the config for device communication from either a json file or a dictionary into self.cfg</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>devConfig</strong><span class="classifier">Union[dict,str,None], optional</span></dt><dd><p>json file or dictionary of configuation details, by default None</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>RuntimeError</dt><dd><p>Raised if an invalid config file is found but self.devMode = False</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-stage._stage"></span><dl class="py class">
+<dt class="sig sig-object py" id="stage._stage.GSC01_Stage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage._stage.</span></span><span class="sig-name descname"><span class="pre">GSC01_Stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.GSC01_Stage" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.GSC01_Stage.positionSetter">
+<span class="sig-name descname"><span class="pre">positionSetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.GSC01_Stage.positionSetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the position to be set is within range and sets it,
+Should be run before executing any moves</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">int</span></dt><dd><p>Position; Position must be a number between -16,777,215 and 16,777,215</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>stage.errors.PositionOutOfBoundsError</dt><dd><p>Raised when the given x is not within the bounds set by the controller</p>
+</dd>
+<dt>TypeError</dt><dd><p>Raised when the given x is not an integer</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.GSC01_Stage.recalculateUmPerPulse">
+<span class="sig-name descname"><span class="pre">recalculateUmPerPulse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.GSC01_Stage.recalculateUmPerPulse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculates the um_per_pulse after setting <cite>self.pulseRange</cite></p>
+<p><cite>self.pulseRange</cite> needs to be set beforehand.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.GSC01_Stage.resetStage">
+<span class="sig-name descname"><span class="pre">resetStage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.GSC01_Stage.resetStage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Meant to set the upper and lower limit based on pulseRange after homing</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.GSC01_Stage.setLimits">
+<span class="sig-name descname"><span class="pre">setLimits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.GSC01_Stage.setLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>We should not need this method, but I implement it just so that this will instantiate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>upper</strong><span class="classifier">int</span></dt><dd><p>Upper limit</p>
+</dd>
+<dt><strong>lower</strong><span class="classifier">int</span></dt><dd><p>Lower limit</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stage._stage.SGSP26_200">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage._stage.</span></span><span class="sig-name descname"><span class="pre">SGSP26_200</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.SGSP26_200" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.SGSP26_200.resetStage">
+<span class="sig-name descname"><span class="pre">resetStage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.SGSP26_200.resetStage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Meant to set the upper and lower limit based on pulseRange after homing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="stage._stage.Stage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage._stage.</span></span><span class="sig-name descname"><span class="pre">Stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.Stage" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.Stage.positionSetter">
+<span class="sig-name descname"><span class="pre">positionSetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.Stage.positionSetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the position to be set is within range and sets it,
+Should be run before executing any moves</p>
+<p>!Unsafe state: if position is dirty but the dirty flag is not set/unset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">number</span></dt><dd><p>Position; Position must be a number between self.LIMIT_LOWER and self.LIMIT_UPPER</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>stage.errors.PositionOutOfBoundsError</dt><dd><p>Raised when the given x is not within the bounds set by the controller</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="stage._stage.Stage.setLimits">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setLimits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#stage._stage.Stage.setLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the lower and upper limit. Also here just so that this class may not be instantiated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>upper</strong><span class="classifier">number</span></dt><dd><p>Upper limit</p>
+</dd>
+<dt><strong>lower</strong><span class="classifier">number</span></dt><dd><p>Lower limit</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>Raised when upper limit is lower than lower limit</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-stage.errors"></span><dl class="py exception">
+<dt class="sig sig-object py" id="stage.errors.ControllerError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.errors.</span></span><span class="sig-name descname"><span class="pre">ControllerError</span></span><a class="headerlink" href="#stage.errors.ControllerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when there is an error when sending commands to the controller</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="stage.errors.PositionDirtyError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.errors.</span></span><span class="sig-name descname"><span class="pre">PositionDirtyError</span></span><a class="headerlink" href="#stage.errors.PositionDirtyError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the position that is requested is dirty</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="stage.errors.PositionOutOfBoundsError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stage.errors.</span></span><span class="sig-name descname"><span class="pre">PositionOutOfBoundsError</span></span><a class="headerlink" href="#stage.errors.PositionOutOfBoundsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when the position given is out of bounds of what the controller supports</p>
+</dd></dl>
+
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">M-Squared Automation</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fitter.html" title="previous chapter">&lt;no title&gt;</a></li>
+      <li>Next: <a href="nanoscan.html" title="next chapter">&lt;no title&gt;</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Yudong Sun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/stage.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

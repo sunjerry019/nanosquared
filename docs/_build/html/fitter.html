@@ -1,0 +1,672 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>&lt;no title&gt; &#8212; M-Squared Automation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="stage.html" />
+    <link rel="prev" title="Welcome to Nanoscan M-Squared Automation’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-fitting.fit_functions"></span><dl class="py function">
+<dt class="sig sig-object py" id="fitting.fit_functions.convertODRtoOCF">
+<span class="sig-prename descclassname"><span class="pre">fitting.fit_functions.</span></span><span class="sig-name descname"><span class="pre">convertODRtoOCF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fit_functions.convertODRtoOCF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a function for scipy.optimize.curve_fit based on a scipy.odr function</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>func</strong><span class="classifier">function</span></dt><dd><p>fcn(beta, x) –&gt; y</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>func</strong><span class="classifier">function</span></dt><dd><p>fcn(x, <a href="#id1"><span class="problematic" id="id2">*</span></a>beta) –&gt; y</p>
+<p>where beta = paramaters</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fitting.fit_functions.iso_omega_z">
+<span class="sig-prename descclassname"><span class="pre">fitting.fit_functions.</span></span><span class="sig-name descname"><span class="pre">iso_omega_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fit_functions.iso_omega_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Beam Radii Function to be fitted according to ISO 11146-1:2021</p>
+<p>Version Referenced: BS EN ISO 11146-1:2021, equation (24) in Section 9
+Beam Diameter Definition: BS EN ISO 11145:2018, Section 3.5.2 (d4sigma)</p>
+<p>The original function uses the diameter, we change it to use the radii by dividing it by 2.
+We assume a stigmatic/simple astigmatic beam.</p>
+<p>The ISO Norm says that normally, the errors in the x,y-axis are optimized (i.e. using scipy.optimize.curve_fit)</p>
+<p>d_sigma(z) = sqrt(a + bz + cz^2)
+z_0        = - b / 2c
+d_0        = sqrt((4ac - b^2)/(4c))
+w_0        = 0.5 * sqrt((4ac - b^2)/(4c))
+z_R        = sqrt(4ac - b^2)/(2c)
+M_sq       = (pi/(8*lmbda)) * sqrt(4ac - b^2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>params</strong><span class="classifier">array_like</span></dt><dd><p>rank-1 array of length 3 where <code class="docutils literal notranslate"><span class="pre">beta</span> <span class="pre">=</span> <span class="pre">array([a,</span> <span class="pre">b,</span> <span class="pre">c])</span></code></p>
+</dd>
+<dt><strong>z</strong><span class="classifier">array_like</span></dt><dd><p>rank-1 array of positions along an axis</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, calculated beam-radii of a single axis based on given parameters</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>From Wikipedia:  If the beam does not fill more than a third of the beam profiler’s sensor area, </dt><dd><p>then there will be a significant number of pixels at the edges of the sensor that register a small 
+baseline value (the background value). If the baseline value is large or if it is not subtracted out 
+of the image, then the computed D4σ value will be larger than the actual value because the baseline 
+value near the edges of the sensor are weighted in the D4σ integral by x2. Therefore, baseline subtraction 
+is necessary for accurate D4σ measurements</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fitting.fit_functions.omega_z">
+<span class="sig-prename descclassname"><span class="pre">fitting.fit_functions.</span></span><span class="sig-name descname"><span class="pre">omega_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fit_functions.omega_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Beam Radii Function to be fitted, according to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/odr.html">https://docs.scipy.org/doc/scipy/reference/odr.html</a></p>
+<p>Beam Radii to be the HALF of the D4Sigma definition of beam width.</p>
+<p>Note that this function is normalized if:
+- Everything is in SI-Units, or
+- w, w_0: [um], z, z_0: [mm], lmbda: [nm]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>params</strong><span class="classifier">array_like</span></dt><dd><p>rank-1 array of length 3 where <code class="docutils literal notranslate"><span class="pre">beta</span> <span class="pre">=</span> <span class="pre">array([w_0,</span> <span class="pre">z_0,</span> <span class="pre">M_sq_lmbda])</span></code></p>
+</dd>
+<dt><strong>z</strong><span class="classifier">array_like</span></dt><dd><p>rank-1 array of positions along an axis</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, calculated beam-radii of a single axis based on given parameters</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="fitting.fit_functions.omega_z_lambda">
+<span class="sig-prename descclassname"><span class="pre">fitting.fit_functions.</span></span><span class="sig-name descname"><span class="pre">omega_z_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fit_functions.omega_z_lambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a w_0 Function to be fitted, according to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/odr.html">https://docs.scipy.org/doc/scipy/reference/odr.html</a> that has wavelength already included</p>
+<p>Refer to fit_functions.omega_z for documentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>Wavelength to be used for the M^2 Fit</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>func</strong><span class="classifier">f(params, z) -&gt; y</span></dt><dd><p>omega_z function that has lambda included</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-fitting.fitter"></span><dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.Fitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">Fitter</span></span><a class="headerlink" href="#fitting.fitter.Fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitter provides the superclass for ODRFitter and OCFFitter</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.Fitter.getPlotOfFit">
+<span class="sig-name descname"><span class="pre">getPlotOfFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.Fitter.getPlotOfFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the fitted function with the original data.
+Opens a <cite>matplotlib</cite> figure to achieve this.</p>
+<p>Returns the <cite>matplotlib</cite> figures and axes.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>numpoints</strong><span class="classifier">int, optional</span></dt><dd><p>Number of data points along the x-axis, by default 4096</p>
+</dd>
+<dt><strong>:rtype:</strong><span class="classifier">py:data:<cite>~typing.Tuple</cite>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>]</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.MsqFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">MsqFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superclass of all Msq Fitters</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>mode: int</strong></dt><dd><p>0: Fit using Msq*lambda as one term in the beam width equation 
+1: Fit using Msq as one term in the beam width equation, lambda directly included
+2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)</p>
+<p>If using <cite>mode = 0</cite>, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+The ISO Fitting method also takes into account the error of the wavelength.
+If using <cite>mode = 1</cite>, the error of the wavelength is disregarded.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqFitter.estimateInitialGuesses">
+<span class="sig-name descname"><span class="pre">estimateInitialGuesses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqFitter.estimateInitialGuesses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimates the initial parameters w_0, z_0 from the data given using the minimum y-value and save it into self.initial_guesses.
+Only for mode = 0 or 1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqFitter.setInitialGuesses">
+<span class="sig-name descname"><span class="pre">setInitialGuesses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqFitter.setInitialGuesses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the initial guesses, only for mode = 0 or 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>w_0</strong><span class="classifier">float, optional</span></dt><dd><p>Guess for beam waist radius, by default 1</p>
+</dd>
+<dt><strong>z_0</strong><span class="classifier">float, optional</span></dt><dd><p>Guess for focal point position, by default 1</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.MsqOCFFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">MsqOCFFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqOCFFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using scipy.optimize.curve_fit</p>
+<p>By default, initial guesses for w_0 and z_0 are 1.
+Use self.estimateInitialGuesses() to estimate w_0, z_0</p>
+<dl class="simple">
+<dt>Note that the fit function is normalized if:</dt><dd><ul class="simple">
+<li><p>Everything is in SI-Units, or</p></li>
+<li><p>w, w_0: [um], z, z_0: [mm], lmbda: [nm]</p></li>
+</ul>
+</dd>
+</dl>
+<p>Using the second case seem to be more numerically stable.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float_like</span></dt><dd><p>Wavelength of the laser, to be given manually for fitting</p>
+</dd>
+<dt><strong>wavelength_err</strong><span class="classifier">float_like, optional</span></dt><dd><p>Error of the wavelength of the laser, to be used in error propagation to find the m_squared
+By default: 0</p>
+</dd>
+<dt><strong>mode: int</strong></dt><dd><p>0: Fit using Msq*lambda as one term in the beam width equation 
+1: Fit using Msq as one term in the beam width equation, lambda directly included
+2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)</p>
+<p>If using <cite>mode = 0</cite>, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+The ISO Fitting method also takes into account the error of the wavelength.
+If using <cite>mode = 1</cite>, the error of the wavelength is disregarded.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>wavelength</strong><span class="classifier">array_like of rank 2</span></dt><dd><p>[wv, wv_err] - wavelength of the data and its corresponding error</p>
+</dd>
+<dt><strong>initial_guesses</strong><span class="classifier">array_like</span></dt><dd><p>initial_guesses for the fit</p>
+</dd>
+<dt><strong>m_squared</strong><span class="classifier">array_like</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">np.array([m_squared,</span> <span class="pre">m_squared_err])</span></code> of floats; calculated m_squared based on self.wavelength and the fit</p>
+</dd>
+<dt><strong>msq_lambda</strong><span class="classifier">bool</span></dt><dd><p>Flag to fit to M_sq_lambda or M_sq</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqOCFFitter.estimateAndFit">
+<span class="sig-name descname"><span class="pre">estimateAndFit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqOCFFitter.estimateAndFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to running <code class="docutils literal notranslate"><span class="pre">estimateInitialGuesses()</span></code> then <code class="docutils literal notranslate"><span class="pre">fit()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>self.output</strong><span class="classifier">Output instance</span></dt><dd><p>See OCFFitter.fit() for more information</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqOCFFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqOCFFitter.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits using self.initial_guesses and OCFFitter.fit()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>self.output</strong><span class="classifier">namedtuple</span></dt><dd><p>See OCFFitter.fit() for more information</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.MsqODRFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">MsqODRFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqODRFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,</p>
+<p>By default, initial guesses for w_0 and z_0 are 1.
+Use self.estimateInitialGuesses() to estimate w_0, z_0</p>
+<dl class="simple">
+<dt>Note that the fit function is normalized if:</dt><dd><ul class="simple">
+<li><p>Everything is in SI-Units, or</p></li>
+<li><p>w, w_0: [um], z, z_0: [mm], lmbda: [nm]</p></li>
+</ul>
+</dd>
+</dl>
+<p>Using the second case seem to be more numerically stable.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>xerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in x, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code> or func(x) –&gt; xerror</p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float_like</span></dt><dd><p>Wavelength of the laser, to be given manually for fitting</p>
+</dd>
+<dt><strong>wavelength_err</strong><span class="classifier">float_like, optional</span></dt><dd><p>Error of the wavelength of the laser, to be used in error propagation to find the m_squared
+By default: 0</p>
+</dd>
+<dt><strong>mode: int</strong></dt><dd><p>0: Fit using Msq*lambda as one term in the beam width equation 
+1: Fit using Msq as one term in the beam width equation, lambda directly included
+2: Fit using the ISO Method. Refer to fitting.fit_functions.iso_omega_z() for more information (Default)</p>
+<p>If using <cite>mode = 0</cite>, fits using M_sq_lambda instead of just M_sq. This allows the error of the wavelength to be taken into account.
+The ISO Fitting method also takes into account the error of the wavelength.
+If using <cite>mode = 1</cite>, the error of the wavelength is disregarded.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">scipy.odr.Model Instance</span></dt><dd></dd>
+<dt><strong>data</strong><span class="classifier">scipy.odr.RealData Instance</span></dt><dd></dd>
+<dt><strong>odr</strong><span class="classifier">scipy.odr.ODR Instance</span></dt><dd></dd>
+<dt><strong>output</strong><span class="classifier">scipy.odr.Output instance</span></dt><dd></dd>
+<dt><strong>wavelength</strong><span class="classifier">array_like of rank 2</span></dt><dd><p>[wv, wv_err] - wavelength of the data and its corresponding error</p>
+</dd>
+<dt><strong>initial_guesses</strong><span class="classifier">array_like</span></dt><dd><p>initial_guesses for the fit</p>
+</dd>
+<dt><strong>m_squared</strong><span class="classifier">array_like</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">np.array([m_squared,</span> <span class="pre">m_squared_err])</span></code> of floats; calculated m_squared based on self.wavelength and the fit</p>
+</dd>
+<dt><strong>msq_lambda</strong><span class="classifier">bool</span></dt><dd><p>Flag to fit to M_sq_lambda or M_sq</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqODRFitter.estimateAndFit">
+<span class="sig-name descname"><span class="pre">estimateAndFit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqODRFitter.estimateAndFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to running <code class="docutils literal notranslate"><span class="pre">estimateInitialGuesses()</span></code> then <code class="docutils literal notranslate"><span class="pre">fit()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>self.output</strong><span class="classifier">Output instance</span></dt><dd><p>See ODRFitter.fit() for more information</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.MsqODRFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.MsqODRFitter.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits using self.initial_guesses and ODRFitter.fit()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>self.output</strong><span class="classifier">Output instance</span></dt><dd><p>See ODRFitter.fit() for more information</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.OCFFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">OCFFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.OCFFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The OCFFitter class fits the given data using scipy.optimize.curve_fit (OCF) and the least-squares method</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror or scalar</p>
+</dd>
+<dt><strong>func</strong><span class="classifier">function</span></dt><dd><p>fcn(beta, x) –&gt; y</p>
+<p>This is based on scipy.odr. It will be converted to 
+a function suitable for scipy.optimize.curve_fit where necessary.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">namedtuple</span></dt><dd><p>.x = xdata
+.y = ydata
+.sy = yerror
+.sx = None</p>
+</dd>
+<dt><strong>output: namedtuple</strong></dt><dd><p>.beta = params
+.sd_beta = one standard deviation errors on the parameters</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.OCFFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.OCFFitter.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the data using <code class="docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit()</span></code> and saves the output to <code class="docutils literal notranslate"><span class="pre">self.output</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>initial_params</strong><span class="classifier">array_like</span></dt><dd><p>Represents the initial guesses. Rank 1 Array with length equal to the number of parameters defined for self.model. 
+For w(z): Rank 1 of length 4 with <code class="docutils literal notranslate"><span class="pre">initial_params</span> <span class="pre">=</span> <span class="pre">array([w_0,</span> <span class="pre">z_0,</span> <span class="pre">M_sq,</span> <span class="pre">lmbda])</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>self.output</strong><span class="classifier">array_like</span></dt><dd><p>Returns [optimalparams, sd_params], where sd_params = one standard deviation errors on the parameters</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>RuntimeError</dt><dd><p>If the fit does not converge</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.OCFFitter.loadData">
+<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.OCFFitter.loadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the data into a data object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank 1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank 1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror or scalar</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.OCFFitter.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.OCFFitter.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the <cite>y</cite> values based on the fitted result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Values to predict</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Predicted Values</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.OCFFitter.printOutput">
+<span class="sig-name descname"><span class="pre">printOutput</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.OCFFitter.printOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the output of .fit(), otherwise raises a warning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>RuntimeWarning</dt><dd><p>Raised if .fit() has not been run.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="fitting.fitter.ODRFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fitting.fitter.</span></span><span class="sig-name descname"><span class="pre">ODRFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.ODRFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ODRFitter class fits the given data using scipy.odr</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank-1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>xerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in x, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code> or func(x) –&gt; xerror or scalar</p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror or scalar</p>
+</dd>
+<dt><strong>func</strong><span class="classifier">function</span></dt><dd><p>fcn(beta, x) –&gt; y</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>model</strong><span class="classifier">scipy.odr.Model Instance</span></dt><dd></dd>
+<dt><strong>data</strong><span class="classifier">scipy.odr.RealData Instance</span></dt><dd></dd>
+<dt><strong>odr</strong><span class="classifier">scipy.odr.ODR Instance</span></dt><dd></dd>
+<dt><strong>output</strong><span class="classifier">scipy.odr.Output instance</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.ODRFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.ODRFitter.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the data using the odr Model and saves the output to <code class="docutils literal notranslate"><span class="pre">self.output</span></code></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>initial_params</strong><span class="classifier">array_like</span></dt><dd><p>Represents the initial guesses. Rank 1 Array with length equal to the number of parameters defined for self.model.
+For w(z): Rank 1 of length 3 with <code class="docutils literal notranslate"><span class="pre">initial_params</span> <span class="pre">=</span> <span class="pre">array([w_0,</span> <span class="pre">z_0,</span> <span class="pre">M_sq_lmbda])</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>self.output</strong><span class="classifier">scipy.odr.Output instance</span></dt><dd><p>This object is also assigned to the attribute .output of Fitter
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.odr.Output.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.odr.Output.html</a></p>
+<dl class="simple">
+<dt>In particular:</dt><dd><p>self.output.res_var = chi_sq_red // <a class="reference external" href="https://arxiv.org/abs/1012.3754">https://arxiv.org/abs/1012.3754</a>
+self.output.beta    = Estimated parameter values
+self.output.sd_beta = Standard deviations of the estimated parameters
+self.output.info    = Reason for returning, as output by ODRPACK (cf. ODRPACK UG p. 38).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.ODRFitter.loadData">
+<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xerror</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yerror</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.ODRFitter.loadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the data into a data object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Rank 1, Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Rank 1, Dependent variable, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code></p>
+</dd>
+<dt><strong>xerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in x, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code> or func(x) –&gt; xerror or scalar</p>
+</dd>
+<dt><strong>yerror</strong><span class="classifier">array_like or function</span></dt><dd><p>Rank 1, Error in y, should be of the same shape as <code class="docutils literal notranslate"><span class="pre">y</span></code> or func(y) –&gt; yerror or scalar</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.ODRFitter.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.ODRFitter.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the <cite>y</cite> values based on the fitted result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array_like</span></dt><dd><p>Values to predict</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Predicted Values</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="fitting.fitter.ODRFitter.printOutput">
+<span class="sig-name descname"><span class="pre">printOutput</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fitting.fitter.ODRFitter.printOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the output of .fit(), otherwise raises a warning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>RuntimeWarning</dt><dd><p>Raised if .fit() has not been run.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">M-Squared Automation</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Nanoscan M-Squared Automation’s documentation!</a></li>
+      <li>Next: <a href="stage.html" title="next chapter">&lt;no title&gt;</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Yudong Sun.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/fitter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
