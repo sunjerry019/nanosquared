@@ -165,6 +165,38 @@ from cameras.nanoscan import NanoScan
 n = NanoScan(devMode = False)
 print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 ```
+To measure the M² of a beam:
+```python
+from measurement.measure import Measurement
+from cameras.nanoscan import NanoScan
+from stage.controller import GSC01
+
+cfg = { "port" : "COM13" } # Check with "Device Manager" for port number
+
+with NanoScan(devMode = False) as n:
+    with GSC01(devMode = False, devConfig = cfg) as s:
+        with Measurement(devMode = False, camera = n, controller = s) as M:
+            meta = {
+                "Wavelength": "2300 nm",
+                "Lens": "f = 250mm CaF2 lens"
+            }
+            M.take_measurements(precision = 10, writeToFile) # auto find beam waist and rayleigh length
+
+            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
+            print(f"X-Axis")
+            print(f"Fit Result:\t{res}")
+            print(f"M-squared:\t{M.fitter.m_squared}")
+            fig, ax = M.fitter.getPlotOfFit()
+            fig.show()
+
+            M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300)
+            print(f"Y-Axis")
+            print(f"Fit Result:\t{res}")
+            print(f"M-squared:\t{M.fitter.m_squared}")
+            fig, ax = M.fitter.getPlotOfFit()
+            fig.show()
+```
+
 *More to be added, or even separate README.*
 
 ## How it works
