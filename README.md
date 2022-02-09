@@ -266,4 +266,4 @@ Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, 
 ```
 
 ## References
-https://stackoverflow.com/a/1067842
+[Beam Profilers](./src/cameras/references.md)

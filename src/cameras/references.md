@@ -3,6 +3,7 @@
 ## Understanding COM and Python
 - [Introduction to COM](http://www.icodeguru.com/WebServer/Python-Programming-on-Win32/ch05.htm)
 - [Advanced Python and COM](http://www.icodeguru.com/WebServer/Python-Programming-on-Win32/ch12.htm)
+- [What can you do with COM/ActiveX in Python? [closed]](https://stackoverflow.com/a/1067842)
 
 ## Understanding loading DLLs
 We reference [this StackOverflow](https://stackoverflow.com/questions/43269781/loading-dll-using-python-ctypes)
