@@ -63,7 +63,8 @@ latex_engine = 'pdflatex'
 latex_elements = {
 	'papersize': 'a4paper',
     'preamble': r'''
-\usepackage[utf8]{inputenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{textgreek}
 \usepackage{libertine}
 \renewcommand{\ttdefault}{cmtt}
 \usepackage[titles]{tocloft}
