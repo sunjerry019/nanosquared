@@ -41,7 +41,7 @@ following the example codes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cameras.nanoscan.NanoScan.AXES">
 <span class="sig-name descname"><span class="pre">AXES</span></span><a class="headerlink" href="#cameras.nanoscan.NanoScan.AXES" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">cameras.nanoscan_constants.NsAxes</span></code></p>
+<dd><p>alias of <a class="reference internal" href="#cameras.nanoscan_constants.NsAxes" title="cameras.nanoscan_constants.NsAxes"><code class="xref py py-class docutils literal notranslate"><span class="pre">cameras.nanoscan_constants.NsAxes</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -113,6 +113,38 @@ nature, i.e. usually enabled and not affected by other settings or results.</p>
 <dt class="sig sig-object py" id="cameras.nanoscan.NanoScanDLL">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan.</span></span><span class="sig-name descname"><span class="pre">NanoScanDLL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan.NanoScanDLL" title="Permalink to this definition">¶</a></dt>
 <dd><p>Provides interface to the 32-bit NanoScan C# DLL using msl-loadlib.</p>
+</dd></dl>
+
+<span class="target" id="module-cameras.nanoscan_server"></span><dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan_server.NanoScanServer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan_server.</span></span><span class="sig-name descname"><span class="pre">NanoScanServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan_server.NanoScanServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper around a 32-bit C#.NET library ‘NanoScanLibrary.dll’. WARNING: No GUI Features available.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cameras.nanoscan_server.NanoScanServer.GetHeadScanRates">
+<span class="sig-name descname"><span class="pre">GetHeadScanRates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan_server.NanoScanServer.GetHeadScanRates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloads GetHeadScanRates so that we can convert the return values to list.</p>
+<p>Otherwise it throws an error as it cannot pickle Single[] objects to send to tbe 64-bit program.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-cameras.nanoscan_constants"></span><p>Provides enums for NanoScan</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan_constants.BeamWidthBasis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan_constants.</span></span><span class="sig-name descname"><span class="pre">BeamWidthBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan_constants.BeamWidthBasis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enum for NsAsBeamWidthBasis</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan_constants.NsAxes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan_constants.</span></span><span class="sig-name descname"><span class="pre">NsAxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan_constants.NsAxes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enum for Axis Selection</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cameras.nanoscan_constants.SelectParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cameras.nanoscan_constants.</span></span><span class="sig-name descname"><span class="pre">SelectParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cameras.nanoscan_constants.SelectParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enum for NsAsSelectParameters</p>
 </dd></dl>
 
 
