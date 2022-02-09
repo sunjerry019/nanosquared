@@ -656,11 +656,10 @@ class GSC01(SerialController):
         -------
         ret: array of strings
             Coordinate, ACK1, ACK2, ACK3
-            Coordinate: Fixed Length of 10 digits including symbols. Symbols are left-aligned, coord are right aligned
-                -> The extra spaces are removed by read
-            ACK1: X = Command Error, K = Command Accepted normally
-            ACK2: L = LS Stop, K = Normal Stop
-            ACK3: B = Busy Status, R = Ready Status
+            - Coordinate: Fixed Length of 10 digits including symbols. Symbols are left-aligned, coord are right aligned, the extra spaces are removed by read
+            - ACK1: X = Command Error, K = Command Accepted normally
+            - ACK2: L = LS Stop, K = Normal Stop
+            - ACK3: B = Busy Status, R = Ready Status
         """
         if self.devMode:
             return "0,K,K,R"

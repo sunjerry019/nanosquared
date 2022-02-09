@@ -5,12 +5,12 @@ src/data/
 *.ignore.*
 
 # Sphinx
-doc/_build/*
-!doc/_build/latex
-!doc/_build/html
+docs/_build/*
+!docs/_build/latex
+!docs/_build/html
 
-doc/_build/latex/*
-!doc/_build/latex/*.pdf
+docs/_build/latex/*
+!docs/_build/latex/*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -83,7 +83,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+# docs/_build/
 
 # PyBuilder
 .pybuilder/

@@ -13,4 +13,4 @@
 # source /etc/profile.d/modules.sh
 # module load openmpi
 
-mpiexec -n 50 python3 processstartparam.py
+mpiexec -n $SLURM_NTASKS python3 processstartparam.py
