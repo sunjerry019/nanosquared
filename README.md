@@ -103,8 +103,6 @@ cam = WinCamD(devMode = False)
 ```
 These 2 modules may be packaged into seperate packages should someone find the time to do it. It would be a meaningful endeavour in providing Python support for these 2 devices. 
 
-If you do not wish to download the entire repository to interface with these beam profilers, a list of necessary files may be found under [cameras/README](./src/cameras/README.md)
-
 Both of these modules inherit the `Camera` class, which guarantees the existence of the following:
 ```python
 x, y, both = cam.AXES.X, cam.AXES.Y, cam.AXES.BOTH  # Enum for the different axes
@@ -113,6 +111,8 @@ cam.wait_stable()                                   # Function returns when beam
 cam.log()
 ```
 See the specific source code for more detailed documentation of the functions.
+
+If you do not wish to download the entire repository to interface with these beam profilers, a list of necessary files may be found under [cameras/README](./src/cameras/README.md).
 
 #### NanoScan
 In addition to the above functions, `NanoScan` also provides the `cam.rotationFrequency` property to set the rotation speed of the scan head. 
