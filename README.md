@@ -6,6 +6,7 @@ Automated M-Squared Scanner and Profiler using the WinCamD / Nanoscan Camera.
 * [Supported Models](#supported-models)
 * [Version Information](#version-information)
 * [Installation](#installation)
+    + [Quick Start](#quick-start)
     + [Python Modules](#python-modules)
     + [NanoScan](#nanoscan)
     + [WinCamD](#wincamd)
@@ -58,18 +59,28 @@ The DataRay Software versions used for the development of this code are as follo
 The NanoScan Software version is: `v2.9.1.28`.
 
 ## Installation
-### Python Modules
-To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
+### Quick Start
+1. Install the necessary vendor software for [NanoScan](#nanoscan) and [WinCamD](#wincamd).
+2. To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
 ```bat
 conda env create -f conda-environment.yml
 conda activate nanosquared
 ```
+3. Thereafter, install the `nanosquared` package by navigating to the repository and doing:
+```bat
+pip install .
+```
+4. Verify that you have installed it properly by doing:
+```python
+import nanosquared
+```
+### Python Modules
 Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
 ```bat
-conda env create -f src\cameras\archive\nanoscan\nanoscan_32.yml
+conda env create -f src\nanosquared\cameras\archive\nanoscan\nanoscan_32.yml
 conda activate nanoscan-32bit
 ```
-This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# directory](./src/cameras/csharp) for more information.
+This might be necessary as not all function calls exposed by the NanoScan ActiveX Endpoint has been implemented into `NanoScanLibrary.dll`. Consult the [C# directory](./src/nanosquared/cameras/csharp) for more information.
 
 ### NanoScan
 To use the `NanoScan` Python Interface, you first need to install the `NanoScan` software. A [copy](./installers) of which lives in this repository for archival purposes.
@@ -88,17 +99,17 @@ Please install the version that corresponds to your Python installation (i.e. 64
 ## Independent Modules
 For every one of these modules described below, the `LoggerMixIn` class has been used. While technically not necessary, it has been included to aid debugging.
 
-Include [`helpers.py`](./src/common/helpers.py) for the `LoggerMixIn` class. See [below](#logging) for more information.
+Include [`helpers.py`](./src/nanosquared/common/helpers.py) for the `LoggerMixIn` class. See [below](#logging) for more information.
 
 ### Beam-Profilers
 You may use the `NanoScan` and `WinCamD` modules independent of the rest of the code in the repository to manage and use the respective beam-profilers (here loosely referred to as cameras). For that, follow the instructions detailed in the above sections ([NanoScan](#NanoScan) and [WinCamD](#WinCamD)) to install the necessary support software. Then follow the instructions under [Usage](#Usage) to import the necessary packages:
 ```python
 # For NanoScan
-from cameras.nanoscan import NanoScan
+from nanosquared.cameras.nanoscan import NanoScan
 cam = NanoScan(devMode = False)
 
 # For WinCamD
-from cameras.wincamd import WinCamD
+from nanosquared.cameras.wincamd import WinCamD
 cam = WinCamD(devMode = False)
 ```
 These 2 modules may be packaged into seperate packages should someone find the time to do it. It would be a meaningful endeavour in providing Python support for these 2 devices. 
@@ -112,7 +123,7 @@ cam.log()
 ```
 See the specific source code for more detailed documentation of the functions.
 
-If you do not wish to download the entire repository to interface with these beam profilers, a list of necessary files may be found under [cameras/README](./src/cameras/README.md).
+If you do not wish to download the entire repository to interface with these beam profilers, a list of necessary files may be found under [cameras/README](./src/nanosquared/cameras/README.md).
 
 #### NanoScan
 In addition to the above functions, `NanoScan` also provides the `cam.rotationFrequency` property to set the rotation speed of the scan head. 
@@ -121,13 +132,13 @@ Most other functions exposed by the ActiveX Endpoint may be accessed using:
 ```python
 cam.NS.<func>
 ```
-where `<func>` is the function you want to call. Refer to [the C# source code](./src/cameras/csharp/NanoScanLibrary/DllImports.cs) for a list of implemented function calls. The documentation for each of the ActiveX function can be (normally) found under:
+where `<func>` is the function you want to call. Refer to [the C# source code](./src/nanosquared/cameras/csharp/NanoScanLibrary/DllImports.cs) for a list of implemented function calls. The documentation for each of the ActiveX function can be (normally) found under:
 ```
 C:\Program Files (x86)\Photon\NanoScan v2\Documentation\50318-001 NanoScan v2 Automation Developer Guide.pdf
 ```
 where usually the `NsAs` part of the function name has been removed in the C# function.
 
-See [csharp/README.md](./src/cameras/csharp/README.md) for more information on why such an implementation was used. 
+See [csharp/README.md](./src/nanosquared/cameras/csharp/README.md) for more information on why such an implementation was used. 
 
 #### WinCamD
 In addition to the above functions, `WinCamD` also provides:
@@ -140,38 +151,42 @@ cam.getCameraIndex()                     # Gets the index of the camera, esp if 
 ```
 
 ### Stage
-The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/stage](./src/stage). Currently, only the accompanying stage `SGSP26-200` has been implemented. To use another stage, make a copy of that class and modify the parameters accordingly. Theoretically,any stage that works with the `GSC01` controller should work with the code. See the [the manual](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) for more information.
+The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/nanosquared/stage](./src/nanosquared/stage). Currently, only the accompanying stage `SGSP26-200` has been implemented. To use another stage, make a copy of that class and modify the parameters accordingly. Theoretically,any stage that works with the `GSC01` controller should work with the code. See the [the manual](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) for more information.
 
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
 
-Refer to [fitting](./src/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
+Refer to [fitting](./src/nanosquared/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
 ### Logging
-All logging is provided by the `LoggerMixIn` class under `src/common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
+All logging is provided by the `LoggerMixIn` class under [`src/nanosquared/common/helpers.py`](./src/nanosquared/common/helpers.py). All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 If you are adding modules to the codebase, it is recommended to inherit the `LoggerMixIn` class.
 
 ## Usage
-We have plans to package the entire repository into an installable Python package. But in the meantime, to write your own macros, add the following to the top of your script:
+If you are using a `pip`-installed version, simply do:
+```python
+import nanosquared
+```
+If you are planning to use the python files directly, add the following to the top of your script:
 ```python
 import os,sys
 src_dir = os.path.join("full\path\to\repo","src")
 sys.path.insert(0, src_dir)
 ```
-You can then import and use the modules, for example:
+You can import and use the modules, for example:
 ```python
-from cameras.nanoscan import NanoScan
+from nanosquared.cameras.nanoscan import NanoScan
 n = NanoScan(devMode = False)
 print(n.getAxis_avg_D4Sigma(axis = n.AXES.X, numsamples = 100))
 ```
 Example on how to measure the M² of a beam:
 ```python
-from measurement.measure import Measurement
-from cameras.nanoscan import NanoScan
-from stage.controller import GSC01
+from nanosquared.measurement.measure import Measurement
+from nanosquared.cameras.nanoscan import NanoScan
+from nanosquared.stage.controller import GSC01
 
-from fitting.fitter import MsqFitter
+from nanosquared.fitting.fitter import MsqFitter
 
 cfg = { "port" : "COM13" } # Check with "Device Manager" for port number
 
@@ -209,7 +224,7 @@ with NanoScan(devMode = False) as n:
 
 ## How it works
 ### Measuring Beam-Width Data
-The measurement of the M² data is carried out by the [Measurement](./src/measurement/measure.py) module.
+The measurement of the M² data is carried out by the [Measurement](./src/nanosquared/measurement/measure.py) module.
 
 #### Preparation
 If no center is given, the code uses the [ternary search algorithm](https://en.wikipedia.org/wiki/Ternary_search) will be used on each axis to find the center. 
@@ -238,7 +253,7 @@ in that order.
 If using all 3 methods does not allow all points to fit within the travel range of the stage, then the function ends and refuses to continue. The setup is therefore not suitable for this stage. Change the setup so that the full measurement process may fit within the travel range of the stage. 
 
 ### Fitting the Data
-The `Fitter` module under [fitting](./src/fitting) is used to fit the data obtained. 
+The `Fitter` module under [fitting](./src/nanosquared/fitting) is used to fit the data obtained. 
 ```
 Fitter ┬─> ODRFitter (scipy.odr):                optimizes x and y-error
        ├─> OCFFitter (scipy.optimize.curve_fit): optimizes y-error
@@ -249,7 +264,7 @@ Fitter ┬─> ODRFitter (scipy.odr):                optimizes x and y-error
     │
 MsqFitter: Provides functionalities common to all fitting methods
 ```
-There are 2 different fitters available (see above). See [fitting](./src/fitting) for more details on the fitting modes available to obtain M² (M²λ, M² and ISO modes). 
+There are 2 different fitters available (see above). See [fitting](./src/nanosquared/fitting) for more details on the fitting modes available to obtain M² (M²λ, M² and ISO modes). 
 
 The default fitting method is `scipy.optimize.curve_fit`. 
 
@@ -308,4 +323,4 @@ Refer to https://stackoverflow.com/a/54488818 for taming PyLint. In particular, 
 ```
 
 ## References
-[Beam Profilers](./src/cameras/references.md)
+[Beam Profilers](./src/nanosquared/cameras/references.md)
