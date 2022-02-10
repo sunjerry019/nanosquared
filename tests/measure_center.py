@@ -1,7 +1,7 @@
 import os, sys
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(base_dir, "../src/"))
+root_dir = os.path.abspath(os.path.join(base_dir, "../src/", "nanosquared"))
 sys.path.insert(0, root_dir)
 
 from measurement.measure import Measurement

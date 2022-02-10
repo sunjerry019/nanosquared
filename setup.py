@@ -21,7 +21,18 @@ setuptools.setup(
         "Operating System :: Windows",
     ],
     package_dir={"": "src"},
-    packages=[ "nanosquared" ], # setuptools.find_packages(where="src")
+    packages = [ # setuptools.find_packages(where="src")
+        'nanosquared', 
+        'nanosquared.cameras', 
+        'nanosquared.common', 
+        'nanosquared.fitting', 
+        'nanosquared.measurement', 
+        'nanosquared.stage'
+    ], 
+    package_data={
+        'nanosquared.cameras': ['csharp/NanoScanLibrary/bin/Release/netstandard2.0/*.dll']
+    }, # https://stackoverflow.com/a/1857436/3211506
+    include_package_data=True,
     python_requires=">=3.9",
     install_requires = [
         "scipy>=1.6.3",
