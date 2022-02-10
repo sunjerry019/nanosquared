@@ -159,7 +159,7 @@ The code responsible for communicating with each component are separated into di
 Refer to [fitting](./src/nanosquared/fitting) for documentation on the fitting module, and how you might can extend it to suit your purposes. 
 
 ### Logging
-All logging is provided by the `LoggerMixIn` class under `src/common/helpers.py`. All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
+All logging is provided by the `LoggerMixIn` class under [`src/nanosquared/common/helpers.py`](./src/nanosquared/common/helpers.py). All component classes inherit `LoggerMixIn`, which provides the method `self.log()`. This allows easy control of the log level and the way logging is handled in the entire project. 
 
 If you are adding modules to the codebase, it is recommended to inherit the `LoggerMixIn` class.
 
