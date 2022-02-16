@@ -132,7 +132,7 @@ Most other functions exposed by the ActiveX Endpoint may be accessed using:
 ```python
 cam.NS.<func>
 ```
-where `<func>` is the function you want to call. Refer to [the C# source code](./src/nanosquared/cameras/csharp/NanoScanLibrary/DllImports.cs) for a list of implemented function calls. The documentation for each of the ActiveX function can be (normally) found under:
+where `<func>` is the function you want to call. Refer to [the C# source code](./src/nanosquared/cameras/csharp/NanoScanLibrary/NanoScan.cs) for a list of implemented function calls. The documentation for each of the ActiveX function can be (normally) found under:
 ```
 C:\Program Files (x86)\Photon\NanoScan v2\Documentation\50318-001 NanoScan v2 Automation Developer Guide.pdf
 ```
