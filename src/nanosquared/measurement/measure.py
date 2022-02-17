@@ -601,7 +601,8 @@ class Measurement(h.LoggerMixIn):
         BOTH = (axis == self.camera.AXES.BOTH)
 
         if self.devMode:
-            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = 13659.09849, asint = True)}")
+            sim_zr = self.SIMULATION_PARAMS["z_R"] / 1000
+            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = sim_zr, asint = True)}")
             # return (100, 200) if BOTH else 100
 
         # We first get the beam width at the center
@@ -790,6 +791,12 @@ class Measurement(h.LoggerMixIn):
 
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
+    SIMULATION_PARAMS = {
+        "z_R"   : 13.65909849, # mm
+        "w_0"   : 100        , # um
+        "z_0"   : 0          , # mm
+        "lambda": 2300         # nm
+    }
     def simulate_beam(self, pos: int):
         """Simulates a beam with:
             z_0 = 0 mm, w_0 = 100 um, lambda = 2300 nm
