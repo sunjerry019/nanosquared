@@ -420,9 +420,6 @@ class Measurement(h.LoggerMixIn):
             The approximate beam-waist position
         """
 
-        if self.devMode:
-            return 15
-
         if axis is None:
             axis = self.camera.AXES.X
 
@@ -433,6 +430,9 @@ class Measurement(h.LoggerMixIn):
         if axis == self.camera.AXES.BOTH:
             return self.find_center_xy(precision = precision, left = left, right = right)
         #################
+        
+        if self.devMode:
+            return self.controller.um_to_pulse(um = (self.SIMULATION_PARAMS["z_0"] * 1000), asint = True)
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
@@ -601,7 +601,7 @@ class Measurement(h.LoggerMixIn):
         BOTH = (axis == self.camera.AXES.BOTH)
 
         if self.devMode:
-            sim_zr = self.SIMULATION_PARAMS["z_R"] / 1000
+            sim_zr = self.SIMULATION_PARAMS["z_R"] * 1000
             self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = sim_zr, asint = True)}")
             # return (100, 200) if BOTH else 100
 
