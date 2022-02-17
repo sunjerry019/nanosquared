@@ -731,9 +731,10 @@ class Measurement(h.LoggerMixIn):
 
                 # 4) Updating Interval
                 y_itp = evaluate(pos = x_itp)
-                if y_itp > 0:
+                orientation = np.sign(y_b - y_a)
+                if y_itp * orientation > 0:
                     x_b = x_itp; y_b = y_itp
-                elif y_itp < 0: 
+                elif y_itp * orientation < 0: 
                     x_a = x_itp; y_a = y_itp
                 else:
                     # Unlikely but alright
