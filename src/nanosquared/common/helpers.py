@@ -12,6 +12,8 @@ import logging
 logging.captureWarnings(True)
 
 class LoggerMixIn():
+	LOGLEVEL_THRESHOLD = logging.DEBUG
+	
 	def __init__(self, *args, **kwargs) -> None:
 		super().__init__(*args, **kwargs)
 
@@ -39,7 +41,7 @@ class LoggerMixIn():
 		"""
 
 		logging.log(loglevel, msg)
-		if loglevel >= logging.DEBUG:
+		if loglevel >= self.LOGLEVEL_THRESHOLD:
 			print(f"{logging.getLevelName(loglevel)}: {msg}", end = end)
 
 def ensureInt(x: int):
