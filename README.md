@@ -61,19 +61,31 @@ The NanoScan Software version is: `v2.9.1.28`.
 ## Installation
 ### Quick Start
 1. Install the necessary vendor software for [NanoScan](#nanoscan) and [WinCamD](#wincamd).
-2. To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
+2. Clone the repository
+    - Using Git Bash: `git clone https://github.com/sunjerry019/nanosquared/`
+    - Git GUI
+        - Right click on parent folder > Git GUI Here
+        - Clone a repository > Source Location: https://github.com/sunjerry019/nanosquared/
+3. To prepare the Python environment, you may choose to use [Anaconda](https://www.anaconda.com/):
 ```bat
 conda env create -f conda-environment.yml
 conda activate nanosquared
 ```
-3. Thereafter, install the `nanosquared` package by navigating to the repository and doing:
+4. Thereafter, install the `nanosquared` package by navigating to the repository and doing:
 ```bat
 pip install .
 ```
-4. Verify that you have installed it properly by doing:
+5. Verify that you have installed it properly by doing:
 ```python
 import nanosquared
 ```
+### Software Updates
+Should there be new versions of the nanosquared software, they may be obtained using the following method:
+- Using Git Bash in the folder: `git pull origin master`
+- Git GUI
+    - Right click on parent folder > Git GUI Here
+    - Remote > Fetch from ... > origin
+
 ### Python Modules
 Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
 ```bat
