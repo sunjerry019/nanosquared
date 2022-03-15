@@ -68,8 +68,9 @@ class Measurement(h.LoggerMixIn):
         if camera is None:
             camera = WinCamD(devMode = devMode)
         
-        assert isinstance(camera, Camera), f"Camera ({camera}) is not recognized"
-        assert isinstance(controller, Controller), f"Controller ({controller}) is not recognized"
+        # https://stackoverflow.com/questions/10582774/python-why-can-isinstance-return-false-when-it-should-return-true
+        assert isinstance(type(camera), type(Camera)), f"Camera ({camera}) is not recognized"
+        assert isinstance(type(controller), type(Controller)), f"Controller ({controller}) is not recognized"
 
         self.controller = controller
         self.camera     = camera
