@@ -81,6 +81,7 @@ import nanosquared
 ```
 ### Software Updates
 Should there be new versions of the nanosquared software, they may be obtained using the following method:
+- Run [`update.bat`](./update.bat)
 - Using Git Bash in the folder: `git pull origin master`
 - Git GUI
     1. Right click on parent folder > Git GUI Here
