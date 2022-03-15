@@ -239,7 +239,8 @@ class NanoScan(cam.Camera):
 		# 	return x
 
 	def __exit__(self, e_type, e_val, traceback):
-		self.NS.__exit__(e_type, e_val, traceback)
+		if not self.devMode:
+			self.NS.__exit__(e_type, e_val, traceback)
 		return super(NanoScan, self).__exit__(e_type, e_val, traceback)
 
 class NanoScanDLL(Client64):
