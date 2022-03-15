@@ -29,6 +29,11 @@ class CLI():
         print("======================")
 
     @staticmethod
+    def presskeycont():
+        input("Press Enter to continue...")
+        return
+
+    @staticmethod
     def getPositiveNonZeroFloat(question, default = None) -> float:
 
         prompt = f"[Default = {default}]" if default is not None else ""

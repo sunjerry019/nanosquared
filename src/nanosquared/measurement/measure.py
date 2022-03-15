@@ -302,7 +302,7 @@ class Measurement(h.LoggerMixIn):
 
         return pfad
 
-    def read_from_file(self, filename: str):
+    def read_from_file(self, filename: str, raiseError = False):
         """Read from a file written by `self.write_to_file()`
 
         Parameters
@@ -314,6 +314,8 @@ class Measurement(h.LoggerMixIn):
             f = open(filename, 'r')
         except OSError as e:
             self.log(f"Unable to read file: {filename}: OSError {e}", logging.WARN)
+            if raiseError:
+                raise OSError(e)
             return 
         
         # We assume the format position[mm] x_diam[um] dx_diam[um] y_diam[um] dy_diam[um]

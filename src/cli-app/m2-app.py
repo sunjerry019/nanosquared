@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+# Made 2022, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
+# Possible Improvements
+# - Different fitting methods
+
 from email.policy import default
 import os, sys
 from matplotlib.style import available
@@ -66,6 +74,7 @@ print(f"""
   │   {CLI.COLORS.OKCYAN}Welcome to M² Measurement Wizard{CLI.COLORS.ENDC}   │
   │                                      │
   │      Made 2021-2022, Yudong Sun      │
+  │  github.com/sunjerry019/nanosquared  │
   │                                      │
   └──────────────────────────────────────┘
 """)
@@ -81,15 +90,21 @@ with cam(devMode = devMode) as n:
     with nanosquared.stage.controller.GSC01(devMode = devMode, devConfig = cfg) as s:
         with nanosquared.measurement.measure.Measurement(devMode = devMode, camera = n, controller = s) as M:
             print(f"{CLI.COLORS.OKGREEN}Initialisation done!{CLI.COLORS.ENDC}")
+
             print("")
+            CLI.print_sep()
+            print(f"{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}: If you happen to quit halfway through, use the Task Manager > Processes to ensure that no NanoScanII.exe instances are running before restarting this wizard.\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}")
+            CLI.print_sep()
+            print("")
+            
             ic = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
 
             def launchInteractive():
+                CLI.print_sep()
                 print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
                 import code; code.interact(local=locals())
             
             if ic:
-                CLI.print_sep()
                 launchInteractive()
             else:
                 if not devMode:
@@ -118,16 +133,18 @@ with cam(devMode = devMode) as n:
                         print(f"{CLI.COLORS.OKGREEN}Fitting data (X-Axis)...{CLI.COLORS.ENDC}")
                         res = M.fit_data(axis = M.camera.AXES.X, wavelength = wavelength)
                         print(f"{CLI.COLORS.OKGREEN}=== X-Axis ==={CLI.COLORS.ENDC}")
-                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: \t{res}")
-                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC}: \t{M.fitter.m_squared}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: {res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC} : {M.fitter.m_squared}")
                         fig, ax = M.fitter.getPlotOfFit()
                         fig.show()
+
+                        CLI.presskeycont()
                         
                         print(f"{CLI.COLORS.OKGREEN}Fitting data (Y-Axis)...{CLI.COLORS.ENDC}")
-                        res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300) # Use defaults (same as above)
+                        res = M.fit_data(axis = M.camera.AXES.Y, wavelength = wavelength) # Use defaults (same as above)
                         print(f"{CLI.COLORS.OKGREEN}=== Y-Axis ==={CLI.COLORS.ENDC}")
-                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: \t{res}")
-                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC}: \t{M.fitter.m_squared}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: {res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC} : {M.fitter.m_squared}")
                         fig, ax = M.fitter.getPlotOfFit()
                         fig.show()
 
@@ -142,9 +159,49 @@ with cam(devMode = devMode) as n:
                             break
                 else:
                     print("Assuming you want to fit...")
-                    
+                    while True:
+                        while True:
+                            wavelength = CLI.getPositiveNonZeroFloat("Laser Wavelength (nm) ?")
 
+                            print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm{CLI.COLORS.ENDC}")
+                            confirm = CLI.whats_it_gonna_be_boy(f"Proceed?", default = "yes")
 
+                            if confirm:
+                                break
 
+                        while True:
+                            try:
+                                filename = input(CLI.GAP + "Filename > ")
+                                M.read_from_file(filename = filename)
+                                break
+                            except OSError as e:
+                                print(f"OSError: {e}. Try again.")
+                        
+                        print(f"{CLI.COLORS.OKGREEN}Fitting data (X-Axis)...{CLI.COLORS.ENDC}")
+                        res = M.fit_data(axis = M.camera.AXES.X, wavelength = wavelength)
+                        print(f"{CLI.COLORS.OKGREEN}=== X-Axis ==={CLI.COLORS.ENDC}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: {res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC} : {M.fitter.m_squared}")
+                        fig, ax = M.fitter.getPlotOfFit()
+                        fig.show()
 
-    
+                        CLI.presskeycont()
+                        
+                        print(f"{CLI.COLORS.OKGREEN}Fitting data (Y-Axis)...{CLI.COLORS.ENDC}")
+                        res = M.fit_data(axis = M.camera.AXES.Y, wavelength = wavelength) # Use defaults (same as above)
+                        print(f"{CLI.COLORS.OKGREEN}=== Y-Axis ==={CLI.COLORS.ENDC}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: {res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC} : {M.fitter.m_squared}")
+                        fig, ax = M.fitter.getPlotOfFit()
+                        fig.show()
+                        
+
+                        print(f"{CLI.COLORS.OKGREEN}All Done!{CLI.COLORS.ENDC}")
+                        
+                        ic2 = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
+                        if ic2:
+                            launchInteractive()
+                        
+                        anotherfit = CLI.whats_it_gonna_be_boy("Fit another?")
+                        if not anotherfit:
+                            break
