@@ -713,8 +713,7 @@ class GSC01(SerialController):
         return self.safesend(f"L:{self.axis}")
 
     def closeDevice(self):
-        if self.dev.isOpen():
-            self.dev.close()
+        return super().closeDevice()
 
     def safesend(self, *args, **kwargs):
         if self.devMode:
