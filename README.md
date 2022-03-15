@@ -239,7 +239,7 @@ n_0     = 0
 ```
 `kappa_1 = 0` is not technically allowed, but experimentally it helps the algorithm to converge faster in certain cases. 
 
-**NOTE**: As of now, only one direction of z_R searching is supported: in the direction of beam propagation when the beam is coming in from the dial side of the stage.
+**NOTE**: z_R searching working in both directions. However, the direction of beam propagation in which the beam is coming in from the dial side of the stage is preferred over the other and will be searched first. 
 
 This way all parameters of the beam may be determined experimentally.
 #### Measuring the caustic
