@@ -83,8 +83,9 @@ import nanosquared
 Should there be new versions of the nanosquared software, they may be obtained using the following method:
 - Using Git Bash in the folder: `git pull origin master`
 - Git GUI
-    - Right click on parent folder > Git GUI Here
-    - Remote > Fetch from ... > origin
+    1. Right click on parent folder > Git GUI Here
+    2. Remote > Fetch from > origin
+    3. Merge > Local Merge > Tracking Branch > origin/master
 
 ### Python Modules
 Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
