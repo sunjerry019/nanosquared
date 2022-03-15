@@ -203,6 +203,11 @@ with NanoScan(devMode = False) as n:
             #   ``repo/data/M2/<datetime>_<random string>.dat``
             # together with the metadata
 
+            # To save to a specific file, use: 
+            #   `M.take_measurements(precision = 10, metadata = meta, writeToFile = "path/to/file")`
+            # or run
+            #   `M.write_to_file("path/to/file", metadata = meta)
+
             # Explicit options
             res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300, \
                 mode = MsqFitter.M2_MODE, useODR = False, xerror = None)
@@ -218,6 +223,27 @@ with NanoScan(devMode = False) as n:
             print(f"M-squared:\t{M.fitter.m_squared}")
             fig, ax = M.fitter.getPlotOfFit()
             fig.show()
+```
+If the measurement has already been taken and only a fit is required, then you can run:
+```python
+from nanosquared.measurement.measure import Measurement
+
+with Measurement(devMode = True) as M:
+    M.read_from_file("path/to/file")
+
+    res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
+    print(f"X-Axis")
+    print(f"Fit Result:\t{res}")
+    print(f"M-squared:\t{M.fitter.m_squared}")
+    fig, ax = M.fitter.getPlotOfFit()
+    fig.show()
+
+    res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300)
+    print(f"Y-Axis")
+    print(f"Fit Result:\t{res}")
+    print(f"M-squared:\t{M.fitter.m_squared}")
+    fig, ax = M.fitter.getPlotOfFit()
+    fig.show()
 ```
 
 *More to be added, or even separate README.*
