@@ -83,40 +83,66 @@ with cam(devMode = devMode) as n:
             print(f"{CLI.COLORS.OKGREEN}Initialisation done!{CLI.COLORS.ENDC}")
             print("")
             ic = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
+
+            def launchInteractive():
+                print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
+                import code; code.interact(local=locals())
             
             if ic:
                 CLI.print_sep()
-                print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
-                import code; code.interact(local=locals())
+                launchInteractive()
             else:
                 if not devMode:
+                    print("Assuming you want to take a measurement...")
                     while True:
+                        while True:
+                            wavelength = CLI.getPositiveNonZeroFloat("Laser Wavelength (nm) ?")
+                            precision  = CLI.getIntWithLimit("Precision of search? (pulses) ?", default = 10, lowerlimit = 2)
+                            other      = input(CLI.GAP + "Other metadata > ")
+
+                            print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                            confirm = CLI.whats_it_gonna_be_boy(f"Proceed?", default = "yes")
+
+                            if confirm:
+                                break
+
                         meta = {
-                            "Wavelength": "2300 nm",
-                            "Lens": "f = 250mm CaF2 lens"
+                            "Wavelength"      : f"{wavelength} nm",
+                            "Precision (pps)" : precision,
+                            "Metadata"        : other
                         }
-                        M.take_measurements(precision = 10, metadata = meta) 
+                        M.take_measurements(precision = precision, metadata = meta) 
                         
-                        res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
-                        print(f"X-Axis")
-                        print(f"Fit Result:\t{res}")
-                        print(f"M-squared:\t{M.fitter.m_squared}")
+                        print(f"{CLI.COLORS.OKGREEN}Done!{CLI.COLORS.ENDC}")
+
+                        print(f"{CLI.COLORS.OKGREEN}Fitting data (X-Axis)...{CLI.COLORS.ENDC}")
+                        res = M.fit_data(axis = M.camera.AXES.X, wavelength = wavelength)
+                        print(f"{CLI.COLORS.OKGREEN}=== X-Axis ==={CLI.COLORS.ENDC}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: \t{res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC}: \t{M.fitter.m_squared}")
                         fig, ax = M.fitter.getPlotOfFit()
                         fig.show()
-
+                        
+                        print(f"{CLI.COLORS.OKGREEN}Fitting data (Y-Axis)...{CLI.COLORS.ENDC}")
                         res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300) # Use defaults (same as above)
-                        print(f"Y-Axis")
-                        print(f"Fit Result:\t{res}")
-                        print(f"M-squared:\t{M.fitter.m_squared}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Y-Axis ==={CLI.COLORS.ENDC}")
+                        print(f"{CLI.COLORS.OKGREEN}=== Fit Result{CLI.COLORS.ENDC}: \t{res}")
+                        print(f"{CLI.COLORS.OKGREEN}=== M-squared{CLI.COLORS.ENDC}: \t{M.fitter.m_squared}")
                         fig, ax = M.fitter.getPlotOfFit()
                         fig.show()
 
-                        break
-                        # Measurement done, launch interactive?
-                        # if not, take another measurement?
-                        # no = exit, yes = redo
+                        print(f"{CLI.COLORS.OKGREEN}All Done!{CLI.COLORS.ENDC}")
+                        
+                        ic2 = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
+                        if ic2:
+                            launchInteractive()
+                        
+                        anothermeasurement = CLI.whats_it_gonna_be_boy("Take another measurement?")
+                        if not anothermeasurement:
+                            break
                 else:
                     print("Assuming you want to fit...")
+                    
 
 
 

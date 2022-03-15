@@ -29,6 +29,64 @@ class CLI():
         print("======================")
 
     @staticmethod
+    def getPositiveNonZeroFloat(question, default = None) -> float:
+
+        prompt = f"[Default = {default}]" if default is not None else ""
+
+        while True:
+            try:
+                resp = input(CLI.GAP + question + " " + prompt + " > ").strip()
+                if default is not None and resp == '':
+                    return default
+                else:
+                    resp = float(resp)
+                    if resp <= 0: 
+                        raise ValueError
+                    return resp
+            except ValueError:
+                print("ERROR: Please respond with a positive number/float.")
+            except EOFError:
+                print("Encountered EOF, exiting...")
+                sys.exit()
+
+    @staticmethod
+    def getIntWithLimit(question, default = None, lowerlimit: int = 1) -> int:
+        """Gets an integer that is no lower than the `lowerlimit`
+
+        Parameters
+        ----------
+        question : str
+            Question to ask
+        default : int, optional
+            Default value, by default None
+        lowerlimit : int, optional
+            Lowest acceptable integer, by default 1
+
+        Returns
+        -------
+        int
+            Received input
+        """
+
+        prompt = f"[Default = {default}]" if default is not None else ""
+
+        while True:
+            try:
+                resp = input(CLI.GAP + question + " " + prompt + " > ").strip()
+                if default is not None and resp == '':
+                    return default
+                else:
+                    resp = int(resp)
+                    if resp <= lowerlimit: 
+                        raise ValueError
+                    return resp
+            except ValueError:
+                print(f"ERROR: Please respond with an integer that is at least {lowerlimit}")
+            except EOFError:
+                print("Encountered EOF, exiting...")
+                sys.exit()
+
+    @staticmethod
     def options(question, options, default):
         assert (default in options) or (default is None), "ERROR: default not in options"
 
