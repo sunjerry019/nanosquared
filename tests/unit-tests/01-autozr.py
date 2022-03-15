@@ -87,7 +87,7 @@ with OutOfRange_Measurement(devMode = True, camera = n, controller = c) as M:
         test_print(2, f"z_R out of range (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
 
 class Asym_Measurement(Measurement):
-    LOGLEVEL_THRESHOLD = logging.ERROR
+    # LOGLEVEL_THRESHOLD = logging.ERROR
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -123,7 +123,7 @@ with Asym_Measurement(devMode = True, camera = n, controller = c) as M:
     test_print(3, "z_R Asymmetric (Single-Axis)...")
     try:
         center = M.find_center(axis = M.camera.AXES.X)
-        z_R    = M.find_zR_pps(axis = M.camera.AXES.X, center = center, precision = 100)
+        z_R    = M.find_zR_pps(axis = M.camera.AXES.X, center = center, precision = 100, kappa1 = 0.1)
         print(f"z_R = {z_R}")
         assert np.isclose(a = z_R, b = referenceVal, atol = 100, rtol = 0)
         test_print(3, f"z_R Asymmetric (Single-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
@@ -135,7 +135,7 @@ with Asym_Measurement(devMode = True, camera = n, controller = c) as M:
     try:
         center = M.find_center(axis = M.camera.AXES.BOTH)
         print(center)
-        z_R    = M.find_zR_pps(axis = M.camera.AXES.BOTH, center = center, precision = 100)
+        z_R    = M.find_zR_pps(axis = M.camera.AXES.BOTH, center = center, precision = 100, kappa1 = 0.1)
         print(f"z_R = {z_R}")
         assert np.allclose(a = z_R, b = [referenceVal, referenceVal], atol = 100, rtol = 0)
         test_print(4, f"z_R Asymmetric (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
