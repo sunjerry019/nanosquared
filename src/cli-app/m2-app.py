@@ -5,6 +5,8 @@
 
 # Possible Improvements
 # - Different fitting methods
+# - Provide option to choose which way the beam is coming in
+# - Some proper way of breaking operations
 
 from email.policy import default
 import os, sys
