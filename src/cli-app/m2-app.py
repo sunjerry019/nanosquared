@@ -17,6 +17,8 @@ from cli import CLI
 
 try:
     import nanosquared
+    print("Using pip-installed version (may not be up-to-date).")
+    print("Do `pip install .` to update the installed version with the one in the repository.")
 except ModuleNotFoundError as e:
     base_dir = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.abspath(os.path.join(base_dir, ".."))
