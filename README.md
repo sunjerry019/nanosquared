@@ -151,7 +151,49 @@ cam.getCameraIndex()                     # Gets the index of the camera, esp if 
 ```
 
 ### Stage
-The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/nanosquared/stage](./src/nanosquared/stage). Currently, only the accompanying stage `SGSP26-200` has been implemented. To use another stage, make a copy of that class and modify the parameters accordingly. Theoretically,any stage that works with the `GSC01` controller should work with the code. See the [the manual](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) for more information.
+The `GSC01` stage controller module from OptoSigma may also be used independently. If you only want to interact with the stage, then you only need the files from [src/nanosquared/stage](./src/nanosquared/stage). Currently, only the accompanying stage `SGSP26-200` has been implemented. To use another stage, make a copy of that class and modify the parameters accordingly. Theoretically, any stage that works with the `GSC01` controller should work with the code. See the [manual](https://jp.optosigma.com/html/en/page_pdf/GSC-01.pdf) for more information.
+
+To use the `SGSP26-200` stage:
+```python
+from nanosquared.stage.controller import GSC01
+
+with GSC01(devMode = False) as control:
+    control.homeStage()
+
+    # move 10 um
+    pulses = control.um_to_pulse(um = 10, asint = True)
+    # we use asint because GSC01 can only use integer pulses
+    control.setSpeed(minSpeed = 500, maxSpeed = 6000)
+    control.rmove(delta = pulses)
+
+    # move to specific position
+    control.move(pos = 500)
+```
+See [src/nanosquared/stage/controller.py](./src/nanosquared/stage/controller.py) for more available functions.
+
+If a stage other than the `SGSP26-200` is to be used, then implement a class as such:
+```python
+import nanosquared.stage._stage as Stg
+
+class NewStageName(Stg.GSC01_Stage):    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs) 
+
+        self.travel     = 200 # mm  # REQUIRED: Obtain from stage
+        self.pulseRange = 100557    # REQUIRED: Obtain from stage
+        self.recalculateUmPerPulse()
+
+    def resetStage(self):
+        upper = (self.pulseRange - 1) / 2
+        lower = - upper
+
+        return self.setLimits(lower = lower, upper = upper)
+```
+and then pass it into the controller:
+```python
+st = GSC01(stage = NewStageName(), devMode = False)
+```
+See [src/nanosquared/stage/_stage.py](./src/nanosquared/stage/_stage.py) for more information.
 
 ## Extending this code
 The code responsible for communicating with each component are separated into different modules, which can be imported into a combination script. As OOP concepts have always been the core to the design of this software, any new stage/beam profiler can easily be integrated into the project by extending the base classes. 
