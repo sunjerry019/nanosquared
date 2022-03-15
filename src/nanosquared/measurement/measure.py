@@ -420,9 +420,6 @@ class Measurement(h.LoggerMixIn):
             The approximate beam-waist position
         """
 
-        if self.devMode:
-            return 15
-
         if axis is None:
             axis = self.camera.AXES.X
 
@@ -433,6 +430,9 @@ class Measurement(h.LoggerMixIn):
         if axis == self.camera.AXES.BOTH:
             return self.find_center_xy(precision = precision, left = left, right = right)
         #################
+        
+        if self.devMode:
+            return self.controller.um_to_pulse(um = (self.SIMULATION_PARAMS["z_0"] * 1000), asint = True)
 
         if not self.controller.stage.ranged and (left is None or right is None):
             self.controller.findRange()
@@ -563,7 +563,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, right: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, other: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -578,10 +578,10 @@ class Measurement(h.LoggerMixIn):
             How precise should we be when searching for the z_R. 
             If the precision is too small, the code may never converge.
             By default 10 pps.
-        right: optional, int
-            Rightmost point to search for. If None, self.controller.stage.LIMIT_UPPER. By default None.
-
-            # TODO: Check if its LIMIT_UPPER or LIMIT_LOWER
+        other: optional, int
+            Right or leftmost point to search for. If None, prioritizes self.controller.stage.LIMIT_UPPER (searches to the right). 
+            If not found, it will try self.controller.stage.LIMIT_LOWER or LIMIT_UPPER depending on the original `other` given.
+            By default None.
         kappa1: optional, float
             Should be in the range (0, inf)
             For use in the ITP Method
@@ -601,7 +601,8 @@ class Measurement(h.LoggerMixIn):
         BOTH = (axis == self.camera.AXES.BOTH)
 
         if self.devMode:
-            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = 13659.09849, asint = True)}")
+            sim_zr = self.SIMULATION_PARAMS["z_R"] * 1000
+            self.log(f"Simulating Beam with z_R = {self.controller.um_to_pulse(um = sim_zr, asint = True)}")
             # return (100, 200) if BOTH else 100
 
         # We first get the beam width at the center
@@ -624,52 +625,64 @@ class Measurement(h.LoggerMixIn):
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
         # https://en.wikipedia.org/wiki/ITP_method#The_method
 
-        # Implement for 1 axis first (x-axis):
-        # We always find towards the right
+        # Implement for 1 axis first (x-axis)
 
         ## TODO Check if the center is the correct size
 
         result = (None, None) if BOTH else None
 
         if not BOTH:
-            if right is None:
-                right = self.controller.stage.LIMIT_UPPER
+            if other is None:
+                other = self.controller.stage.LIMIT_UPPER
 
-            x_a = center
-            y_a = (omega_0 - sqrt2_omega)[0] if not self.devMode else evaluate(x_a)
-
-            # Initialize
-            left = x_a
-            y_b  = -1   # Force a negative first
-            x_b  = x_a
-
+            # We search from the origin outwards
+            origin, bound = center, other
             it = 0
+            remaining_tries = 1 # the other direction
+            err = ""
             while True:
                 it += 1
 
                 # We first search for a point that is positive
-                # Search from the center
-                x_b = np.around(left + np.abs(right - left) / 3).astype(int)
-                y_b = evaluate(pos = x_b)
+                # Search from the origin to the bound
+                x = np.around(origin + (bound - origin) / 3).astype(int)
+                y = evaluate(pos = x)
 
-                self.log(f"Center [{it}]: \t[{left}, {right}] \t==> f({x_b}) = {y_b}")
+                self.log(f"Bounding Search [{it}]: \t[{origin} -> {bound}] \t==> f({x}) = {y}")
 
-                if y_b > 0:
+                if y > 0:
                     break
-                elif y_b == 0: # unlikely but just in case
-                    return x_b
+                elif y == 0: # unlikely but just in case
+                    return x
                 else:
-                    left = x_b
+                    origin = x
 
-                if np.abs(left - right) <= precision:
+                if np.abs(bound - origin) <= precision:
                     # We have not found it
-                    err = f"Unable to find a point > z_R! Search Range [{center}, {right}]"
+                    if not err:
+                        err += f"Unable to find a point > z_R! Search Range [{origin}, {bound}]"
+                    else:
+                        err += f" and [{origin}, {bound}]"
+
                     self.log(err, logging.ERROR)
-                    raise me.StageOutOfRangeError(err)
+                    
+                    if remaining_tries > 0:
+                        remaining_tries -= 1
+                        origin = center
+                        bound  = self.controller.stage.LIMIT_LOWER if (other > center) else self.controller.stage.LIMIT_UPPER
+                    else:
+                        raise me.StageOutOfRangeError(err)
+
+            waist = (omega_0 - sqrt2_omega)[0] if not self.devMode else evaluate(center)
+
+            if x > center:
+                x_a, y_a = center, waist
+                x_b, y_b = x, y
+            else:
+                x_a, y_a = x, y
+                x_b, y_b = center, waist
 
             self.log(f"Initial Values: f({x_a}) = {y_a}, f({x_b}) = {y_b}")
-
-            # TODO: Account for x_b being on the other side
 
             kappa_1 = kappa1 # (0, inf)
             kappa_2 = kappa2 # [1, 1+\phi) = [1, 1 + scipy.constants.golden] where \phi = 1/2(1+sqrt(5))
@@ -718,9 +731,10 @@ class Measurement(h.LoggerMixIn):
 
                 # 4) Updating Interval
                 y_itp = evaluate(pos = x_itp)
-                if y_itp > 0:
+                orientation = np.sign(y_b - y_a)
+                if y_itp * orientation > 0:
                     x_b = x_itp; y_b = y_itp
-                elif y_itp < 0: 
+                elif y_itp * orientation < 0: 
                     x_a = x_itp; y_a = y_itp
                 else:
                     # Unlikely but alright
@@ -745,6 +759,7 @@ class Measurement(h.LoggerMixIn):
 
             self.log(f"z_R = {self.controller.pulse_to_um(z_R)/1000} mm")
         except Exception as e:
+            # When result == None
             z_R = result
 
         return z_R
@@ -777,6 +792,12 @@ class Measurement(h.LoggerMixIn):
 
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
 
+    SIMULATION_PARAMS = {
+        "z_R"   : 13.65909849, # mm
+        "w_0"   : 100        , # um
+        "z_0"   : 0          , # mm
+        "lambda": 2300         # nm
+    }
     def simulate_beam(self, pos: int):
         """Simulates a beam with:
             z_0 = 0 mm, w_0 = 100 um, lambda = 2300 nm
