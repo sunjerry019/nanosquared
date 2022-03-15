@@ -21,6 +21,7 @@ def setup():
         print(f"{CLI.COLORS.HEADER}==== SETUP ===={CLI.COLORS.ENDC}")
         print("\nIn the following questions, pressing Enter will enter the default option, which is indicated in capital letters.")
         print("\nIn development mode, no actual devices are required.\nAll function calls will therefore be simulated.")
+        print("Use this mode if you only want to fit.")
         devMode = CLI.whats_it_gonna_be_boy("Run in development mode?")
 
         print("\nNanoScan and WinCamD Beam Profilers are supported. \nyes = NanoScan, no = WinCamD")
@@ -75,43 +76,49 @@ cfg = { "port" : f"COM{comPort}" }
 
 cam = nanosquared.cameras.nanoscan.NanoScan if useNanoScan else nanosquared.cameras.wincamd.WinCamD
 
-print("Got it! Initialising...")
+print(f"{CLI.COLORS.OKGREEN}Got it! Initialising...{CLI.COLORS.ENDC}")
 with cam(devMode = devMode) as n:
     with nanosquared.stage.controller.GSC01(devMode = devMode, devConfig = cfg) as s:
         with nanosquared.measurement.measure.Measurement(devMode = devMode, camera = n, controller = s) as M:
             print(f"{CLI.COLORS.OKGREEN}Initialisation done!{CLI.COLORS.ENDC}")
             print("")
             ic = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
+            
+            if ic:
+                CLI.print_sep()
+                print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
+                import code; code.interact(local=locals())
+            else:
+                if not devMode:
+                    while True:
+                        meta = {
+                            "Wavelength": "2300 nm",
+                            "Lens": "f = 250mm CaF2 lens"
+                        }
+                        M.take_measurements(precision = 10, metadata = meta) 
+                        
+                        res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300)
+                        print(f"X-Axis")
+                        print(f"Fit Result:\t{res}")
+                        print(f"M-squared:\t{M.fitter.m_squared}")
+                        fig, ax = M.fitter.getPlotOfFit()
+                        fig.show()
 
-            meta = {
-                "Wavelength": "2300 nm",
-                "Lens": "f = 250mm CaF2 lens"
-            }
-            M.take_measurements(precision = 10, metadata = meta) 
-            # incl. auto find beam waist and rayleigh length
-            # Measurement data will be saved under 
-            #   ``repo/data/M2/<datetime>_<random string>.dat``
-            # together with the metadata
+                        res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300) # Use defaults (same as above)
+                        print(f"Y-Axis")
+                        print(f"Fit Result:\t{res}")
+                        print(f"M-squared:\t{M.fitter.m_squared}")
+                        fig, ax = M.fitter.getPlotOfFit()
+                        fig.show()
 
-            # To save to a specific file, use: 
-            #   `M.take_measurements(precision = 10, metadata = meta, writeToFile = "path/to/file")`
-            # or run
-            #   `M.write_to_file("path/to/file", metadata = meta)
+                        break
+                        # Measurement done, launch interactive?
+                        # if not, take another measurement?
+                        # no = exit, yes = redo
+                else:
+                    print("Assuming you want to fit...")
 
-            # Explicit options
-            res = M.fit_data(axis = M.camera.AXES.X, wavelength = 2300, \
-                mode = MsqFitter.M2_MODE, useODR = False, xerror = None)
-            print(f"X-Axis")
-            print(f"Fit Result:\t{res}")
-            print(f"M-squared:\t{M.fitter.m_squared}")
-            fig, ax = M.fitter.getPlotOfFit()
-            fig.show()
 
-            res = M.fit_data(axis = M.camera.AXES.Y, wavelength = 2300) # Use defaults (same as above)
-            print(f"Y-Axis")
-            print(f"Fit Result:\t{res}")
-            print(f"M-squared:\t{M.fitter.m_squared}")
-            fig, ax = M.fitter.getPlotOfFit()
-            fig.show()
-# import code; code.interact(local=locals())
+
+
     
