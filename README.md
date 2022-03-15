@@ -220,6 +220,10 @@ All logging is provided by the `LoggerMixIn` class under [`src/nanosquared/commo
 If you are adding modules to the codebase, it is recommended to inherit the `LoggerMixIn` class.
 
 ## Usage
+**To start the quick-and-dirty CLI Application, simply double click on `launch_m2.bat`.**
+
+**The environment `nanosquared` needs to be set up with Anaconda.**
+
 If you are using a `pip`-installed version, simply do:
 ```python
 import nanosquared
