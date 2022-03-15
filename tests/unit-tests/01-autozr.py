@@ -30,7 +30,14 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def test_print(num, message):
+test_results = {}
+
+def test_print(num, message, success = None):
+    global test_results
+
+    if success is not None:
+        test_results = test_results | { num: success }
+
     print(f"{bcolors.HEADER}=======>{bcolors.ENDC} [{bcolors.HEADER}Test {num}{bcolors.ENDC}]: {message}")
 
 n = NanoScan(devMode = True)
@@ -73,18 +80,18 @@ with OutOfRange_Measurement(devMode = True, camera = n, controller = c) as M:
     try:
         center = M.find_center(axis = M.camera.AXES.X)
         z_R    = M.find_zR_pps(axis = M.camera.AXES.X, center = center, precision = 100)
-        test_print(1, f"z_R out of range (Single-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]")
+        test_print(1, f"z_R out of range (Single-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]", success = False)
     except me.StageOutOfRangeError as e:
-        test_print(1, f"z_R out of range (Single-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
+        test_print(1, f"z_R out of range (Single-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]", success = True)
 
     test_print(2, "z_R out of range (Both-Axis)...")
     try:
         center = M.find_center(axis = M.camera.AXES.BOTH)
         print(center)
         z_R    = M.find_zR_pps(axis = M.camera.AXES.BOTH, center = center, precision = 100)
-        test_print(2, f"z_R out of range (Both-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]")
+        test_print(2, f"z_R out of range (Both-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]", success = False)
     except me.StageOutOfRangeError as e:
-        test_print(2, f"z_R out of range (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
+        test_print(2, f"z_R out of range (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]", success = True)
 
 class Asym_Measurement(Measurement):
     # LOGLEVEL_THRESHOLD = logging.ERROR
@@ -126,9 +133,9 @@ with Asym_Measurement(devMode = True, camera = n, controller = c) as M:
         z_R    = M.find_zR_pps(axis = M.camera.AXES.X, center = center, precision = 100, kappa1 = 0.1)
         print(f"z_R = {z_R}")
         assert np.isclose(a = z_R, b = referenceVal, atol = 100, rtol = 0)
-        test_print(3, f"z_R Asymmetric (Single-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
+        test_print(3, f"z_R Asymmetric (Single-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]", success = True)
     except Exception as e:
-        test_print(3, f"z_R Asymmetric (Single-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]")
+        test_print(3, f"z_R Asymmetric (Single-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]", success = False)
         
 
     test_print(4, "z_R Asymmetric (Both-Axis)...")
@@ -138,7 +145,10 @@ with Asym_Measurement(devMode = True, camera = n, controller = c) as M:
         z_R    = M.find_zR_pps(axis = M.camera.AXES.BOTH, center = center, precision = 100, kappa1 = 0.1)
         print(f"z_R = {z_R}")
         assert np.allclose(a = z_R, b = [referenceVal, referenceVal], atol = 100, rtol = 0)
-        test_print(4, f"z_R Asymmetric (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]")
+        test_print(4, f"z_R Asymmetric (Both-Axis)...[{bcolors.OKGREEN}OK{bcolors.ENDC}]", success = True)
     except Exception as e:
-        test_print(4, f"z_R Asymmetric (Both-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]")
+        test_print(4, f"z_R Asymmetric (Both-Axis)...[{bcolors.FAIL}FAIL{bcolors.ENDC}]", success = False)
 
+num_tests = len(test_results.keys())
+test_results_val = list(test_results.values())
+print(f"\n======================\nTest Result: {bcolors.OKGREEN}OK: {test_results_val.count(True)}/{num_tests}{bcolors.ENDC}\t{bcolors.FAIL}FAIL: {test_results_val.count(False)}/{num_tests}{bcolors.ENDC}\n======================\n")
