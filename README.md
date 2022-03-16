@@ -82,7 +82,7 @@ import nanosquared
 Steps 4 and 5 makes it easier to use the package but is not essential.
 
 ### Software Updates
-Should there be new versions of the nanosquared software, you can simply run [`update-and-install.bat`](./update-and-install.bat), which will get the newest update from Github and then install it as a local package (not strictly required for use).
+Should there be new versions of the nanosquared software, you can simply run [`update-and-install.bat`](./update-and-install.bat), which will get the newest update from Github and then install it as a local package (not strictly required for use). [_The environment nanosquared needs to be set up with Anaconda_]
 
 Alternatively, the updates may be obtained using the following method:
 - Run [`update.bat`](./update.bat)
@@ -91,6 +91,7 @@ Alternatively, the updates may be obtained using the following method:
     1. Right click on parent folder > Git GUI Here
     2. Remote > Fetch from > origin
     3. Merge > Local Merge > Tracking Branch > origin/master
+
 Then you may run 
 ```
 conda activate nanosquared
