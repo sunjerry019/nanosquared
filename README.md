@@ -79,14 +79,24 @@ pip install .
 ```python
 import nanosquared
 ```
+Steps 4 and 5 makes it easier to use the package but is not essential.
+
 ### Software Updates
-Should there be new versions of the nanosquared software, they may be obtained using the following method:
+Should there be new versions of the nanosquared software, you can simply run [`update-and-install.bat`](./update-and-install.bat), which will get the newest update from Github and then install it as a local package (not strictly required for use).
+
+Alternatively, the updates may be obtained using the following method:
 - Run [`update.bat`](./update.bat)
 - Using Git Bash in the folder: `git pull origin master`
 - Git GUI
     1. Right click on parent folder > Git GUI Here
     2. Remote > Fetch from > origin
     3. Merge > Local Merge > Tracking Branch > origin/master
+Then you may run 
+```
+conda activate nanosquared
+pip install .
+```
+to install the latest version of the software as a local python package.
 
 ### Python Modules
 Should you need to directly debug the NanoScan interfacing C# code, prepare a 32-bit environment:
