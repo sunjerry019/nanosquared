@@ -108,13 +108,14 @@ with cam(devMode = devMode) as n:
             
             ic = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
 
-            def launchInteractive():
+            def launchInteractive(locs):
                 CLI.print_sep()
                 print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
-                import code; code.interact(local=locals())
+                import code;
+                code.interact(local=dict(globals(), **locals(), **locs))
             
             if ic:
-                launchInteractive()
+                launchInteractive(locals())
             else:
                 if not devMode:
                     print("Assuming you want to take a measurement...")
@@ -161,7 +162,7 @@ with cam(devMode = devMode) as n:
                         
                         ic2 = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
                         if ic2:
-                            launchInteractive()
+                            launchInteractive(locals())
                         
                         anothermeasurement = CLI.whats_it_gonna_be_boy("Take another measurement?")
                         if not anothermeasurement:
@@ -212,7 +213,7 @@ with cam(devMode = devMode) as n:
                         
                         ic2 = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
                         if ic2:
-                            launchInteractive()
+                            launchInteractive(locals())
                         
                         anotherfit = CLI.whats_it_gonna_be_boy("Fit another?")
                         if not anotherfit:
