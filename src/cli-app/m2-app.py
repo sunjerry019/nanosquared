@@ -15,10 +15,13 @@ import serial.tools.list_ports
 
 from cli import CLI
 
+CLI.clear_screen()
+
 try:
     import nanosquared
     print("Using pip-installed version (may not be up-to-date).")
     print("If you have recently updated the repository, do `pip install .` to update the installed version with the one in the repository.")
+    print("Otherwise it is safe to ignore this message. ")
 except ModuleNotFoundError as e:
     base_dir = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -71,7 +74,6 @@ def setup():
 
     return devMode, useNanoScan, comPort
 
-CLI.clear_screen()
 print(f"""
   ┌──────────────────────────────────────┐
   │                                      │
