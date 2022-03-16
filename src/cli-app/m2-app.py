@@ -83,6 +83,9 @@ print(f"""
   │  github.com/sunjerry019/nanosquared  │
   │                                      │
   └──────────────────────────────────────┘
+
+  - Hint: Control + Z during input exits program.
+
 """)
 
 devMode, useNanoScan, comPort = setup()
