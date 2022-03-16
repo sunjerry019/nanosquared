@@ -176,7 +176,7 @@ with cam(devMode = devMode) as n:
                         while True:
                             try:
                                 filename = input(CLI.GAP + "Filename > ")
-                                M.read_from_file(filename = filename)
+                                M.read_from_file(filename = filename, raiseError = True)
                                 break
                             except OSError as e:
                                 print(f"OSError: {e}. Try again.")
