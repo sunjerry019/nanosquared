@@ -11,9 +11,9 @@ dependencies:
     - wxpython>=4.1.1
     - comtypes==1.1.8
     - pywin32>=228
+    - pythonnet>=2.5.2
     - pip
     - pip:
         - pyqt5>=5.15
         - matplotlib>=3.4.2
         - msl-loadlib>=0.9.0
-        - pythonnet>=2.5.2
