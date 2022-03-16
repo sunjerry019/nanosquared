@@ -79,7 +79,9 @@ pip install .
 ```python
 import nanosquared
 ```
-Steps 4 and 5 makes it easier to use the package but is not essential.
+Step 4 makes it easier to use the package but is not essential.
+
+Step 3 and 4 may be automated using [`anaconda-install.bat`](./anaconda-install.bat)
 
 ### Software Updates
 Should there be new versions of the nanosquared software, you can simply run [`update-and-install.bat`](./update-and-install.bat), which will get the newest update from Github and then install it as a local package (not strictly required for use). [_The environment nanosquared needs to be set up with Anaconda_]
