@@ -180,6 +180,9 @@ with cam(devMode = devMode) as n:
                                 break
                             except OSError as e:
                                 print(f"OSError: {e}. Try again.")
+                            except EOFError:
+                                print("Encountered EOF, exiting...")
+                                sys.exit()
                         
                         print(f"{CLI.COLORS.OKGREEN}Fitting data (X-Axis)...{CLI.COLORS.ENDC}")
                         res = M.fit_data(axis = M.camera.AXES.X, wavelength = wavelength)
