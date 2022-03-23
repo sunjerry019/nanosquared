@@ -1,5 +1,5 @@
 # M-Squared Automation
-Automated measurement of [M²](https://en.wikipedia.org/wiki/M_squared), also known as the beam propagation ratio or beam quality factor, using the WinCamD / Nanoscan beam profilers. WinCamD and NanoScan code may be used independently.
+Open source automated measurement of [M²](https://en.wikipedia.org/wiki/M_squared), also known as the beam propagation ratio or beam quality factor, using the WinCamD / Nanoscan beam profilers. WinCamD and NanoScan code may be used independently.
 
 **Table of Content**
 * [Important Note](#important-note)
