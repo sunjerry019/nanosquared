@@ -123,9 +123,18 @@ with cam(devMode = devMode) as n:
                         while True:
                             wavelength = CLI.getPositiveNonZeroFloat("Laser Wavelength (nm) ?")
                             precision  = CLI.getIntWithLimit("Precision of search? (pulses) ?", default = 10, lowerlimit = 2)
+
+                            if useNanoScan:
+                                print(f"NanoScan has the following rotation frequencies (Hz): {n.allowedRots}")
+                                scanrate = float(CLI.options("Rotation Frequency of NanoScan?", options = n.allowedRots, default = n.rotationFrequency))
+
                             other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
-                            print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                            if useNanoScan:
+                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Rotation Rate  : {scanrate} Hz\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                            else:
+                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+
                             confirm = CLI.whats_it_gonna_be_boy(f"Proceed?", default = "yes")
 
                             if confirm:
@@ -136,6 +145,10 @@ with cam(devMode = devMode) as n:
                             "Precision (pps)" : precision,
                             "Metadata"        : other
                         }
+                        if useNanoScan:
+                            n.rotationFrequency = scanrate
+                            meta["NanoScan Rotation Rate (Hz)"] = scanrate
+
                         M.take_measurements(precision = precision, metadata = meta) 
                         
                         print(f"{CLI.COLORS.OKGREEN}Done!{CLI.COLORS.ENDC}")
