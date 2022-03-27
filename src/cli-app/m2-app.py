@@ -123,7 +123,7 @@ with cam(devMode = devMode) as n:
                         while True:
                             wavelength = CLI.getPositiveNonZeroFloat("Laser Wavelength (nm) ?")
                             precision  = CLI.getIntWithLimit("Precision of search? (pulses) ?", default = 10, lowerlimit = 2)
-                            other      = input(CLI.GAP + "Other metadata > ")
+                            other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
                             print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
                             confirm = CLI.whats_it_gonna_be_boy(f"Proceed?", default = "yes")
