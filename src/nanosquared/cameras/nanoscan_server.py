@@ -3,11 +3,7 @@
 # Made 2021, Sun Yudong
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
-import os,sys
-
-base_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(base_dir, ".."))
-sys.path.insert(0, root_dir)
+import os
 
 from msl.loadlib import Server32
 
@@ -19,6 +15,7 @@ class NanoScanServer(Server32):
 
     def __init__(self, host, port, **kwargs):
         # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
+        path = Server32.remove_site_packages_64bit()
         try:
             super(NanoScanServer, self).__init__(
                 # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
@@ -52,6 +49,11 @@ class NanoScanServer(Server32):
         def send(*args, **kwargs):
             return getattr(self.NS, name)(*args, **kwargs)
         return send
+
+    def log(self, message):
+        with open(os.path.join(os.path.dirname(__file__), "log.log"), 'a') as f:
+            f.write(str(message))
+            f.write("\n")
 
     def __enter__(self):
         return self
