@@ -6,4 +6,5 @@ try:
     from . import wincamd_constants
     from . import wincamd
 except ModuleNotFoundError:
+    # Probably got called from msl-loadlib/Server32
     pass
