@@ -447,6 +447,8 @@ class GSC01(SerialController):
         The above cannot be changed. 
         
         """
+        self.log("Homing stage...", end="\r", loglevel = logging.INFO)
+
         ret = self.safesend(f"H:{self.axis}")
         self.waitClear()
 
@@ -457,6 +459,8 @@ class GSC01(SerialController):
         # but I don't want to deal with all the cases resulting from resetPositionToZero()
 
         self.resetPositionToZero()
+
+        self.log("Homing stage...Done", loglevel = logging.INFO)
         
         return ret
 
@@ -481,6 +485,8 @@ class GSC01(SerialController):
             The obtained pulse range.
 
         """
+
+        self.log("Finding stage range...", end="\r", loglevel = logging.INFO)
 
         self.stage.pulseRange = 0
 
@@ -508,6 +514,8 @@ class GSC01(SerialController):
         self.stage.ranged = True
 
         self.setSpeed(jogSpeed = orig_speed)
+
+        self.log("Finding stage range...Done", loglevel = logging.INFO)
 
         return self.stage.pulseRange    
 
@@ -798,23 +806,23 @@ class GSC01(SerialController):
         waitTime = 0
         waitTimeLimit = 0.3
         while True:
-        	x = self.isBusy(waitTime = waitTime)
-        	if x is not None and not x:
-        		break
+            x = self.isBusy(waitTime = waitTime)
+            if x is not None and not x:
+                break
 
-        	if x is None:
-        		timeoutCount += 1
-        		if timeoutCount >= timeoutLimit:
-        			timeoutCount = 0
-        			waitTime += 0.1
+            if x is None:
+                timeoutCount += 1
+                if timeoutCount >= timeoutLimit:
+                    timeoutCount = 0
+                    waitTime += 0.1
 
-        		if waitTime >= waitTimeLimit:
-        			raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
+                if waitTime >= waitTimeLimit:
+                    raise RuntimeError("waitClear timed out, this should not happen. Did you switch on the microcontroller?")
 
-        		# We try again but quit if 2nd time still none
+                # We try again but quit if 2nd time still none
 
-        	# print("Waiting for stack to clear...", end="\r")
-        	time.sleep(0.1)
+            # print("Waiting for stack to clear...", end="\r")
+            time.sleep(0.1)
         # print("Waiting for stack to clear...cleared")
 
         return True
