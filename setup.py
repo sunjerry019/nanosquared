@@ -33,7 +33,7 @@ setuptools.setup(
         'nanosquared.cameras': ['csharp/NanoScanLibrary/bin/Release/netstandard2.0/*.dll']
     }, # https://stackoverflow.com/a/1857436/3211506
     include_package_data=True,
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     install_requires = [
         "scipy>=1.6.3",
         "numpy>=1.20.3",
