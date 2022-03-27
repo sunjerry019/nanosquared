@@ -102,7 +102,7 @@ with cam(devMode = devMode) as n:
 
             print("")
             CLI.print_sep()
-            print(f"{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}: If you happen to quit halfway through, use the Task Manager > Processes to ensure that no NanoScanII.exe instances are running before restarting this wizard.\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}")
+            print(f"{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}: If you happen to quit halfway through, use the Task Manager > Processes to ensure that no NanoScanII.exe instances are running before restarting this wizard.\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}: Pressing Ctrl+Z then Enter during input will exit program cleanly.\n{CLI.COLORS.FAIL}IMPT{CLI.COLORS.ENDC}")
             CLI.print_sep()
             print("")
             
