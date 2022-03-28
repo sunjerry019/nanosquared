@@ -97,13 +97,15 @@ class CLI():
 
         prompt = f"[Default = {default}]" if default is not None else ""
 
+        stroptions = [str(x) for x in options]
+
         while True:
             try:
                 resp = input(CLI.GAP + question + " " + prompt + " > ").strip().lower()
                 if default is not None and resp == '':
                     return default
                 else:
-                    if resp not in options:
+                    if resp not in stroptions:
                         raise ValueError
                     return resp
             except ValueError:
