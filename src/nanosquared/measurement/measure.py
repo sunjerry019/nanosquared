@@ -134,7 +134,7 @@ class Measurement(h.LoggerMixIn):
         
         if axis is None or not isinstance(axis, self.camera.AXES):
             axis = self.camera.AXES.BOTH
-            self.log(f"Defaulting to {axis}")
+            self.log(f"Defaulting to both axis measurement")
             
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
