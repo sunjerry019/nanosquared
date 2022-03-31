@@ -131,14 +131,14 @@ class NanoScan(cam.Camera):
 		out = np.array([[self.oneRev()] for _ in range(numsamples)])
 
 		# Throw away top 10% of values
-		throwout = int(np.around(0.1 * numsamples))
-		if axis == NsAxes.BOTH:
-			x_axis, y_axis = out[:,0], out[:,1]
-			x_axis, y_axis = np.sort(x_axis)[:-throwout], np.sort(y_axis)[:-throwout]
+		# throwout = int(np.around(0.1 * numsamples))
+		# if axis == NsAxes.BOTH:
+		# 	x_axis, y_axis = out[:,0], out[:,1]
+		# 	x_axis, y_axis = np.sort(x_axis)[:-throwout], np.sort(y_axis)[:-throwout]
 
-			out = np.column_stack((x_axis, y_axis))
-		else:
-			out = np.sort(out)[:-throwout]
+		# 	out = np.column_stack((x_axis, y_axis))
+		# else:
+		# 	out = np.sort(out)[:-throwout]
 
 		average = np.average(out, axis = 0)
 		stddev  = np.std(out, axis = 0)
