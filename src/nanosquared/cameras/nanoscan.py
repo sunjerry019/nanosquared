@@ -228,7 +228,7 @@ class NanoScan(cam.Camera):
 			centroidValue_X = self.NS.GetCentroidPosition(NsAxes.X, self.roiIndex)
 			centroidValue_Y = self.NS.GetCentroidPosition(NsAxes.Y, self.roiIndex)
 
-			self.log(f"{cnt}: waitStable: ({centroidValue_X}, {centroidValue_Y})", logging.DEBUG, end = "\r")
+			self.log(f"{cnt}: waitStable: Centroid ({centroidValue_X}, {centroidValue_Y})", logging.DEBUG, end = "\r")
 
 			cnt += 1
 
