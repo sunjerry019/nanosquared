@@ -505,7 +505,7 @@ class Measurement(h.LoggerMixIn):
             right = [self.controller.stage.LIMIT_UPPER, self.controller.stage.LIMIT_UPPER]
 
         if any(not isinstance(item, int) for item in left) or any(not isinstance(item, int) for item in right):
-            self.log(f"Reft {left}, Right {right} invalid", logging.WARN)
+            self.log(f"Left {left}, Right {right} invalid", logging.WARN)
             return (0, 0)
 
         if(precision < 2):
