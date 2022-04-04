@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal
 
-data = pd.read_csv("dataset_42.dat", sep=",", header = 0)
+data = pd.read_csv("dataset_41.dat", sep=",", header = 0)
 
 x = data['x'].to_numpy()
 horizontal = np.arange(len(x))
@@ -15,36 +15,46 @@ def remove_spikes(arr: np.ndarray, threshold: float) -> np.ndarray:
     # We make use of a circular wrap-around
     # https://stackoverflow.com/questions/17739543/wrapping-around-slices-in-python-numpy
     # d = np.diff(arr, append = arr[0]) # Wrap-around
-    # l = len(arr)
+    
     # ret = []
     # for i in range(l):
     #     r = range(i-1, i+1)
     #     neighs = d.take(r, mode='wrap')
     #     # if np.abs(neighs)
 
-    peaks, properties = scipy.signal.find_peaks(arr, prominence = threshold)
-    print(properties)
-    left_bases  = properties["left_bases"]
-    right_bases = properties["right_bases"] 
+    i = 0
+    horizontal = np.arange(len(arr))
 
-    within_peak = []
-    for i in range(len(peaks)):
-        within_peak.append(np.arange(left_bases[i] + 1, right_bases[i]))
-
-    within_peak = np.unique(np.concatenate(within_peak))
+    plt.plot(horizontal, arr, 'r+:', label = "raw data")
     
-    print(within_peak)
+    arr_rem = arr
+    horizontal_rem = horizontal
+    while True:
+        # find peaks
+        peaks, _ = scipy.signal.find_peaks(arr_rem, prominence = threshold)
 
-    # plt.plot(np.arange(len(arr)), arr, 'b+:')
-    # plt.plot(peaks, arr.take(peaks), "ro")
-    # plt.ylabel('Beam Diam [um]')
-    # plt.xlabel('Time [sec]')
-    # plt.show()
-    # plt.clf()
+        if len(peaks) == 0:
+            break
 
+        # Generate masks
+        l    = len(arr_rem)
+        mask = np.ones(l, dtype=bool)
+        mask[peaks] = False
+
+        horizontal_rem = horizontal_rem[mask] 
+        arr_rem        = arr_rem[mask]
         
-    return arr
-    return np.array(ret)
+        plt.plot(horizontal_rem, arr_rem, "o", label = f"Cycle {i}")
+        
+        i += 1
+
+    plt.ylabel('Beam Diam [um]')
+    plt.xlabel('Time [sec]')
+    plt.legend()
+    plt.show()
+    plt.clf()
+
+    return arr_rem
 
 def get_hist(x):
     hist, bin_edges = np.histogram(x, bins = 30)
