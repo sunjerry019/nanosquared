@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal
 
-data = pd.read_csv("dataset_40.dat", sep=",", header = 0)
+data = pd.read_csv("dataset_39.dat", sep=",", header = 0)
 
 x = data['x'].to_numpy()
 horizontal = np.arange(len(x))
@@ -67,8 +67,9 @@ def remove_spikes(arr: np.ndarray, threshold: float) -> np.ndarray:
 
 
     plt.ylabel('Beam Diam [um]')
-    plt.xlabel('Time [sec]')
-    plt.legend()
+    plt.xlabel('Measurement number')
+    plt.legend(loc = "upper center", bbox_to_anchor=(1.2, 1))
+    plt.tight_layout()
     plt.show()
     plt.clf()
 
