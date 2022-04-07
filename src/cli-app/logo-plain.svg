@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="logo.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.12374369"
+     inkscape:cx="-1384.1007"
+     inkscape:cy="1424.3853"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Arrow"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-540.36218)">
+    <g
+       transform="matrix(0.83492595,0,0,0.83492595,28.638807,569.00149)"
+       id="g3051"
+       style="fill:#ff8c00;fill-opacity:1">
+      <g
+         id="g3053"
+         style="fill:#ff8c00;fill-opacity:1">
+        <path
+           inkscape:connector-curvature="0"
+           d="M 513.144,323.779 544.54,12.387 C 545.385,4.706 539.847,-0.799 532.169,0.095 L 222.735,33.29 c -7.677,0.894 -8.21,4.241 -1.193,7.482 L 362.636,109.555 109.558,362.632 40.775,221.538 c -3.238,-7.017 -6.588,-6.481 -7.482,1.193 L 0.096,532.168 c -0.894,7.678 4.611,13.216 12.295,12.372 l 311.392,-31.396 c 7.681,-0.844 8.231,-4.177 1.229,-7.444 L 184.718,436.617 436.617,184.718 505.7,325.012 c 3.267,6.999 6.603,6.448 7.444,-1.233 z"
+           id="path3055"
+           style="fill:#ff8c00;fill-opacity:1" />
+      </g>
+    </g>
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3057" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3059" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3061" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3063" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3065" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3067" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3069" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3071" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3073" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3075" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3077" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3079" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3081" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3083" />
+    <g
+       transform="matrix(0.55300124,0,0,0.55300124,118.61641,619.43545)"
+       id="g3085" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="NanoScan">
+    <path
+       sodipodi:type="arc"
+       style="fill:#1b818d;fill-opacity:1"
+       id="path3931"
+       sodipodi:cx="322.74374"
+       sodipodi:cy="305.4238"
+       sodipodi:rx="150.00766"
+       sodipodi:ry="150.00766"
+       d="m 472.7514,305.4238 a 150.00766,150.00766 0 1 1 -300.01532,0 150.00766,150.00766 0 1 1 300.01532,0 z"
+       transform="matrix(1.1212121,0,0,1.1212121,-105.86419,-86.444867)" />
+  </g>
+</svg>

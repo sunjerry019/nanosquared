@@ -9,13 +9,15 @@ from PyQt5.QtCore import pyqtSlot, Qt
 
 from qthelpers import moveToCentre
 
+from nanosquared.measurement.measure import Measurement
+
 import platform, ctypes
 
 class Stgctrl(QtWidgets.QWidget):
-    def __init__(self, *args):
+    def __init__(self, *args): #  measurement: Measurement, 
         super().__init__(*args)
 
-        # self.customicon = os.path.join(base_dir, 'icons', 'shutterbtn.svg')
+        self.customicon = os.path.join('logo-plain.svg')
 
         self.title = 'Stage Control with Camera'
         self.left = 10
@@ -113,7 +115,7 @@ class Stgctrl(QtWidgets.QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        # self.setWindowIcon(QIcon(self.customicon))
+        self.setWindowIcon(QIcon(self.customicon))
 
         moveToCentre(self)
 
