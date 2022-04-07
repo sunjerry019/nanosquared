@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Only works with NanoScan
+
+# Made 2022, Sun Yudong
+# yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
+
 import sys, os
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -106,8 +111,8 @@ class Stgctrl(QtWidgets.QWidget):
         if self.measurement is not None:
             for rate in self.measurement.camera.allowedRots:
                 self._scan_speed.addItem(str(rate))
-
-            index = self._scan_speed.findData(str(self.measurement.camera.rotationFrequency))
+            
+            index = self.measurement.camera.allowedRots.index(self.measurement.camera.rotationFrequency)
             if index != -1 :
                 self._scan_speed.setCurrentIndex(index)
         else:
@@ -157,11 +162,51 @@ class Stgctrl(QtWidgets.QWidget):
     def initEventListeners(self):
         self.installEventFilter(self)
 
-        self._homeBtn.clicked.connect(lambda: self.measurement.controller.homeStage())
+        self._homeBtn.clicked.connect(lambda: self.homeStage())
 
         self._leftArrow.clicked.connect(lambda: self.jog(positive = True))
         self._rightArrow.clicked.connect(lambda: self.jog(positive = False))
         self._stopButton.clicked.connect(lambda: self.stop())
+
+        self._d4sigmaBtn.clicked.connect(lambda: self.measureD4Sigma())
+
+        self._scan_speed.currentIndexChanged.connect(lambda: self.changeScanSpeed())
+    
+    def homeStage(self):
+        self.measurement.controller.homeStage()
+        self.resyncPos()
+
+    def changeScanSpeed(self):
+        rot = float(self._scan_speed.currentText())
+        self.measurement.camera.rotationFrequency = rot
+
+    def measureD4Sigma(self, *args, **kwargs):
+        if self.measurement is not None:
+            _numSamples = int(self._numsamples.text())
+            res = self.measurement.camera.getAxis_avg_D4Sigma(axis = self.measurement.camera.AXES.BOTH)
+            _x, _y = res[0], res[1]
+            self.informationDialog(message = f"X-Axis: {_x}\nY-Axis: {_y}", host = self)
+
+    def informationDialog(self, message, title = "Information", informativeText = None, host = None):
+        _msgBox = QtWidgets.QMessageBox(host)
+        _msgBox.setIcon(QtWidgets.QMessageBox.Information)
+        _msgBox.setWindowTitle(title)
+        _msgBox.setText(message)
+        if informativeText is not None:
+            _msgBox.setInformativeText(informativeText)
+
+        # Get height and width
+        _h = _msgBox.height()
+        _w = _msgBox.width()
+        _msgBox.setGeometry(0, 0, _w, _h)
+
+        moveToCentre(_msgBox)
+
+        _msgBox.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+
+        ret = _msgBox.exec_()
+
+        return ret
 
     def jog(self, *args, **kwargs):
         if self.measurement is not None:
@@ -220,17 +265,15 @@ def main():
         myappid = u'MPQ.LEX.GSC01.StageControl' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-    # TODO: If launched from main, then nanoscan functions disabled
-    n = NanoScan(devMode = True)
-    s = GSC01(devMode = False)
-    m = Measurement(camera = n, controller = s, devMode = False)
-
-    app = QtWidgets.QApplication(sys.argv)
-    ex = Stgctrl(measurement = m)
-    ex.show()
-    ex.raise_()
-    ex.setFocus()
-    sys.exit(app.exec_())
+    with NanoScan(devMode = False) as n:
+        with GSC01(devMode = False) as s:
+            with Measurement(camera = n, controller = s, devMode = False) as m:
+                app = QtWidgets.QApplication(sys.argv)
+                ex = Stgctrl(measurement = m)
+                ex.show()
+                ex.raise_()
+                ex.setFocus(True)
+                sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
