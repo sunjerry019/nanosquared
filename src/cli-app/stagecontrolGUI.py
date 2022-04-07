@@ -62,12 +62,14 @@ class Stgctrl(QtWidgets.QWidget):
         self._rightArrow = QtWidgets.QPushButton(u'\u21E8')
         self._homeBtn    = QtWidgets.QPushButton("Home Stage")
         self._d4sigmaBtn = QtWidgets.QPushButton("Take D4Sigma\nBeam Width\n(Both Axis)")
+        self._stopButton = QtWidgets.QPushButton("!<STOP>!")
 
         self._stage_buttons = [
             self._leftArrow  ,
             self._rightArrow ,
             self._homeBtn    ,
-            self._d4sigmaBtn
+            self._d4sigmaBtn ,
+            self._stopButton
         ]
 
         for btn in self._stage_buttons:
@@ -79,6 +81,8 @@ class Stgctrl(QtWidgets.QWidget):
 
         self._leftArrow.setFont(self.arrowFont)
         self._rightArrow.setFont(self.arrowFont)
+        
+        self._stopButton.setStyleSheet("font-weight: bold; background-color: #cb3365; color: #ffffff;")
 
         # SETTINGS AND PARAMS
         self._numsamples = QtWidgets.QLineEdit()
@@ -122,7 +126,8 @@ class Stgctrl(QtWidgets.QWidget):
 
         _stage_layout.addWidget(self._leftArrow, 6, 0, 1, 1)
         _stage_layout.addWidget(self._rightArrow, 6, 1, 1, 1)
-        _stage_layout.addWidget(self._homeBtn, 7, 0, 1, 2)
+        _stage_layout.addWidget(self._homeBtn, 7, 0, 1, 1)
+        _stage_layout.addWidget(self._stopButton, 7, 1, 1, 1)
 
         _stage_layout.addWidget(_velocity_label, 2, 3, 1, 1)
         _stage_layout.addWidget(self._velocity, 3, 3, 1, 1)
@@ -153,10 +158,12 @@ class Stgctrl(QtWidgets.QWidget):
         self._homeBtn.clicked.connect(lambda: self.measurement.controller.homeStage())
 
         self._leftArrow.clicked.connect(lambda: self.jog(positive = True))
-        self._leftArrow.released.connect(lambda: self.measurement.controller.stop())
+        self._leftArrow.released.connect(lambda: self.stop())
 
         self._rightArrow.clicked.connect(lambda: self.jog(positive = False))
-        self._rightArrow.released.connect(lambda: self.measurement.controller.stop())
+        self._rightArrow.released.connect(lambda: self.stop())
+
+        self._stopButton.clicked.connect(lambda: self.stop())
 
     def jog(self, *args, **kwargs):
         _spd = int(self._velocity.text())
@@ -166,6 +173,14 @@ class Stgctrl(QtWidgets.QWidget):
 
         self.measurement.controller.jog(*args, **kwargs)
 
+    def stop(self, *args, **kwargs):
+        self.measurement.controller.stop(*args, **kwargs)
+        self.resyncPos()
+
+    def resyncPos(self):
+        if self.measurement is not None:
+            self.measurement.controller.syncPosition()
+            self._lcd.display(self.measurement.controller.stage.position)
 
     def eventFilter(self, source, evt):
         # https://www.riverbankcomputing.com/static/Docs/PyQt4/qt.html#Key-enum
@@ -175,9 +190,7 @@ class Stgctrl(QtWidgets.QWidget):
         if evt.type() == QtCore.QEvent.ActivationChange:
             if self.isActiveWindow():
                 # Focus in
-                if self.measurement is not None:
-                    self.measurement.controller.syncPosition()
-                    self._lcd.display(self.measurement.controller.stage.position)
+                self.resyncPos()
 
         # if isinstance(evt, QtGui.QKeyEvent): #.type() ==
         #     # Check source here
@@ -261,6 +274,7 @@ def main():
     ex = Stgctrl(measurement = m)
     ex.show()
     ex.raise_()
+    ex.setFocus()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
