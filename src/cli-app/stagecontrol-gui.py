@@ -20,52 +20,45 @@ class Stgctrl(QtWidgets.QWidget):
         self.title = 'Stage Control with Camera'
         self.left = 10
         self.top = 10
-        self.width = 500
-        self.height = 500
+        self.width = 400
+        self.height = 200
         self.isOpen = False
 
         self.initUI()
 
-    # def make_widget_from_layou`t(function):
-    #     def wrapper(self):
-    #         # We create a widget
-    #         widget = QtWidgets.QWidget()
-    #         # Get the layout
-    #         layout = function(self, widget)
-    #         # Assign the layout to the widget
-    #         widget.setLayout(layout)
-
-    #         return widget
-
-    #     return wrapper
-
-    # @make_widget_from_layout
-    def create_stage(self, widget):
+    def create_stage(self):
         # Create all child elements
 
         # need to link to stagecontrol to read position of controllers
 
-        # LCDS
+        # LCD
         _lcd_label = QtWidgets.QLabel("Current Position")
         _lcd_label.setAlignment(QtCore.Qt.AlignCenter)
-        _lcd_label.setMaximumHeight(20)
+
+        self.labelFont = QtGui.QFont("Arial", 24)
+        self.labelFont.setBold(True)
+        _lcd_label.setFont(self.labelFont)
 
         self._lcd = QtWidgets.QLCDNumber()
-        self._lcd.setDigitCount(8)
+        self._lcd.setDigitCount(10)
         self._lcd.setSmallDecimalPoint(True)
         self._lcd.setMaximumHeight(200)
-        self._lcd.setMinimumHeight(150)
-        # TODO: Some styling here for the QLCD number
+        self._lcd.setMinimumHeight(100)
+
+        _numsamples_label = QtWidgets.QLabel("Number of Samples")
+        _numsamples_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
 
         # BUTTONS
         self._leftArrow  = QtWidgets.QPushButton(u'\u21E6')
         self._rightArrow = QtWidgets.QPushButton(u'\u21E8')
-        self._homeBtn    = QtWidgets.QPushButton("Home\nStage")
+        self._homeBtn    = QtWidgets.QPushButton("Home Stage")
+        self._d4sigmaBtn = QtWidgets.QPushButton("Take D4Sigma\nBeam Width\n(Both Axis)")
 
         self._stage_buttons = [
             self._leftArrow  ,
             self._rightArrow ,
             self._homeBtn    ,
+            self._d4sigmaBtn
         ]
 
         for btn in self._stage_buttons:
@@ -78,7 +71,12 @@ class Stgctrl(QtWidgets.QWidget):
         self._leftArrow.setFont(self.arrowFont)
         self._rightArrow.setFont(self.arrowFont)
 
-        # # SETTINGS AND PARAMS
+        # SETTINGS AND PARAMS
+        self._numsamples = QtWidgets.QLineEdit()
+        self._numsamples.setText('20')
+        self._numsamples.setAlignment(QtCore.Qt.AlignCenter)
+        self._numsamples.setValidator(QtGui.QIntValidator(1,10000))
+
         # _velocity_label = QtWidgets.QLabel("Velocity ({}m/s)".format(self.MICROSYMBOL))
         # _velocity_label.setAlignment(QtCore.Qt.AlignRight)
         # _step_size_label = QtWidgets.QLabel("Step size ({}m)".format(self.MICROSYMBOL))
@@ -108,27 +106,26 @@ class Stgctrl(QtWidgets.QWidget):
         # void QGridLayout::addWidget(QWidget *widget, int fromRow, int fromColumn, int rowSpan, int columnSpan, Qt::Alignment alignment = Qt::Alignment())
 
         # currx, y label
-        _stage_layout.addWidget(_lcd_label, 0, 1, 1, 2)
+        _stage_layout.addWidget(_lcd_label, 0, 0, 1, 2)
+        _stage_layout.addWidget(self._lcd, 1, 0, 2, 2)
 
-        # _stage_layout.addWidget(self._lcdx, 1, 1, 1, 2)
-        # _stage_layout.addWidget(self._lcdy, 1, 3, 1, 2)
+        _stage_layout.addWidget(self._leftArrow, 3, 0, 1, 1)
+        _stage_layout.addWidget(self._rightArrow, 3, 1, 1, 1)
+        _stage_layout.addWidget(self._homeBtn, 4, 0, 1, 2)
 
-        # _stage_layout.addWidget(_lcdx_label, 0, 1, 1, 2)
-        # _stage_layout.addWidget(_lcdy_label, 0, 3, 1, 2)
+        _stage_layout.addWidget(_numsamples_label, 1, 3, 1, 1)
+        _stage_layout.addWidget(self._numsamples, 2, 3, 1, 1)
+        _stage_layout.addWidget(self._d4sigmaBtn, 3, 3, 2, 1)
 
         # _stage_layout.addWidget(_velocity_label, 2, 0)
         # _stage_layout.addWidget(self._SL_velocity, 2, 1, 1, 2)
         # _stage_layout.addWidget(self._SL_step_size, 2, 3, 1, 2)
         # _stage_layout.addWidget(_step_size_label, 2, 5)
-
-        # _stage_layout.addWidget(self._upArrow, 4, 2, 1, 2)
-        # _stage_layout.addWidget(self._downArrow, 5, 2, 1, 2)
-        # _stage_layout.addWidget(self._leftArrow, 5, 0, 1, 2)
-        # _stage_layout.addWidget(self._rightArrow, 5, 4, 1, 2)
+        
 
         # _stage_layout.addWidget(_SL_settings, 4, 4, 1, 2)
 
-        # _stage_layout.addWidget(self._homeBtn, 4, 0, 1, 2)
+        
 
         return _stage_layout
 
@@ -176,8 +173,6 @@ class Stgctrl(QtWidgets.QWidget):
         self._layout = self.create_stage()
         self.setLayout(self._layout)
 
-        self.show()
-
     # @pyqtSlot()
     # def on_click(self):
     #     if self.isOpen:
@@ -200,6 +195,8 @@ def main():
 
     app = QtWidgets.QApplication(sys.argv)
     ex = Stgctrl()
+    ex.show()
+    ex.raise_()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
