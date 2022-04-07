@@ -5,7 +5,6 @@ import sys, os
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot, Qt
 
 from qthelpers import moveToCentre
 
@@ -94,9 +93,12 @@ class Stgctrl(QtWidgets.QWidget):
         _velocity_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
 
         self._velocity = QtWidgets.QLineEdit()
-        self._velocity.setText('500')
+        self._velocity.setText('4000')
         self._velocity.setValidator(QtGui.QIntValidator(100,20000))
         self._velocity.setAlignment(QtCore.Qt.AlignCenter)
+
+        if self.measurement is not None:
+            self.measurement.controller.setSpeed(jogSpeed = 4000)
 
         _scan_speed_label = QtWidgets.QLabel("NanoScan Scan Rate (Hz)")
         _scan_speed_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
@@ -158,24 +160,22 @@ class Stgctrl(QtWidgets.QWidget):
         self._homeBtn.clicked.connect(lambda: self.measurement.controller.homeStage())
 
         self._leftArrow.clicked.connect(lambda: self.jog(positive = True))
-        self._leftArrow.released.connect(lambda: self.stop())
-
         self._rightArrow.clicked.connect(lambda: self.jog(positive = False))
-        self._rightArrow.released.connect(lambda: self.stop())
-
         self._stopButton.clicked.connect(lambda: self.stop())
 
     def jog(self, *args, **kwargs):
-        _spd = int(self._velocity.text())
-        if _spd != self.lastSetSpeed:
-            self.lastSetSpeed = _spd
-            self.measurement.controller.setSpeed(jogSpeed = self.lastSetSpeed)
+        if self.measurement is not None:
+            _spd = int(self._velocity.text())
+            if _spd != self.lastSetSpeed:
+                self.lastSetSpeed = _spd
+                self.measurement.controller.setSpeed(jogSpeed = self.lastSetSpeed)
 
-        self.measurement.controller.jog(*args, **kwargs)
+            self.measurement.controller.jog(*args, **kwargs)
 
     def stop(self, *args, **kwargs):
-        self.measurement.controller.stop(*args, **kwargs)
-        self.resyncPos()
+        if self.measurement is not None:
+            self.measurement.controller.stop(*args, **kwargs)
+            self.resyncPos()
 
     def resyncPos(self):
         if self.measurement is not None:
@@ -192,66 +192,21 @@ class Stgctrl(QtWidgets.QWidget):
                 # Focus in
                 self.resyncPos()
 
-        # if isinstance(evt, QtGui.QKeyEvent): #.type() ==
-        #     # Check source here
-        #     evtkey = evt.key()
+        if isinstance(evt, QtGui.QKeyEvent): #.type() ==
+            # Check source here
+            evtkey = evt.key()
 
-        #     # if (evt.type() == QtCore.QEvent.KeyPress):
-        #     #     print("KeyPress : {}".format(key))
-        #     #     if key not in self.keysPressed:
-        #     #         self.keysPressed[key] = 1
+            if (evt.type() == QtCore.QEvent.KeyRelease):
+                # print("KeyRelease : {}".format(evtkey))
 
-        #         # if key in self.keysPressed:
-        #         #     del self.keysPressed[key]
-        #     # print("\033[K", str(self.keysPressed), end="\r")
+                # All KeyRelease events go here
 
-        #     if (evt.type() == QtCore.QEvent.KeyRelease):
-        #         # print("KeyRelease : {}".format(evtkey))
+                if source == self:
+                    if evtkey == QtCore.Qt.Key_Left:
+                        self.jog(positive = True)
 
-        #         # All KeyRelease events go here
-        #         if evtkey == QtCore.Qt.Key_C and (evt.modifiers() & QtCore.Qt.ControlModifier):
-        #             # Will work everywhere
-        #             self.KeyboardInterruptHandler()
-
-        #             return True # Prevents further handling
-
-        #         if evtkey == QtCore.Qt.Key_Space:
-        #             self.stageControl.controller.shutter.close() if self.stageControl.controller.shutter.isOpen else self.stageControl.controller.shutter.open()
-        #             return True # Prevents further handling
-
-        #         # self.logconsole(self.lastCardinalStageMove)
-
-        #         # now = datetime.datetime.now()
-        #         # try:
-        #         #     if now >= self.lastEvent + datetime.timedelta(seconds = 1):
-        #         #         print(self.numEvents)
-        #         #         self.numSeconds += 1
-        #         #         self.lastEvent = now
-        #         #         self.numEvents = 0
-        #         # except Exception as e:
-        #         #     self.lastEvent = now
-        #         #     self.numSeconds = 0
-        #         #     self.numEvents = 0
-        #         #
-        #         # self.numEvents += 1
-        #         # ==> we deduce about 66 events / second
-
-        #         # we try to block it as early and possible
-        #         # WARNING: This still doesn't work as expected like in the previous VBA iteration of this
-
-        #         if source == self.stage_widget and not self.cardinalStageMoving and datetime.datetime.now() > self.lastCardinalStageMove + datetime.timedelta(milliseconds = self.KEYSTROKE_TIMEOUT):
-
-        #             if evtkey == QtCore.Qt.Key_Up:
-        #                 self.cardinalMoveStage(self.UP)
-
-        #             if evtkey == QtCore.Qt.Key_Down:
-        #                 self.cardinalMoveStage(self.DOWN)
-
-        #             if evtkey == QtCore.Qt.Key_Left:
-        #                 self.cardinalMoveStage(self.LEFT)
-
-        #             if evtkey == QtCore.Qt.Key_Right:
-        #                 self.cardinalMoveStage(self.RIGHT)
+                    if evtkey == QtCore.Qt.Key_Right:
+                        self.jog(positive = False)
 
         # return QtWidgets.QWidget.eventFilter(self, source, evt)
         return super(QtWidgets.QWidget, self).eventFilter(source, evt)
