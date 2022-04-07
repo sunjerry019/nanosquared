@@ -183,9 +183,12 @@ class Stgctrl(QtWidgets.QWidget):
     def measureD4Sigma(self, *args, **kwargs):
         if self.measurement is not None:
             _numSamples = int(self._numsamples.text())
-            res = self.measurement.camera.getAxis_avg_D4Sigma(axis = self.measurement.camera.AXES.BOTH)
-            _x, _y = res[0], res[1]
-            self.informationDialog(message = f"X-Axis: {_x}\nY-Axis: {_y}", host = self)
+            if _numSamples > 0:
+                res = self.measurement.camera.getAxis_avg_D4Sigma(axis = self.measurement.camera.AXES.BOTH, numsamples = _numSamples)
+                _x, _y = res[0], res[1]
+                self.informationDialog(message = f"X-Axis: {_x}\nY-Axis: {_y}", host = self)
+            else:
+                self.informationDialog(message = f"Invalid Number of Samples", host = self)
 
     def informationDialog(self, message, title = "Information", informativeText = None, host = None):
         _msgBox = QtWidgets.QMessageBox(host)
