@@ -14,7 +14,7 @@ from nanosquared.measurement.measure import Measurement
 import platform, ctypes
 
 class Stgctrl(QtWidgets.QWidget):
-    def __init__(self, measurement: Measurement, *args):   
+    def __init__(self, measurement: Measurement, *args): 
         super().__init__(*args)
 
         self.customicon = os.path.join('logo-plain.svg')
@@ -25,6 +25,8 @@ class Stgctrl(QtWidgets.QWidget):
         self.width = 400
         self.height = 200
         self.isOpen = False
+
+        self.measurement = measurement
 
         self.initUI()
 
@@ -79,7 +81,6 @@ class Stgctrl(QtWidgets.QWidget):
         self._numsamples.setAlignment(QtCore.Qt.AlignCenter)
         self._numsamples.setValidator(QtGui.QIntValidator(1,10000))
 
-
         _velocity_label = QtWidgets.QLabel("Jog Speed (pulses/s)")
         _velocity_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
 
@@ -132,7 +133,7 @@ def main():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     app = QtWidgets.QApplication(sys.argv)
-    ex = Stgctrl()
+    ex = Stgctrl(measurement = None)
     ex.show()
     ex.raise_()
     sys.exit(app.exec_())

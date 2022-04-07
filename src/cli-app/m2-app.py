@@ -131,9 +131,11 @@ with cam(devMode = devMode) as n:
                 code.interact(local=dict(globals(), **locals(), **locs))
 
             def launchGUI(_stgctrl, _app):
+                _stgctrl.measurement.camera.NS.SetShowWindow(True)
                 _stgctrl.show()
                 _stgctrl.raise_()
                 _app.exec_()
+                _stgctrl.measurement.camera.NS.SetShowWindow(False)
             
             if ic:
                 launchInteractive(locals())
