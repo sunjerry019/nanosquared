@@ -8,10 +8,13 @@
 # - Provide option to choose which way the beam is coming in
 # - Some proper way of breaking operations
 
-from email.policy import default
 import os, sys
-from matplotlib.style import available
 import serial.tools.list_ports
+
+import platform, ctypes
+
+from PyQt5 import QtWidgets
+from stagecontrolGUI import Stgctrl 
 
 from cli import CLI
 
@@ -98,6 +101,19 @@ print(f"{CLI.COLORS.OKGREEN}Got it! Initialising...{CLI.COLORS.ENDC}")
 with cam(devMode = devMode) as n:
     with nanosquared.stage.controller.GSC01(devMode = devMode, devConfig = cfg) as s:
         with nanosquared.measurement.measure.Measurement(devMode = devMode, camera = n, controller = s) as M:
+            if useNanoScan == True:
+                # We implement for NanoScan first
+                # https://stackoverflow.com/a/1857/3211506
+                # Windows = Windows, Linux = Linux, Mac = Darwin
+                # For setting icon on Windows
+                if platform.system() == "Windows":
+                    # https://stackoverflow.com/a/1552105/3211506
+                    myappid = u'MPQ.LEX.GSC01.StageControl' # arbitrary string
+                    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+                APP     = QtWidgets.QApplication(sys.argv)
+                STGCTRL = Stgctrl(measurement = M)
+
             print(f"{CLI.COLORS.OKGREEN}Initialisation done!{CLI.COLORS.ENDC}")
 
             print("")
@@ -113,11 +129,23 @@ with cam(devMode = devMode) as n:
                 print(f"\n{CLI.COLORS.OKCYAN}with nanosquared.measurement.measure.Measurement(devMode = {devMode}) as M{CLI.COLORS.ENDC}")
                 import code;
                 code.interact(local=dict(globals(), **locals(), **locs))
+
+            def launchGUI(_stgctrl, _app):
+                _stgctrl.measurement.camera.NS.SetShowWindow(True)
+                _stgctrl.show()
+                _stgctrl.raise_()
+                _app.exec_()
+                _stgctrl.measurement.camera.NS.SetShowWindow(False)
             
             if ic:
                 launchInteractive(locals())
             else:
                 if not devMode:
+                    if useNanoScan:
+                        gui = CLI.whats_it_gonna_be_boy("Launch Stage Control GUI?")
+                        if gui:
+                            launchGUI(STGCTRL, APP)
+
                     print("Assuming you want to take a measurement...")
                     while True:
                         while True:
@@ -176,6 +204,11 @@ with cam(devMode = devMode) as n:
                         ic2 = CLI.whats_it_gonna_be_boy("Launch Interactive Console?")
                         if ic2:
                             launchInteractive(locals())
+
+                        if useNanoScan:
+                            gui = CLI.whats_it_gonna_be_boy("Launch Stage Control GUI?")
+                            if gui:
+                                launchGUI(STGCTRL, APP)
                         
                         anothermeasurement = CLI.whats_it_gonna_be_boy("Take another measurement?")
                         if not anothermeasurement:
