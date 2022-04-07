@@ -28,6 +28,7 @@ class Stgctrl(QtWidgets.QWidget):
         self.measurement = measurement
 
         self.initUI()
+        self.initEventListeners()
 
     def create_stage(self):
         # Create all child elements
@@ -141,6 +142,85 @@ class Stgctrl(QtWidgets.QWidget):
         self._layout = self.create_stage()
         self.setLayout(self._layout)
 
+    def initEventListeners(self):
+        self.installEventFilter(self)
+
+    def eventFilter(self, source, evt):
+        # https://www.riverbankcomputing.com/static/Docs/PyQt4/qt.html#Key-enum
+        # print(evt)
+
+        # https://stackoverflow.com/a/30361237/3211506
+        if evt.type() == QtCore.QEvent.ActivationChange:
+            if self.isActiveWindow():
+                # Focus in
+                if self.measurement is not None:
+                    self.measurement.controller.syncPosition()
+                    self._lcd.value = self.measurement.controller.stage.position
+
+        # if isinstance(evt, QtGui.QKeyEvent): #.type() ==
+        #     # Check source here
+        #     evtkey = evt.key()
+
+        #     # if (evt.type() == QtCore.QEvent.KeyPress):
+        #     #     print("KeyPress : {}".format(key))
+        #     #     if key not in self.keysPressed:
+        #     #         self.keysPressed[key] = 1
+
+        #         # if key in self.keysPressed:
+        #         #     del self.keysPressed[key]
+        #     # print("\033[K", str(self.keysPressed), end="\r")
+
+        #     if (evt.type() == QtCore.QEvent.KeyRelease):
+        #         # print("KeyRelease : {}".format(evtkey))
+
+        #         # All KeyRelease events go here
+        #         if evtkey == QtCore.Qt.Key_C and (evt.modifiers() & QtCore.Qt.ControlModifier):
+        #             # Will work everywhere
+        #             self.KeyboardInterruptHandler()
+
+        #             return True # Prevents further handling
+
+        #         if evtkey == QtCore.Qt.Key_Space:
+        #             self.stageControl.controller.shutter.close() if self.stageControl.controller.shutter.isOpen else self.stageControl.controller.shutter.open()
+        #             return True # Prevents further handling
+
+        #         # self.logconsole(self.lastCardinalStageMove)
+
+        #         # now = datetime.datetime.now()
+        #         # try:
+        #         #     if now >= self.lastEvent + datetime.timedelta(seconds = 1):
+        #         #         print(self.numEvents)
+        #         #         self.numSeconds += 1
+        #         #         self.lastEvent = now
+        #         #         self.numEvents = 0
+        #         # except Exception as e:
+        #         #     self.lastEvent = now
+        #         #     self.numSeconds = 0
+        #         #     self.numEvents = 0
+        #         #
+        #         # self.numEvents += 1
+        #         # ==> we deduce about 66 events / second
+
+        #         # we try to block it as early and possible
+        #         # WARNING: This still doesn't work as expected like in the previous VBA iteration of this
+
+        #         if source == self.stage_widget and not self.cardinalStageMoving and datetime.datetime.now() > self.lastCardinalStageMove + datetime.timedelta(milliseconds = self.KEYSTROKE_TIMEOUT):
+
+        #             if evtkey == QtCore.Qt.Key_Up:
+        #                 self.cardinalMoveStage(self.UP)
+
+        #             if evtkey == QtCore.Qt.Key_Down:
+        #                 self.cardinalMoveStage(self.DOWN)
+
+        #             if evtkey == QtCore.Qt.Key_Left:
+        #                 self.cardinalMoveStage(self.LEFT)
+
+        #             if evtkey == QtCore.Qt.Key_Right:
+        #                 self.cardinalMoveStage(self.RIGHT)
+
+        # return QtWidgets.QWidget.eventFilter(self, source, evt)
+        return super(QtWidgets.QWidget, self).eventFilter(source, evt)
+
 def main():
     # https://stackoverflow.com/a/1857/3211506
     # Windows = Windows, Linux = Linux, Mac = Darwin
@@ -149,6 +229,8 @@ def main():
         # https://stackoverflow.com/a/1552105/3211506
         myappid = u'MPQ.LEX.GSC01.StageControl' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+    # TODO: If launched from main, then nanoscan functions disabled
 
     app = QtWidgets.QApplication(sys.argv)
     ex = Stgctrl(measurement = None)
