@@ -14,7 +14,7 @@ from nanosquared.measurement.measure import Measurement
 import platform, ctypes
 
 class Stgctrl(QtWidgets.QWidget):
-    def __init__(self, *args): #  measurement: Measurement, 
+    def __init__(self, measurement: Measurement, *args):   
         super().__init__(*args)
 
         self.customicon = os.path.join('logo-plain.svg')
