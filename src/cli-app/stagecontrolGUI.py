@@ -9,6 +9,8 @@ from PyQt5.QtCore import pyqtSlot, Qt
 
 from qthelpers import moveToCentre
 
+from nanosquared.cameras.nanoscan import NanoScan
+from nanosquared.stage.controller import GSC01
 from nanosquared.measurement.measure import Measurement
 
 import platform, ctypes
@@ -29,6 +31,9 @@ class Stgctrl(QtWidgets.QWidget):
 
         self.initUI()
         self.initEventListeners()
+
+        self.lastSetSpeed = int(self._velocity.text())
+        self.measurement.controller.setSpeed(jogSpeed = self.lastSetSpeed)
 
     def create_stage(self):
         # Create all child elements
@@ -145,6 +150,23 @@ class Stgctrl(QtWidgets.QWidget):
     def initEventListeners(self):
         self.installEventFilter(self)
 
+        self._homeBtn.clicked.connect(lambda: self.measurement.controller.homeStage())
+
+        self._leftArrow.clicked.connect(lambda: self.jog(positive = True))
+        self._leftArrow.released.connect(lambda: self.measurement.controller.stop())
+
+        self._rightArrow.clicked.connect(lambda: self.jog(positive = False))
+        self._rightArrow.released.connect(lambda: self.measurement.controller.stop())
+
+    def jog(self, *args, **kwargs):
+        _spd = int(self._velocity.text())
+        if _spd != self.lastSetSpeed:
+            self.lastSetSpeed = _spd
+            self.measurement.controller.setSpeed(jogSpeed = self.lastSetSpeed)
+
+        self.measurement.controller.jog(*args, **kwargs)
+
+
     def eventFilter(self, source, evt):
         # https://www.riverbankcomputing.com/static/Docs/PyQt4/qt.html#Key-enum
         # print(evt)
@@ -155,7 +177,7 @@ class Stgctrl(QtWidgets.QWidget):
                 # Focus in
                 if self.measurement is not None:
                     self.measurement.controller.syncPosition()
-                    self._lcd.value = self.measurement.controller.stage.position
+                    self._lcd.display(self.measurement.controller.stage.position)
 
         # if isinstance(evt, QtGui.QKeyEvent): #.type() ==
         #     # Check source here
@@ -231,9 +253,12 @@ def main():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     # TODO: If launched from main, then nanoscan functions disabled
+    n = NanoScan(devMode = True)
+    s = GSC01(devMode = False)
+    m = Measurement(camera = n, controller = s, devMode = False)
 
     app = QtWidgets.QApplication(sys.argv)
-    ex = Stgctrl(measurement = None)
+    ex = Stgctrl(measurement = m)
     ex.show()
     ex.raise_()
     sys.exit(app.exec_())
