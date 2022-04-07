@@ -128,7 +128,7 @@ class NanoScan(cam.Camera):
 		self.NS.SelectParameters(originalParams | NsSP.BEAM_WIDTH_D4SIGMA)
 
 		# A stack of x, y values
-		out = np.array([[self.oneRev()] for _ in range(numsamples)])
+		out = np.array([list(self.oneRev()) for _ in range(numsamples)])
 
 		# Throw away top 10% of values
 		# throwout = int(np.around(0.1 * numsamples))
