@@ -24,7 +24,6 @@ class Stgctrl(QtWidgets.QWidget):
         self.top = 10
         self.width = 400
         self.height = 200
-        self.isOpen = False
 
         self.measurement = measurement
 
@@ -89,6 +88,22 @@ class Stgctrl(QtWidgets.QWidget):
         self._velocity.setValidator(QtGui.QIntValidator(100,20000))
         self._velocity.setAlignment(QtCore.Qt.AlignCenter)
 
+        _scan_speed_label = QtWidgets.QLabel("NanoScan Scan Rate (Hz)")
+        _scan_speed_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
+        self._scan_speed = QtWidgets.QComboBox()
+        if self.measurement is not None:
+            for rate in self.measurement.camera.allowedRots:
+                self._scan_speed.addItem(str(rate))
+
+            index = self._scan_speed.findData(str(self.measurement.camera.rotationFrequency))
+            if index != -1 :
+                self._scan_speed.setCurrentIndex(index)
+        else:
+            for rate in [1.25, 2.5, 5.0, 10.0, 20.0]:
+                self._scan_speed.addItem(str(rate))
+
+            self._scan_speed.setCurrentIndex(3)
+        
         # Create the layout with the child elements
         _stage_layout = QtWidgets.QGridLayout()
 
@@ -97,18 +112,21 @@ class Stgctrl(QtWidgets.QWidget):
 
         # currx, y label
         _stage_layout.addWidget(_lcd_label, 0, 0, 1, 2)
-        _stage_layout.addWidget(self._lcd, 1, 0, 4, 2)
+        _stage_layout.addWidget(self._lcd, 1, 0, 5, 2)
 
-        _stage_layout.addWidget(self._leftArrow, 5, 0, 1, 1)
-        _stage_layout.addWidget(self._rightArrow, 5, 1, 1, 1)
-        _stage_layout.addWidget(self._homeBtn, 6, 0, 1, 2)
+        _stage_layout.addWidget(self._leftArrow, 6, 0, 1, 1)
+        _stage_layout.addWidget(self._rightArrow, 6, 1, 1, 1)
+        _stage_layout.addWidget(self._homeBtn, 7, 0, 1, 2)
 
-        _stage_layout.addWidget(_velocity_label, 1, 3, 1, 1)
-        _stage_layout.addWidget(self._velocity, 2, 3, 1, 1)
+        _stage_layout.addWidget(_velocity_label, 2, 3, 1, 1)
+        _stage_layout.addWidget(self._velocity, 3, 3, 1, 1)
 
-        _stage_layout.addWidget(_numsamples_label, 3, 3, 1, 1)
-        _stage_layout.addWidget(self._numsamples, 4, 3, 1, 1)
-        _stage_layout.addWidget(self._d4sigmaBtn, 5, 3, 2, 1)
+        _stage_layout.addWidget(_numsamples_label, 4, 3, 1, 1)
+        _stage_layout.addWidget(self._numsamples, 5, 3, 1, 1)
+        _stage_layout.addWidget(self._d4sigmaBtn, 6, 3, 2, 1)
+
+        _stage_layout.addWidget(_scan_speed_label, 0, 3, 1, 1)
+        _stage_layout.addWidget(self._scan_speed, 1, 3, 1, 1)
 
         return _stage_layout
 
@@ -136,6 +154,7 @@ def main():
     ex = Stgctrl(measurement = None)
     ex.show()
     ex.raise_()
+    app.exec_()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
