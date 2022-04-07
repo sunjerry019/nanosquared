@@ -154,7 +154,6 @@ def main():
     ex = Stgctrl(measurement = None)
     ex.show()
     ex.raise_()
-    app.exec_()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
