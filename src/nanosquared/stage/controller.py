@@ -636,7 +636,18 @@ class GSC01(SerialController):
         """
 
         pos = self.getPositionReadOut()
-        self.stage.position = pos  # Should not raise any error
+        try:
+            self.stage.position = pos  # Should not raise any error
+        except stage.errors.PositionOutOfBoundsError as e:
+            if pos < self.stage.LIMIT_LOWER:
+                self.stage.LIMIT_LOWER = pos
+            elif pos > self.stage.LIMIT_UPPER:
+                self.stage.LIMIT_UPPER = pos
+
+            # Perhaps the stage is now dirty?
+            self.stage.pulseRange = abs(self.stage.LIMIT_LOWER - self.stage.LIMIT_UPPER)
+            self.stage.recalculateUmPerPulse()
+            self.syncPosition()
 
         if self.powered:
             self.stage.dirty = False
