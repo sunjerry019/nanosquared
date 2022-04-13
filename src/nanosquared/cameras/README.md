@@ -31,6 +31,8 @@ nanoscan.py
 ../common/helpers.py
 ```
 
+TODO: Something about removing peaks
+
 ### Installation
 Ensure the corresponding vendor software has been installed beforehand.
 

@@ -5,6 +5,7 @@
 
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
+import numbers
 import os,sys
 from typing import Optional, Tuple, Union
 import numpy as np
@@ -82,7 +83,10 @@ class Measurement(h.LoggerMixIn):
             self.camera.wait_stable()
 
         self.controller.homeStage()
-        self.controller.findRange()        
+        self.controller.findRange()
+
+        self.removeOutliers = 0
+        self.threshold      = 0.2     
 
     def __enter__(self):
         return self
@@ -90,7 +94,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict()):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -127,7 +131,28 @@ class Measurement(h.LoggerMixIn):
             With `default_meta = { "Rayleigh Length": f"{rayleighLength} mm" }`.
             Values in `default_meta` will be overwritten by entries in this parameter. 
             By default, empty `dict()`
+        removeOutliers: int, optional
+            See documentation in nanoscan.getAxis_avg_D4Sigma()
+            
+            By default = 0
+        threshold: float, optional
+            See documentation in nanoscan.getAxis_avg_D4Sigma()
+
+            By default = 0.2
         """
+
+        if removeOutliers not in [0, 1, 2]:
+            self.log(f"Invalid removeOutlier mode {removeOutliers}! Using mode 0: do nothing", loglevel = logging.warn)
+            removeOutliers = 0 
+
+        if removeOutliers == 2:
+            # Check if the threshold is valid:
+            if not isinstance(threshold, numbers.Number) or threshold <= 0:
+                self.log(f"Invalid threshold {threshold}. Using 0.2.", loglevel = logging.warn)
+                threshold = 0.2
+
+        self.removeOutliers = removeOutliers
+        self.threshold      = threshold
 
         if not self.devMode and self.controller.stage.dirty:
             self.controller.homeStage()
@@ -767,7 +792,7 @@ class Measurement(h.LoggerMixIn):
 
         return z_R
         
-    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10):
+    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10, removeOutliers: int = None, threshold: float = None):
         """Moves the stage to that position and takes a measurement for the diameter
 
         If both axis: X: center = 0, Y: center = 100
@@ -780,6 +805,10 @@ class Measurement(h.LoggerMixIn):
             Position to measure at in pps
         numsamples: int
             Number of samples to take, by default 10
+        removeOutliers: int, optional
+            By default, None (i.e. use self.removeOutliers)
+        threshold: int, optional
+            By default, None (i.e. use self.threshold)
 
         Returns
         -------
@@ -793,7 +822,13 @@ class Measurement(h.LoggerMixIn):
         if self.camera.devMode:
             return (self.simulate_beam(pos = pos), self.simulate_beam(pos = (pos - 100))) if axis == self.camera.AXES.BOTH else self.simulate_beam(pos = pos)
 
-        return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples)
+        if removeOutliers is None:
+            removeOutliers = self.removeOutliers
+        
+        if threshold is None or threshold < 0:
+            threshold = self.threshold
+
+        return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples, removeOutliers = removeOutliers, threshold = threshold)
 
     SIMULATION_PARAMS = {
         "z_R"   : 13.65909849, # mm
