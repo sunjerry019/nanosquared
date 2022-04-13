@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal
 
-data = pd.read_csv("dataset_39.dat", sep=",", header = 0)
+data = pd.read_csv("dataset_37.dat", sep=",", header = 0)
 
 x = data['x'].to_numpy()
 horizontal = np.arange(len(x))
