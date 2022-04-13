@@ -136,7 +136,7 @@ class NanoScan(cam.Camera):
 
 		return arr_rem
 
-	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20, removeOutliers: int = 2, threshold: float = 0.2) -> Tuple[float, float]:
+	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20, removeOutliers: int = 0, threshold: float = 0.2) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples` using the Sync1Rev implementation.
 
 		Using NsAxes somewhat changes the signature of this function in a strict sense, but at this point I think would make easier for me to check.
@@ -159,7 +159,7 @@ class NanoScan(cam.Camera):
 			1 = Remove highest 10% of results
 			2 = Remove positive peaks from result based on a threshold of 20% * Mean.
 
-			By default, 2
+			By default, 0
 		threshold: float, optional
 			Threshold of peak prominence, must be more than 0. Ignored if `removeOutliers` is not 2.
 
