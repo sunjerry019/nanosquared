@@ -270,11 +270,16 @@ with NanoScan(devMode = False) as n:
                 "Wavelength": "2300 nm",
                 "Lens": "f = 250mm CaF2 lens"
             }
-            M.take_measurements(precision = 10, metadata = meta) 
+            M.take_measurements(precision = 10, metadata = meta, removeOutliers = 0) 
             # incl. auto find beam waist and rayleigh length
             # Measurement data will be saved under 
             #   ``repo/data/M2/<datetime>_<random string>.dat``
             # together with the metadata
+            
+            # removeOutliers:
+            # 0 = Do not remove outliers, calculate as is
+			# 1 = Remove highest 10% of results
+			# 2 = Remove positive peaks from result based on a threshold of 20% * Mean.
 
             # To save to a specific file, use: 
             #   `M.take_measurements(precision = 10, metadata = meta, writeToFile = "path/to/file")`
