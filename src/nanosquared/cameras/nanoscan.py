@@ -3,8 +3,11 @@
 # Made 2021, Sun Yudong
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
+import numbers
 import os,sys
 from typing import Tuple, List
+
+import scipy.signal
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -83,7 +86,57 @@ class NanoScan(cam.Camera):
 
 		self._rotFreq = freq
 
-	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20) -> Tuple[float, float]:
+	@staticmethod
+	def remove_spikes(arr: np.ndarray, threshold: float) -> np.ndarray:
+		"""Method to remove positive peaks from data.
+
+		Parameters
+		----------
+		arr : np.ndarray
+			Array to remove spikes from
+		threshold : float
+			Prominence as defined in scipy.signal
+
+		Returns
+		-------
+		np.ndarray
+			result without spikes
+		"""
+		i = 0
+		
+		arr_rem = arr
+		while True:
+			# find peaks
+			peaks, _ = scipy.signal.find_peaks(arr_rem, prominence = threshold)
+
+			if len(peaks) == 0:
+				break
+
+			# Generate masks
+			l    = len(arr_rem)
+			mask = np.ones(l, dtype=bool)
+			mask[peaks] = False
+			arr_rem     = arr_rem[mask]
+			
+			i += 1
+
+		# manually check first and last points
+		l    = len(arr_rem)
+		mask = np.ones(l, dtype=bool)
+
+		d = arr_rem[0] - arr_rem[1]
+		if np.abs(d) > threshold:
+			mask[0] = False
+
+		d = arr_rem[-1] - arr_rem[-2]
+		if np.abs(d) > threshold:
+			mask[-1] = False
+
+		arr_rem = arr_rem[mask]
+
+		return arr_rem
+
+	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20, removeOutliers: int = 0, threshold: float = 0.2, *args, **kwargs) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples` using the Sync1Rev implementation.
 
 		Using NsAxes somewhat changes the signature of this function in a strict sense, but at this point I think would make easier for me to check.
@@ -99,6 +152,23 @@ class NanoScan(cam.Camera):
 			This is a compromise I am willing to take. 
 		numsamples : int, optional
 			Number of samples to average over, by default 20
+		removeOutliers: int, optional
+			NanoScan has the tendency to output data with high variation. This setting can help to reduce the standard deviation of the results obtained by removing outliers.
+
+			0 = Do not remove outliers, calculate as is
+			1 = Remove highest 10% of results
+			2 = Remove positive peaks from result based on a threshold of 20% * Mean.
+
+			By default, 0
+		threshold: float, optional
+			Threshold of peak prominence, must be more than 0. Ignored if `removeOutliers` is not 2.
+
+			If value is less than or equal to 1, then it represents the precentage of the mean to use as the prominence threshold.
+			If value is more than 1, then it represents the absolute prominence threshold.
+
+			If an invalid value is given, then threshold = 0.2
+
+			By default 0.2 = 20% of the average.
 
 		Returns
 		-------
@@ -111,6 +181,16 @@ class NanoScan(cam.Camera):
 		if not isinstance(axis, NsAxes):
 			self.log(f"Invalid axis {axis} selected, expected axis of type {NsAxes}.")
 			return ret
+
+		if removeOutliers not in [0, 1, 2]:
+			self.log(f"Invalid removeOutlier mode {removeOutliers}! Using mode 0: do nothing", loglevel = logging.warn)
+			removeOutliers = 0 
+
+		if removeOutliers == 2:
+			# Check if the threshold is valid:
+			if not isinstance(threshold, numbers.Number) or threshold <= 0:
+				self.log(f"Invalid threshold {threshold}. Using 0.2.", loglevel = logging.warn)
+				threshold = 0.2
 
 		if self.devMode:
 			if axis == NsAxes.BOTH:
@@ -128,17 +208,38 @@ class NanoScan(cam.Camera):
 		self.NS.SelectParameters(originalParams | NsSP.BEAM_WIDTH_D4SIGMA)
 
 		# A stack of x, y values
-		out = np.array([list(self.oneRev()) for _ in range(numsamples)])
+		out = np.array([list(self.oneRev()) for _ in range(numsamples + 10)])
 
-		# Throw away top 10% of values
-		# throwout = int(np.around(0.1 * numsamples))
-		# if axis == NsAxes.BOTH:
-		# 	x_axis, y_axis = out[:,0], out[:,1]
-		# 	x_axis, y_axis = np.sort(x_axis)[:-throwout], np.sort(y_axis)[:-throwout]
+		# Throwaway the first 10 values
+		out = out[10:]
 
-		# 	out = np.column_stack((x_axis, y_axis))
-		# else:
-		# 	out = np.sort(out)[:-throwout]
+		# Remove Outliers
+		if removeOutliers == 1:
+			# Throw away top 10% of values
+			throwout = int(np.around(0.1 * numsamples))
+			if axis == NsAxes.BOTH:
+				x_axis, y_axis = out[:,0], out[:,1]
+				x_axis, y_axis = np.sort(x_axis)[:-throwout], np.sort(y_axis)[:-throwout]
+
+				out = np.column_stack((x_axis, y_axis))
+			else:
+				out = np.sort(out)[:-throwout]
+
+		if removeOutliers == 2:
+			# Remove spike using 20% as the threshold
+			if axis == NsAxes.BOTH:
+				x_axis, y_axis = out[:,0], out[:,1]
+				if threshold <= 1:
+					x_axis, y_axis = NanoScan.remove_spikes(x_axis, threshold * np.average(x_axis)), NanoScan.remove_spikes(y_axis, threshold * np.average(y_axis))
+				else:
+					x_axis, y_axis = NanoScan.remove_spikes(x_axis, threshold), NanoScan.remove_spikes(y_axis, threshold)
+
+				out = np.column_stack((x_axis, y_axis))
+			else:
+				if threshold <= 1:
+					out = NanoScan.remove_spikes(out, threshold * np.average(out))
+				else:
+					out = NanoScan.remove_spikes(out, threshold)
 
 		average = np.average(out, axis = 0)
 		stddev  = np.std(out, axis = 0)
