@@ -131,6 +131,7 @@ with cam(devMode = devMode) as n:
                 code.interact(local=dict(globals(), **locals(), **locs))
 
             def launchGUI(_stgctrl, _app):
+                print(f"\n{CLI.COLORS.OKCYAN}Close Stage Control GUI to continue{CLI.COLORS.ENDC}\n")
                 _stgctrl.measurement.camera.NS.SetShowWindow(True)
                 _stgctrl.show()
                 _stgctrl.raise_()
