@@ -29,7 +29,7 @@ class Stgctrl(QtWidgets.QWidget):
         self.left = 10
         self.top = 10
         self.width = 400
-        self.height = 200
+        self.height = 230
 
         self.measurement = measurement
 
@@ -97,6 +97,12 @@ class Stgctrl(QtWidgets.QWidget):
         _velocity_label = QtWidgets.QLabel("Jog Speed (pulses/s)")
         _velocity_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
 
+        _velocity_warning_label = QtWidgets.QLabel("""Press `STOP` to retrieve position. We recommend speed = 4000 pps. 
+Stage might not move when certain speeds are set. In that case, position data will be dirty.
+FIX: For each end: Let the stage travel to edge and press `STOP` after the stage has stopped.""")
+        _velocity_warning_label.setAlignment(QtCore.Qt.AlignLeft)
+        # _velocity_warning_label.setStyleSheet("color: red;")
+
         self._velocity = QtWidgets.QLineEdit()
         self._velocity.setText('4000')
         self._velocity.setValidator(QtGui.QIntValidator(100,20000))
@@ -136,15 +142,17 @@ class Stgctrl(QtWidgets.QWidget):
         _stage_layout.addWidget(self._homeBtn, 7, 0, 1, 1)
         _stage_layout.addWidget(self._stopButton, 7, 1, 1, 1)
 
-        _stage_layout.addWidget(_velocity_label, 2, 3, 1, 1)
-        _stage_layout.addWidget(self._velocity, 3, 3, 1, 1)
+        _stage_layout.addWidget(_velocity_label, 2, 2, 1, 1)
+        _stage_layout.addWidget(self._velocity, 3, 2, 1, 1)
 
-        _stage_layout.addWidget(_numsamples_label, 4, 3, 1, 1)
-        _stage_layout.addWidget(self._numsamples, 5, 3, 1, 1)
-        _stage_layout.addWidget(self._d4sigmaBtn, 6, 3, 2, 1)
+        _stage_layout.addWidget(_numsamples_label, 4, 2, 1, 1)
+        _stage_layout.addWidget(self._numsamples, 5, 2, 1, 1)
+        _stage_layout.addWidget(self._d4sigmaBtn, 6, 2, 2, 1)
 
-        _stage_layout.addWidget(_scan_speed_label, 0, 3, 1, 1)
-        _stage_layout.addWidget(self._scan_speed, 1, 3, 1, 1)
+        _stage_layout.addWidget(_scan_speed_label, 0, 2, 1, 1)
+        _stage_layout.addWidget(self._scan_speed, 1, 2, 1, 1)
+
+        _stage_layout.addWidget(_velocity_warning_label, 8, 0, 1, 3)
 
         return _stage_layout
 
@@ -268,9 +276,9 @@ def main():
         myappid = u'MPQ.LEX.GSC01.StageControl' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-    with NanoScan(devMode = False) as n:
-        with GSC01(devMode = False) as s:
-            with Measurement(camera = n, controller = s, devMode = False) as m:
+    with NanoScan(devMode = True) as n:
+        with GSC01(devMode = True) as s:
+            with Measurement(camera = n, controller = s, devMode = True) as m:
                 app = QtWidgets.QApplication(sys.argv)
                 ex = Stgctrl(measurement = m)
                 ex.show()
