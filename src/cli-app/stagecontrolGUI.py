@@ -67,13 +67,15 @@ class Stgctrl(QtWidgets.QWidget):
         self._homeBtn    = QtWidgets.QPushButton("Home Stage")
         self._d4sigmaBtn = QtWidgets.QPushButton("Take D4Sigma\nBeam Width\n(Both Axis)")
         self._stopButton = QtWidgets.QPushButton("!<STOP>!")
+        self._NSGUIBtn   = QtWidgets.QPushButton("Show/Hide\nNanoScan GUI")
 
         self._stage_buttons = [
             self._leftArrow  ,
             self._rightArrow ,
             self._homeBtn    ,
             self._d4sigmaBtn ,
-            self._stopButton
+            self._stopButton,
+            self._NSGUIBtn
         ]
 
         for btn in self._stage_buttons:
@@ -147,7 +149,8 @@ FIX: For each end: Let the stage travel to edge and press `STOP` after the stage
 
         _stage_layout.addWidget(_numsamples_label, 4, 2, 1, 1)
         _stage_layout.addWidget(self._numsamples, 5, 2, 1, 1)
-        _stage_layout.addWidget(self._d4sigmaBtn, 6, 2, 2, 1)
+        _stage_layout.addWidget(self._d4sigmaBtn, 6, 2, 1, 1)
+        _stage_layout.addWidget(self._NSGUIBtn, 7, 2, 1, 1)
 
         _stage_layout.addWidget(_scan_speed_label, 0, 2, 1, 1)
         _stage_layout.addWidget(self._scan_speed, 1, 2, 1, 1)
@@ -178,15 +181,25 @@ FIX: For each end: Let the stage travel to edge and press `STOP` after the stage
 
         self._d4sigmaBtn.clicked.connect(lambda: self.measureD4Sigma())
 
+        self._NSGUIBtn.clicked.connect(lambda: self.showHideNSGUI())
+
         self._scan_speed.currentIndexChanged.connect(lambda: self.changeScanSpeed())
     
+    def showHideNSGUI(self):
+        if self.measurement is not None:
+            if not self.measurement.camera.devMode:
+                _guiopen = self.measurement.camera.NS.GetShowWindow()
+                self.measurement.camera.NS.SetShowWindow(not _guiopen)
+
     def homeStage(self):
-        self.measurement.controller.homeStage()
-        self.resyncPos()
+        if self.measurement is not None:
+            self.measurement.controller.homeStage()
+            self.resyncPos()
 
     def changeScanSpeed(self):
-        rot = float(self._scan_speed.currentText())
-        self.measurement.camera.rotationFrequency = rot
+        if self.measurement is not None:
+            rot = float(self._scan_speed.currentText())
+            self.measurement.camera.rotationFrequency = rot
 
     def measureD4Sigma(self, *args, **kwargs):
         if self.measurement is not None:
@@ -276,7 +289,7 @@ def main():
         myappid = u'MPQ.LEX.GSC01.StageControl' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-    with NanoScan(devMode = True) as n:
+    with NanoScan(devMode = False) as n:
         with GSC01(devMode = True) as s:
             with Measurement(camera = n, controller = s, devMode = True) as m:
                 app = QtWidgets.QApplication(sys.argv)
