@@ -3,8 +3,7 @@
 # Made 2021, Sun Yudong
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
-import os
-
+import os, sys
 from msl.loadlib import Server32
 
 import clr
@@ -15,7 +14,15 @@ class NanoScanServer(Server32):
 
     def __init__(self, host, port, **kwargs):
         # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
-        path = Server32.remove_site_packages_64bit()
+        path64 = Server32.remove_site_packages_64bit()
+
+        # paths = []
+        # for pfad in sys.path:
+        #     if not pfad.endswith("\\src\\nanosquared"):
+        #         paths.append(pfad)
+
+        # sys.path = paths
+
         try:
             super(NanoScanServer, self).__init__(
                 # csharp/NanoScanLibrary/bin/Release/netstandard2.0/NanoScanLibrary.dll
