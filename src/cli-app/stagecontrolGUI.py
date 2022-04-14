@@ -23,7 +23,8 @@ class Stgctrl(QtWidgets.QWidget):
     def __init__(self, measurement: Measurement, *args): 
         super().__init__(*args)
 
-        self.customicon = os.path.join('logo-plain.svg')
+        base_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+        self.customicon = os.path.join(base_dir, 'logo-plain.svg')
 
         self.title = 'Stage Control with Camera'
         self.left = 10
