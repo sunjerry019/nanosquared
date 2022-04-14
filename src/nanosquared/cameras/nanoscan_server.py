@@ -16,12 +16,12 @@ class NanoScanServer(Server32):
         # Load the self compiled 'NanoScanLibrary.dll' shared-library file using pythonnet
         path64 = Server32.remove_site_packages_64bit()
 
-        paths = []
-        for pfad in sys.path:
-            if not pfad.endswith("\\src\\nanosquared"):
-                paths.append(pfad)
+        # paths = []
+        # for pfad in sys.path:
+        #     if not pfad.endswith("\\src\\nanosquared"):
+        #         paths.append(pfad)
 
-        sys.path = paths
+        # sys.path = paths
 
         try:
             super(NanoScanServer, self).__init__(
