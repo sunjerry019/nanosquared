@@ -170,6 +170,12 @@ class NanoScan(cam.Camera):
 			If an invalid value is given, then threshold = 0.2
 
 			By default 0.2 = 20% of the average.
+		returnRaw: bool, optional
+			Whether to return the raw data obtained as well. 
+
+			If set to True, the function returns the tuple (result, rawdata)
+
+			By default, False
 
 		Returns
 		-------
