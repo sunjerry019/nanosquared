@@ -137,7 +137,7 @@ class NanoScan(cam.Camera):
 
 		return arr_rem
 
-	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20, removeOutliers: int = 0, threshold: float = 0.2, *args, **kwargs) -> Tuple[float, float]:
+	def getAxis_avg_D4Sigma(self, axis: NsAxes, numsamples: int = 20, removeOutliers: int = 0, threshold: float = 0.2, returnRaw: bool = False, *args, **kwargs) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples` using the Sync1Rev implementation.
 
 		Using NsAxes somewhat changes the signature of this function in a strict sense, but at this point I think would make easier for me to check.
@@ -214,6 +214,9 @@ class NanoScan(cam.Camera):
 		# Throwaway the first 10 values
 		out = out[10:]
 
+		if returnRaw:
+			rawout = out
+
 		# Remove Outliers
 		if removeOutliers == 1:
 			# Throw away top 10% of values
@@ -253,6 +256,9 @@ class NanoScan(cam.Camera):
 			ret = (average.flatten()[axis], stddev.flatten()[axis])
 
 		self.NS.SelectParameters(originalParams)
+
+		if returnRaw:
+			return ret, rawout
 
 		return ret
 		
