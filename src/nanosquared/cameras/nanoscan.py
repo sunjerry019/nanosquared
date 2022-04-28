@@ -164,7 +164,7 @@ class NanoScan(cam.Camera):
 		threshold: float, optional
 			Threshold of peak prominence, must be more than 0. Ignored if `removeOutliers` is not 2.
 
-			If value is less than or equal to 1, then it represents the precentage of the mean to use as the prominence threshold.
+			If value is less than or equal to 1, then it represents the percentage of the mean to use as the prominence threshold.
 			If value is more than 1, then it represents the absolute prominence threshold.
 
 			If an invalid value is given, then threshold = 0.2

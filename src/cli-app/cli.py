@@ -1,5 +1,6 @@
 import os, sys
 import distutils.util
+from typing import Any, List
 
 # https://stackoverflow.com/a/287944/3211506
 class bcolors:
@@ -92,7 +93,24 @@ class CLI():
                 sys.exit()
 
     @staticmethod
-    def options(question, options, default):
+    def options(question: str, options: List[Any], default: Any) -> str:
+        """Gets an option
+
+        Parameters
+        ----------
+        question : str
+            Question to be asked
+        options : list(Any)
+            List of options. The datatype in this list should match the type of `default`.
+        default : Any
+            The default option. The datatype of default should match the type of the `options` elements.
+
+        Returns
+        -------
+        response : str
+            Returns the response (or default) as a string. Do the necessary conversions where necessary.
+
+        """
         assert (default in options) or (default is None), "ERROR: default not in options"
 
         prompt = f"[Default = {default}]" if default is not None else ""
@@ -103,7 +121,7 @@ class CLI():
             try:
                 resp = input(CLI.GAP + question + " " + prompt + " > ").strip().lower()
                 if default is not None and resp == '':
-                    return default
+                    return str(default)
                 else:
                     if resp not in stroptions:
                         raise ValueError

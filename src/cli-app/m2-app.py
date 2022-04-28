@@ -143,6 +143,8 @@ with cam(devMode = devMode) as n:
             else:
                 if not devMode:
                     if useNanoScan:
+                        print(f"You can use the stage control GUI to check your beam parameters (e.g. to see if there are huge variations in data returned)")
+                        print(f"// If you want to check the variations, use the GetD4Sigma button.")
                         gui = CLI.whats_it_gonna_be_boy("Launch Stage Control GUI?")
                         if gui:
                             launchGUI(STGCTRL, APP)
@@ -156,6 +158,21 @@ with cam(devMode = devMode) as n:
                             if useNanoScan:
                                 print(f"NanoScan has the following rotation frequencies (Hz): {n.allowedRots}")
                                 scanrate = float(CLI.options("Rotation Frequency of NanoScan?", options = n.allowedRots, default = n.rotationFrequency))
+
+                                print(f"For NanoScan, post processing of raw data before taking a summary is supported.\nYou can use this if you see large variations in the data obtained.\n!! USE WITH CAUTION !!\n\nThe modes are as follows:")
+                                print(f"\t0 = Do nothing, use all data to calculate avg and stddev")
+                                print(f"\t1 = Remove highest 10% of results before calculating")
+                                print(f"\t2 = Remove positive peaks from result based on a threshold")
+                                removeOutliers = int(CLI.options("Post processing mode?", options = [0,1,2], default = M.removeOutliers))
+
+                                if removeOutliers == 2:
+                                    print(f"The threshold t is interpreted as such:")
+                                    print(f"\t 0 < t <= 1: Percentage of the mean to use as the prominence threshold (e.g. 0.2 := 20% * Mean)")
+                                    print(f"\t     t >  1: Absolute prominence threshold")
+                                    threshold = CLI.getPositiveNonZeroFloat("Threshold?", default = 0.2)
+                            else:
+                                removeOutliers = 0
+                                threshold = 0.2
 
                             other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
@@ -178,7 +195,7 @@ with cam(devMode = devMode) as n:
                             n.rotationFrequency = scanrate
                             meta["NanoScan Rotation Rate (Hz)"] = scanrate
 
-                        M.take_measurements(precision = precision, metadata = meta) 
+                        M.take_measurements(precision = precision, metadata = meta, removeOutliers = removeOutliers, threshold = threshold) 
                         
                         print(f"{CLI.COLORS.OKGREEN}Done!{CLI.COLORS.ENDC}")
 
@@ -207,6 +224,8 @@ with cam(devMode = devMode) as n:
                             launchInteractive(locals())
 
                         if useNanoScan:
+                            print(f"You can use the stage control GUI to check your beam parameters (e.g. to see if there are huge variations in data returned)")
+                            print(f"// If you want to check the variations, use the GetD4Sigma button.")
                             gui = CLI.whats_it_gonna_be_boy("Launch Stage Control GUI?")
                             if gui:
                                 launchGUI(STGCTRL, APP)
