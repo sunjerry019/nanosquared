@@ -157,6 +157,14 @@ with cam(devMode = devMode) as n:
                                 print(f"NanoScan has the following rotation frequencies (Hz): {n.allowedRots}")
                                 scanrate = float(CLI.options("Rotation Frequency of NanoScan?", options = n.allowedRots, default = n.rotationFrequency))
 
+                                print(f"For NanoScan, post processing of raw data before taking a summary is supported.\nYou can use this if you see large variations in the data obtained.\n!! USE WITH CAUTION !!\n\nThe modes are as follows:")
+                                print(f"0 = Do nothing, use all data to calculate avg and stddev")
+                                print(f"1 = Remove highest 10% of results before calculating")
+                                print(f"2 = Remove positive peaks from result based on a threshold of 20% * Mean.")
+                                removeOutliers = int(CLI.options("Post processing mode?", options = [0,1,2], default = M.removeOutliers))
+                            else:
+                                removeOutliers = 0
+
                             other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
                             if useNanoScan:
@@ -178,7 +186,7 @@ with cam(devMode = devMode) as n:
                             n.rotationFrequency = scanrate
                             meta["NanoScan Rotation Rate (Hz)"] = scanrate
 
-                        M.take_measurements(precision = precision, metadata = meta) 
+                        M.take_measurements(precision = precision, metadata = meta, removeOutliers = removeOutliers) 
                         
                         print(f"{CLI.COLORS.OKGREEN}Done!{CLI.COLORS.ENDC}")
 
