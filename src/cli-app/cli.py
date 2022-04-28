@@ -1,5 +1,6 @@
 import os, sys
 import distutils.util
+from typing import Any, List
 
 # https://stackoverflow.com/a/287944/3211506
 class bcolors:
@@ -92,7 +93,7 @@ class CLI():
                 sys.exit()
 
     @staticmethod
-    def options(question, options, default) -> str:
+    def options(question: str, options: List[Any], default: Any) -> str:
         """Gets an option
 
         Parameters
