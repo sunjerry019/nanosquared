@@ -183,7 +183,7 @@ class Measurement(h.LoggerMixIn):
 
         if rayleighLength is None:
             try:
-                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision))
+                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision, saveRaw = saveRaw))
             except me.StageOutOfRangeError as e:
                 raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
         else:
@@ -644,7 +644,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, other: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, other: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden, saveRaw: Optional[TextIO] = None) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -694,13 +694,13 @@ class Measurement(h.LoggerMixIn):
             #     ])
             omega_0 = None
         else:
-            omega_0 = np.array(self.measure_at(axis = axis, pos = center))
+            omega_0 = np.array(self.measure_at(axis = axis, pos = center, saveRaw = saveRaw))
 
         if omega_0 is not None:
             sqrt2_omega = np.sqrt(2) * omega_0
 
         def evaluate(pos: int):
-            data = self.measure_at(axis = axis, pos = pos)
+            data = self.measure_at(axis = axis, pos = pos, saveRaw = saveRaw)
             return data - sqrt2_omega if BOTH else (data - sqrt2_omega)[0]
 
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
