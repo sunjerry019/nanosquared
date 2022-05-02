@@ -168,7 +168,7 @@ class WinCamD(cam.Camera):
 		return self.dataCtrl.dynamicCall(f"SetClipLevel({clip}, 0.5, {mode}, {CLIP_MODES.CLIP_LEVEL_METHOD})")
 
 	# Implementations
-	def getAxis_avg_D4Sigma(self, axis: WinCamAxes, numsamples: int = 20, *args, **kwargs) -> Tuple[float, float]:
+	def getAxis_avg_D4Sigma(self, axis: WinCamAxes, numsamples: int = 20, returnRaw: bool = False, *args, **kwargs) -> Tuple[float, float]:
 		"""Get the d4sigma in one `axis` and averages it over `numsamples`.
 		This function opens the camera where necessary, and returns it to the previous state after it is done.
 
@@ -182,6 +182,8 @@ class WinCamD(cam.Camera):
 			May take values 'x' or 'y'
 		numsamples : int, optional
 			Number of samples to average over, by default 20
+		returnRaw : bool, optional
+			If set to True, return the raw data
 
 		Returns
 		-------
@@ -222,9 +224,15 @@ class WinCamD(cam.Camera):
 		if axis == self.AXES.BOTH:
 			average = np.average(data, axis = 0)
 			stddev  = np.std(data, axis = 0)
-			return np.vstack((average, stddev)).T
+			
+			ret = np.vstack((average, stddev)).T
 		else:
-			return (np.average(data), np.std(data))
+			ret = (np.average(data), np.std(data))
+
+		if returnRaw:
+			return ret, data
+		else:
+			return ret
 
 	def getAxis_D4Sigma(self, axis: WinCamAxes):
 		"""Get the d4sigma in one `axis`, opens the camera if necessary, then restores the previous state that the camera was in.
