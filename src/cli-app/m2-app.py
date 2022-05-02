@@ -179,7 +179,12 @@ with cam(devMode = devMode) as n:
                             other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
                             if useNanoScan:
-                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Rotation Rate  : {scanrate} Hz\n--- Save Raw Data  : {saveRaw}\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Rotation Rate  : {scanrate} Hz\n--- Save Raw Data  : {saveRaw}\n--- Post Processing: Mode {removeOutliers}")
+
+                                if removeOutliers == 2:
+                                    print(f"--- Threshold      : {threshold}")
+
+                                print(f"--- Other Metadata : {other}{CLI.COLORS.ENDC}")
                             else:
                                 print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Save Raw Data  : {saveRaw}\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
 
