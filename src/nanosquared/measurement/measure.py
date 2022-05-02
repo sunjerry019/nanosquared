@@ -177,7 +177,7 @@ class Measurement(h.LoggerMixIn):
         # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
         # TODO: Check if rayleigh length is correct size for axis chosen
         if isinstance(saveRaw, TextIOWrapper):
-            saveRaw.write("=== Finding Center ===\n")
+            saveRaw.write("# === Finding Center ===\n")
 
         if axis == self.camera.AXES.BOTH:
             _center    = self.find_center_xy(precision = precision, saveRaw = saveRaw)          if center is None else center
@@ -187,7 +187,7 @@ class Measurement(h.LoggerMixIn):
         if rayleighLength is None:
             try:
                 if isinstance(saveRaw, TextIOWrapper):
-                    saveRaw.write("=== Finding Rayleigh Length ===\n")
+                    saveRaw.write("# === Finding Rayleigh Length ===\n")
                 rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision, saveRaw = saveRaw))
             except me.StageOutOfRangeError as e:
                 raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
