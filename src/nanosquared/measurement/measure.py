@@ -5,9 +5,10 @@
 
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
+from io import TextIOWrapper
 import numbers
 import os,sys
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, TextIO
 import numpy as np
 import scipy
 
@@ -793,7 +794,7 @@ class Measurement(h.LoggerMixIn):
 
         return z_R
         
-    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10, removeOutliers: int = None, threshold: float = None):
+    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10, removeOutliers: int = None, threshold: float = None, saveRaw: Optional[TextIO] = None):
         """Moves the stage to that position and takes a measurement for the diameter
 
         If both axis: X: center = 0, Y: center = 100
@@ -810,6 +811,12 @@ class Measurement(h.LoggerMixIn):
             By default, None (i.e. use self.removeOutliers)
         threshold: int, optional
             By default, None (i.e. use self.threshold)
+        saveRaw: TextIO
+            File to write to. If set to an open file, the raw data will be written to this file.
+
+            Ignored for devMode.
+
+            By default, None.
 
         Returns
         -------
@@ -829,6 +836,26 @@ class Measurement(h.LoggerMixIn):
         if threshold is None or threshold < 0:
             threshold = self.threshold
 
+        if isinstance(saveRaw, TextIOWrapper):
+            ret, rawout = self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples, removeOutliers = removeOutliers, threshold = threshold, returnRaw = True)
+            
+            position = self.controller.pulse_to_um(pps = pos) / 1000 # Convert to mm
+            if axis == self.camera.AXES.BOTH:
+                x_axis, y_axis = rawout[:,0], rawout[:,1]
+                saveRaw.write(f"# position[mm]\tx_diam[um]\ty_diam[um]\n")
+                for i in range(len(x_axis)):
+                    saveRaw.write(f"{position}\t{x_axis[i]}\t{y_axis[i]}\n")
+            else:
+                mapping = {
+                    self.camera.AXES.X: "x_diam[um]",
+                    self.camera.AXES.Y: "y_diam[um]"
+                }
+                saveRaw.write(f"# position[mm]\t{mapping[axis]}\n")
+                for i in range(len(rawout)):
+                    saveRaw.write(f"{position}\t{rawout[i]}\n")
+
+            return ret
+        
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples, removeOutliers = removeOutliers, threshold = threshold)
 
     SIMULATION_PARAMS = {
