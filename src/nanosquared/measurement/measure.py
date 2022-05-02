@@ -176,13 +176,18 @@ class Measurement(h.LoggerMixIn):
         # find params
         # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
         # TODO: Check if rayleigh length is correct size for axis chosen
+        if isinstance(saveRaw, TextIOWrapper):
+            saveRaw.write("=== Finding Center ===\n")
+
         if axis == self.camera.AXES.BOTH:
-            _center    = self.find_center_xy(precision = precision)          if center is None else center
+            _center    = self.find_center_xy(precision = precision, saveRaw = saveRaw)          if center is None else center
         else:
-            _center    = np.array([self.find_center(precision = precision)]) if center is None else center
+            _center    = np.array([self.find_center(precision = precision, saveRaw = saveRaw)]) if center is None else center
 
         if rayleighLength is None:
             try:
+                if isinstance(saveRaw, TextIOWrapper):
+                    saveRaw.write("=== Finding Rayleigh Length ===\n")
                 rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision, saveRaw = saveRaw))
             except me.StageOutOfRangeError as e:
                 raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
@@ -477,7 +482,7 @@ class Measurement(h.LoggerMixIn):
 
         return self.fitter.m_squared     
 
-    def find_center(self, axis: CameraAxes = None, precision: int = 100, left: int = None, right: int = None) -> int:
+    def find_center(self, axis: CameraAxes = None, precision: int = 100, left: int = None, right: int = None, saveRaw: Optional[TextIO] = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -494,6 +499,10 @@ class Measurement(h.LoggerMixIn):
             The smallest possible position, by default None
         right : int, optional
             The biggest possible position, by default None
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
         Returns
         -------
@@ -509,7 +518,7 @@ class Measurement(h.LoggerMixIn):
         
         #### USE XY if XY
         if axis == self.camera.AXES.BOTH:
-            return self.find_center_xy(precision = precision, left = left, right = right)
+            return self.find_center_xy(precision = precision, left = left, right = right, saveRaw = saveRaw)
         #################
         
         if self.devMode:
@@ -531,8 +540,8 @@ class Measurement(h.LoggerMixIn):
             left_third  = np.around(left  + (right - left) / 3).astype(int)
             right_third = np.around(right - (right - left) / 3).astype(int)
             
-            l = self.measure_at(axis = axis, pos = left_third)
-            r = self.measure_at(axis = axis, pos = right_third)
+            l = self.measure_at(axis = axis, pos = left_third, saveRaw = saveRaw)
+            r = self.measure_at(axis = axis, pos = right_third, saveRaw = saveRaw)
 
             # absolute_precision = np.max([l[1], r[1], default_abs_pres])
 
@@ -546,7 +555,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_center_xy(self, precision: int = 100, left: Tuple[int, int] = None, right: Tuple[int, int] = None) -> Tuple[int, int]:
+    def find_center_xy(self, precision: int = 100, left: Tuple[int, int] = None, right: Tuple[int, int] = None, saveRaw: Optional[TextIO] = None) -> Tuple[int, int]:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -563,6 +572,10 @@ class Measurement(h.LoggerMixIn):
             The smallest possible position, by default None
         right : int, optional
             The biggest possible position, by default None
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
         Returns
         -------
@@ -614,9 +627,9 @@ class Measurement(h.LoggerMixIn):
 
             self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}", loglevel = logging.DEBUG)
             self.log(f"Search between [{left[current_axis]}, {right[current_axis]}]", loglevel = logging.DEBUG)
-            l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
+            l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third, saveRaw = saveRaw)
             self.log(f"=== LEFT  POINT: [{left_third}]\t{l}", loglevel = logging.DEBUG)
-            r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
+            r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third, saveRaw = saveRaw)
             self.log(f"=== RIGHT POINT: [{right_third}]\t{r}", loglevel = logging.DEBUG)
             self.log("", loglevel = logging.DEBUG)
 
@@ -671,6 +684,10 @@ class Measurement(h.LoggerMixIn):
             Should be in the range [1, 1+\phi) where \phi is the golden ratio (scipy.constants.golden)
             For use in the ITP Method
             By default scipy.constants.golden
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
 
         Returns
