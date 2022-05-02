@@ -269,6 +269,12 @@ class Measurement(h.LoggerMixIn):
 
         if isinstance(saveRaw, TextIOWrapper):
             metadata["Raw Data File"] = os.path.realpath(saveRaw.name)
+        
+        if isinstance(self.camera, NanoScan):
+            postProcMethod = ["0: Do Nothing", "1: Remove top 10%", "2: Remove positive peaks from data"]
+            metadata["Post Processing Mode"] = postProcMethod[removeOutliers]
+            if removeOutliers == 2:
+                metadata["Threshold"] = threshold
 
         self.write_to_file(writeToFile = writeToFile, metadata = metadata)
 
