@@ -96,7 +96,7 @@ class Measurement(h.LoggerMixIn):
     def __exit__(self, e_type, e_val, traceback):
         pass
 
-    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2, saveRaw: bool = False):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -141,6 +141,10 @@ class Measurement(h.LoggerMixIn):
             See documentation in nanoscan.getAxis_avg_D4Sigma()
 
             By default = 0.2
+        saveRaw: bool, optional
+            If set to True, writes raw data to a temp file. 
+
+            By default, false
         """
 
         if removeOutliers not in [0, 1, 2]:
@@ -162,6 +166,9 @@ class Measurement(h.LoggerMixIn):
         if axis is None or not isinstance(axis, self.camera.AXES):
             axis = self.camera.AXES.BOTH
             self.log(f"Defaulting to both axis measurement")
+
+        if saveRaw:
+            saveRaw = self.get_raw_file(metadata = metadata)
             
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
@@ -230,7 +237,7 @@ class Measurement(h.LoggerMixIn):
             # https://stackoverflow.com/a/25293744
             self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
 
-            (y_x, y_y) = self.measure_at(pos = pt, numsamples = numsamples, axis = self.camera.AXES.BOTH)
+            (y_x, y_y) = self.measure_at(pos = pt, numsamples = numsamples, axis = self.camera.AXES.BOTH, saveRaw = saveRaw)
             x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
 
             dtpt_x = np.array([x, y_x[0], y_x[1]])
@@ -246,6 +253,9 @@ class Measurement(h.LoggerMixIn):
         # self.data = {'x': xdata, 'y': ydata }
         # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
 
+        if isinstance(saveRaw, TextIOWrapper):
+            saveRaw.close()
+
         default_meta = {
             "Rayleigh Length": f"{self.controller.pulse_to_um(pps = rayleighLength) / 1000} mm"
         }
@@ -255,6 +265,47 @@ class Measurement(h.LoggerMixIn):
         self.write_to_file(writeToFile = writeToFile, metadata = metadata)
 
         return self.data
+
+    def get_raw_file(self, writeToFile: Optional[str] = None, metadata: Optional[dict] = None) -> TextIO:
+        f = None
+        pfad = writeToFile
+
+        now = datetime.now()
+
+        if pfad is not None and isinstance(pfad, str):
+            # We use the given file
+            try:
+                f = open(pfad, 'w')
+            except OSError as e:
+                self.log(f"{pfad}: OSError {e}", logging.ERROR)
+        elif pfad is None:
+            # We create a file in the M2 directory to save the data.
+
+            tempdir = os.path.join(root_dir, ".." ,"data", "M2")
+            Path(tempdir).mkdir(parents=True, exist_ok=True)
+            fd, pfad = tempfile.mkstemp(suffix = ".raw.log" if not self.devMode else ".dev.raw.log", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
+            # Returns a file descriptor instead of the file
+
+            f = os.fdopen(fd, 'w')
+        else:
+            self.log(f"Invalid parameter WriteToFile: {writeToFile}. Skipping writing to file.", logging.WARNING)
+
+            return None
+        
+        self.log(f"Saving raw data file to {pfad}", logging.INFO)
+
+        f.write(f"# Log started on {now.strftime('%Y-%m-%d at %H:%M:%S')}\n")
+
+        if metadata is not None and isinstance(metadata, dict):
+            f.write("# ==== Metadata ====\n")
+            for key, val in metadata.items():
+                f.write(f"#\t{key}: {val}\n")
+        elif metadata is not None:
+            self.log(f"No metadata written, invalid metadata received: {metadata}", logging.WARN)
+        
+        f.write("# ====== Data ======\n")
+
+        return f
 
     def write_to_file(self, writeToFile: Optional[str] = None, metadata: Optional[dict] = None) -> Union[str, None]:
         """Writes `self.data` to a file given by the parameter `writeToFile`.
