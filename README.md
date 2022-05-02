@@ -144,9 +144,11 @@ These 2 modules may be packaged into seperate packages should someone find the t
 Both of these modules inherit the `Camera` class, which guarantees the existence of the following:
 ```python
 x, y, both = cam.AXES.X, cam.AXES.Y, cam.AXES.BOTH  # Enum for the different axes
-cam.getAxis_avg_D4Sigma(axis = x, numsamples = 20)  # Obtains an average D4Sigma diameter
 cam.wait_stable()                                   # Function returns when beam-profiler is stable
 cam.log()
+# To obtain an average D4Sigma diameter
+cam.getAxis_avg_D4Sigma(axis = x, numsamples = 20, returnRaw = False)
+# If returnRaw is set to True, function returns: (data, rawdata)
 ```
 See the specific source code for more detailed documentation of the functions.
 
