@@ -267,6 +267,9 @@ class Measurement(h.LoggerMixIn):
 
         metadata = {**default_meta, **metadata}
 
+        if isinstance(saveRaw, TextIOWrapper):
+            metadata["Raw Data File"] = os.path.realpath(saveRaw.name)
+
         self.write_to_file(writeToFile = writeToFile, metadata = metadata)
 
         return self.data
