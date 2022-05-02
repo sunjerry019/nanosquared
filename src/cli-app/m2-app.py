@@ -174,12 +174,14 @@ with cam(devMode = devMode) as n:
                                 removeOutliers = 0
                                 threshold = 0.2
 
+                            saveRaw    = CLI.whats_it_gonna_be_boy("Save Raw Data?", default = "no")
+
                             other      = input(CLI.GAP + "Other metadata (e.g. Lens) > ")
 
                             if useNanoScan:
-                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Rotation Rate  : {scanrate} Hz\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Rotation Rate  : {scanrate} Hz\n--- Save Raw Data  : {saveRaw}\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
                             else:
-                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
+                                print(f"{CLI.COLORS.HEADER}Obtained:\n--- Wavelength     : {wavelength} nm\n--- Precision      : {precision} pps\n--- Save Raw Data  : {saveRaw}\n--- Other Metadata : {other}{CLI.COLORS.ENDC}")
 
                             confirm = CLI.whats_it_gonna_be_boy(f"Proceed?", default = "yes")
 
@@ -195,7 +197,7 @@ with cam(devMode = devMode) as n:
                             n.rotationFrequency = scanrate
                             meta["NanoScan Rotation Rate (Hz)"] = scanrate
 
-                        M.take_measurements(precision = precision, metadata = meta, removeOutliers = removeOutliers, threshold = threshold) 
+                        M.take_measurements(precision = precision, metadata = meta, removeOutliers = removeOutliers, threshold = threshold, saveRaw = saveRaw) 
                         
                         print(f"{CLI.COLORS.OKGREEN}Done!{CLI.COLORS.ENDC}")
 
