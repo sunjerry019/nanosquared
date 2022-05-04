@@ -123,6 +123,7 @@ class Measurement(h.LoggerMixIn):
         if isinstance(self.openedFile, TextIOWrapper):
             try:
                 self.openedFile.close()
+                self.openedFile = None
             except (OSError, IOError) as e:
                 pass
 
