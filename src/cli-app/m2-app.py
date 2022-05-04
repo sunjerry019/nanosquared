@@ -170,6 +170,8 @@ with cam(devMode = devMode) as n:
                                     print(f"\t 0 < t <= 1: Percentage of the mean to use as the prominence threshold (e.g. 0.2 := 20% * Mean)")
                                     print(f"\t     t >  1: Absolute prominence threshold")
                                     threshold = CLI.getPositiveNonZeroFloat("Threshold?", default = 0.2)
+                                else:
+                                    threshold = 0.2
                             else:
                                 removeOutliers = 0
                                 threshold = 0.2
