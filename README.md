@@ -128,6 +128,8 @@ For every one of these modules described below, the `LoggerMixIn` class has been
 
 Include [`helpers.py`](./src/nanosquared/common/helpers.py) for the `LoggerMixIn` class. See [below](#logging) for more information.
 
+We recommend initializing all modules with the `with` keyword in Python to ensure that the `__exit__()` method is called when the program ends. 
+
 ### Beam-Profilers
 You may use the `NanoScan` and `WinCamD` modules independent of the rest of the code in the repository to manage and use the respective beam-profilers (here loosely referred to as cameras). For that, follow the instructions detailed in the above sections ([NanoScan](#NanoScan) and [WinCamD](#WinCamD)) to install the necessary support software. Then follow the instructions under [Usage](#Usage) to import the necessary packages:
 ```python
@@ -144,9 +146,11 @@ These 2 modules may be packaged into seperate packages should someone find the t
 Both of these modules inherit the `Camera` class, which guarantees the existence of the following:
 ```python
 x, y, both = cam.AXES.X, cam.AXES.Y, cam.AXES.BOTH  # Enum for the different axes
-cam.getAxis_avg_D4Sigma(axis = x, numsamples = 20)  # Obtains an average D4Sigma diameter
 cam.wait_stable()                                   # Function returns when beam-profiler is stable
 cam.log()
+# To obtain an average D4Sigma diameter
+cam.getAxis_avg_D4Sigma(axis = x, numsamples = 20, returnRaw = False)
+# If returnRaw is set to True, function returns: (data, rawdata)
 ```
 See the specific source code for more detailed documentation of the functions.
 

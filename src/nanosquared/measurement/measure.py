@@ -5,9 +5,11 @@
 
 """File provides the backend for the GUI. It is meant to combine all the modules together"""
 
+from io import TextIOWrapper
 import numbers
 import os,sys
-from typing import Optional, Tuple, Union
+import signal
+from typing import Optional, Tuple, Union, TextIO
 import numpy as np
 import scipy
 
@@ -89,13 +91,49 @@ class Measurement(h.LoggerMixIn):
         self.removeOutliers = 0
         self.threshold      = 0.2     
 
+        self.openedFile = None
+        
+        self.startSignalHandlers()
+
+    def startSignalHandlers(self):
+        """ Starts appropriate signal handlers to handle e.g. keyboard interrupts. 
+        Ensures safe exit and disconnecting of controller.
+        """
+        # https://stackoverflow.com/a/4205386/3211506
+        signal.signal(signal.SIGINT, self.KeyboardInterruptHandler)
+
+    def KeyboardInterruptHandler(self, signal, frame):
+        """Ensures that any open file is closed on keyboard interrupt
+        Handles a SIGINT according to https://docs.python.org/3/library/signal.html#signal.signal.
+
+        Parameters
+        ----------
+        signal : int
+            signal number
+        frame : signal Frame object
+            Frame objects represent execution frames. They may occur in traceback objects (see below), and are also passed to registered trace functions.
+        """
+
+        print("^C Detected: Closing any open file")
+        self.closeAnyOpenFile()
+        raise KeyboardInterrupt
+        # use os._exit(1) to avoid raising any SystemExit exception
+
+    def closeAnyOpenFile(self):
+        if isinstance(self.openedFile, TextIOWrapper):
+            try:
+                self.openedFile.close()
+                self.openedFile = None
+            except OSError as e:
+                pass
+
     def __enter__(self):
         return self
 
     def __exit__(self, e_type, e_val, traceback):
-        pass
+        return self.closeAnyOpenFile()
 
-    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2):
+    def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2, saveRaw: bool = False):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
         on the given Rayleigh Length.
 
@@ -140,6 +178,10 @@ class Measurement(h.LoggerMixIn):
             See documentation in nanoscan.getAxis_avg_D4Sigma()
 
             By default = 0.2
+        saveRaw: bool, optional
+            If set to True, writes raw data to a temp file. 
+
+            By default, false
         """
 
         if removeOutliers not in [0, 1, 2]:
@@ -161,6 +203,10 @@ class Measurement(h.LoggerMixIn):
         if axis is None or not isinstance(axis, self.camera.AXES):
             axis = self.camera.AXES.BOTH
             self.log(f"Defaulting to both axis measurement")
+
+        if saveRaw:
+            saveRaw = self.get_raw_file(metadata = metadata)
+            self.openedFile = saveRaw
             
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
@@ -168,14 +214,19 @@ class Measurement(h.LoggerMixIn):
         # find params
         # TODO: CHECK IF CENTER IS CORRECT FOR AXIS CHOSEN
         # TODO: Check if rayleigh length is correct size for axis chosen
+        if isinstance(saveRaw, TextIOWrapper):
+            saveRaw.write("# === Finding Center ===\n")
+
         if axis == self.camera.AXES.BOTH:
-            _center    = self.find_center_xy(precision = precision)          if center is None else center
+            _center    = self.find_center_xy(precision = precision, saveRaw = saveRaw)          if center is None else center
         else:
-            _center    = np.array([self.find_center(precision = precision)]) if center is None else center
+            _center    = np.array([self.find_center(precision = precision, saveRaw = saveRaw)]) if center is None else center
 
         if rayleighLength is None:
             try:
-                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision))
+                if isinstance(saveRaw, TextIOWrapper):
+                    saveRaw.write("# === Finding Rayleigh Length ===\n")
+                rayleighLength = np.array(self.find_zR_pps(center = _center, axis = axis, precision = precision, saveRaw = saveRaw))
             except me.StageOutOfRangeError as e:
                 raise me.ConfigurationError(f"The travel range of the stage does not support the current configuration")
         else:
@@ -229,7 +280,7 @@ class Measurement(h.LoggerMixIn):
             # https://stackoverflow.com/a/25293744
             self.log(f"Point [{(n+1): >{digits}}/{totalpts}]: {pt}")
 
-            (y_x, y_y) = self.measure_at(pos = pt, numsamples = numsamples, axis = self.camera.AXES.BOTH)
+            (y_x, y_y) = self.measure_at(pos = pt, numsamples = numsamples, axis = self.camera.AXES.BOTH, saveRaw = saveRaw)
             x = self.controller.pulse_to_um(pps = pt) / 1000 # Convert to mm
 
             dtpt_x = np.array([x, y_x[0], y_x[1]])
@@ -245,15 +296,69 @@ class Measurement(h.LoggerMixIn):
         # self.data = {'x': xdata, 'y': ydata }
         # where {x,y}data is an nparray with each element the format [z, diam, delta_diam]
 
+        if isinstance(saveRaw, TextIOWrapper):
+            saveRaw.close()
+            self.openedFile = None
+
         default_meta = {
             "Rayleigh Length": f"{self.controller.pulse_to_um(pps = rayleighLength) / 1000} mm"
         }
 
         metadata = {**default_meta, **metadata}
 
+        if isinstance(saveRaw, TextIOWrapper):
+            metadata["Raw Data File"] = os.path.realpath(saveRaw.name)
+        
+        if isinstance(self.camera, NanoScan):
+            postProcMethod = ["0: Do Nothing", "1: Remove top 10%", "2: Remove positive peaks from data"]
+            metadata["Post Processing Mode"] = postProcMethod[removeOutliers]
+            if removeOutliers == 2:
+                metadata["Threshold"] = threshold
+
         self.write_to_file(writeToFile = writeToFile, metadata = metadata)
 
         return self.data
+
+    def get_raw_file(self, writeToFile: Optional[str] = None, metadata: Optional[dict] = None) -> TextIO:
+        f = None
+        pfad = writeToFile
+
+        now = datetime.now()
+
+        if pfad is not None and isinstance(pfad, str):
+            # We use the given file
+            try:
+                f = open(pfad, 'w')
+            except OSError as e:
+                self.log(f"{pfad}: OSError {e}", logging.ERROR)
+        elif pfad is None:
+            # We create a file in the M2 directory to save the data.
+
+            tempdir = os.path.join(root_dir, ".." ,"nanosquared-data", "M2")
+            Path(tempdir).mkdir(parents=True, exist_ok=True)
+            fd, pfad = tempfile.mkstemp(suffix = ".raw.log" if not self.devMode else ".dev.raw.log", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
+            # Returns a file descriptor instead of the file
+
+            f = os.fdopen(fd, 'w')
+        else:
+            self.log(f"Invalid parameter WriteToFile: {writeToFile}. Skipping writing to file.", logging.WARNING)
+
+            return None
+        
+        self.log(f"Saving raw data file to {pfad}", logging.INFO)
+
+        f.write(f"# Log started on {now.strftime('%Y-%m-%d at %H:%M:%S')}\n")
+
+        if metadata is not None and isinstance(metadata, dict):
+            f.write("# ==== Metadata ====\n")
+            for key, val in metadata.items():
+                f.write(f"#\t{key}: {val}\n")
+        elif metadata is not None:
+            self.log(f"No metadata written, invalid metadata received: {metadata}", logging.WARN)
+        
+        f.write("# ====== Data ======\n")
+
+        return f
 
     def write_to_file(self, writeToFile: Optional[str] = None, metadata: Optional[dict] = None) -> Union[str, None]:
         """Writes `self.data` to a file given by the parameter `writeToFile`.
@@ -290,7 +395,7 @@ class Measurement(h.LoggerMixIn):
         elif pfad is None:
             # We create a file in the M2 directory to save the data.
 
-            tempdir = os.path.join(root_dir, ".." ,"data", "M2")
+            tempdir = os.path.join(root_dir, ".." ,"nanosquared-data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
             fd, pfad = tempfile.mkstemp(suffix = ".dat" if not self.devMode else ".dev.dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
@@ -425,7 +530,7 @@ class Measurement(h.LoggerMixIn):
 
         return self.fitter.m_squared     
 
-    def find_center(self, axis: CameraAxes = None, precision: int = 100, left: int = None, right: int = None) -> int:
+    def find_center(self, axis: CameraAxes = None, precision: int = 100, left: int = None, right: int = None, saveRaw: Optional[TextIO] = None) -> int:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -442,6 +547,10 @@ class Measurement(h.LoggerMixIn):
             The smallest possible position, by default None
         right : int, optional
             The biggest possible position, by default None
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
         Returns
         -------
@@ -457,7 +566,7 @@ class Measurement(h.LoggerMixIn):
         
         #### USE XY if XY
         if axis == self.camera.AXES.BOTH:
-            return self.find_center_xy(precision = precision, left = left, right = right)
+            return self.find_center_xy(precision = precision, left = left, right = right, saveRaw = saveRaw)
         #################
         
         if self.devMode:
@@ -479,8 +588,8 @@ class Measurement(h.LoggerMixIn):
             left_third  = np.around(left  + (right - left) / 3).astype(int)
             right_third = np.around(right - (right - left) / 3).astype(int)
             
-            l = self.measure_at(axis = axis, pos = left_third)
-            r = self.measure_at(axis = axis, pos = right_third)
+            l = self.measure_at(axis = axis, pos = left_third, saveRaw = saveRaw)
+            r = self.measure_at(axis = axis, pos = right_third, saveRaw = saveRaw)
 
             # absolute_precision = np.max([l[1], r[1], default_abs_pres])
 
@@ -494,7 +603,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_center_xy(self, precision: int = 100, left: Tuple[int, int] = None, right: Tuple[int, int] = None) -> Tuple[int, int]:
+    def find_center_xy(self, precision: int = 100, left: Tuple[int, int] = None, right: Tuple[int, int] = None, saveRaw: Optional[TextIO] = None) -> Tuple[int, int]:
         """Finds the approximate position of the beam waist using ternary search. 
         If `left` or `right` is set to None, the limits of the stage are taken
 
@@ -511,6 +620,10 @@ class Measurement(h.LoggerMixIn):
             The smallest possible position, by default None
         right : int, optional
             The biggest possible position, by default None
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
         Returns
         -------
@@ -562,9 +675,9 @@ class Measurement(h.LoggerMixIn):
 
             self.log(f"[{step}] Axes Remaining : {remaining_axes}: Current: {current_axis},\tLeft: {left},\tRight: {right}", loglevel = logging.DEBUG)
             self.log(f"Search between [{left[current_axis]}, {right[current_axis]}]", loglevel = logging.DEBUG)
-            l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third)
+            l = self.measure_at(axis = self.camera.AXES.BOTH, pos = left_third, saveRaw = saveRaw)
             self.log(f"=== LEFT  POINT: [{left_third}]\t{l}", loglevel = logging.DEBUG)
-            r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third)
+            r = self.measure_at(axis = self.camera.AXES.BOTH, pos = right_third, saveRaw = saveRaw)
             self.log(f"=== RIGHT POINT: [{right_third}]\t{r}", loglevel = logging.DEBUG)
             self.log("", loglevel = logging.DEBUG)
 
@@ -592,7 +705,7 @@ class Measurement(h.LoggerMixIn):
         self.log(f"Center at {cen}")
         return cen
 
-    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, other: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden) -> Union[int, Tuple[int, int]]:
+    def find_zR_pps(self, center: int, axis: Camera.AXES, precision: int = 10, other: int = None, kappa1: float = 0, kappa2: float = scipy.constants.golden, saveRaw: Optional[TextIO] = None) -> Union[int, Tuple[int, int]]:
         """Using the center, automatically finds the approximate Rayleigh Length
 
         IMPORTANT: Assumes that find_center has been run, or that somehow the stage is homed properly
@@ -619,6 +732,10 @@ class Measurement(h.LoggerMixIn):
             Should be in the range [1, 1+\phi) where \phi is the golden ratio (scipy.constants.golden)
             For use in the ITP Method
             By default scipy.constants.golden
+        saveRaw : TextIO, optional
+            See self.measure_at()
+
+            By default, None
 
 
         Returns
@@ -642,13 +759,13 @@ class Measurement(h.LoggerMixIn):
             #     ])
             omega_0 = None
         else:
-            omega_0 = np.array(self.measure_at(axis = axis, pos = center))
+            omega_0 = np.array(self.measure_at(axis = axis, pos = center, saveRaw = saveRaw))
 
         if omega_0 is not None:
             sqrt2_omega = np.sqrt(2) * omega_0
 
         def evaluate(pos: int):
-            data = self.measure_at(axis = axis, pos = pos)
+            data = self.measure_at(axis = axis, pos = pos, saveRaw = saveRaw)
             return data - sqrt2_omega if BOTH else (data - sqrt2_omega)[0]
 
         # We implement the ITP Method and somehow improve it so that it keeps track of the other axis as well
@@ -793,7 +910,7 @@ class Measurement(h.LoggerMixIn):
 
         return z_R
         
-    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10, removeOutliers: int = None, threshold: float = None):
+    def measure_at(self, axis: CameraAxes, pos: int, numsamples: int = 10, removeOutliers: int = None, threshold: float = None, saveRaw: Optional[TextIO] = None):
         """Moves the stage to that position and takes a measurement for the diameter
 
         If both axis: X: center = 0, Y: center = 100
@@ -810,6 +927,12 @@ class Measurement(h.LoggerMixIn):
             By default, None (i.e. use self.removeOutliers)
         threshold: int, optional
             By default, None (i.e. use self.threshold)
+        saveRaw: TextIO
+            File to write to. If set to an open file, the raw data will be written to this file.
+
+            Ignored for devMode.
+
+            By default, None.
 
         Returns
         -------
@@ -829,6 +952,26 @@ class Measurement(h.LoggerMixIn):
         if threshold is None or threshold < 0:
             threshold = self.threshold
 
+        if isinstance(saveRaw, TextIOWrapper):
+            ret, rawout = self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples, removeOutliers = removeOutliers, threshold = threshold, returnRaw = True)
+            
+            position = self.controller.pulse_to_um(pps = pos) / 1000 # Convert to mm
+            if axis == self.camera.AXES.BOTH:
+                x_axis, y_axis = rawout[:,0], rawout[:,1]
+                saveRaw.write(f"# position[mm]\tx_diam[um]\ty_diam[um]\n")
+                for i in range(len(x_axis)):
+                    saveRaw.write(f"{position}\t{x_axis[i]}\t{y_axis[i]}\n")
+            else:
+                mapping = {
+                    self.camera.AXES.X: "x_diam[um]",
+                    self.camera.AXES.Y: "y_diam[um]"
+                }
+                saveRaw.write(f"# position[mm]\t{mapping[axis]}\n")
+                for i in range(len(rawout)):
+                    saveRaw.write(f"{position}\t{rawout[i]}\n")
+
+            return ret
+        
         return self.camera.getAxis_avg_D4Sigma(axis, numsamples = numsamples, removeOutliers = removeOutliers, threshold = threshold)
 
     SIMULATION_PARAMS = {

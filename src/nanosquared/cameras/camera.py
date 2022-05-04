@@ -18,7 +18,7 @@ class Camera(h.LoggerMixIn):
     def __init__(self):
         self.apertureOpen = False
 
-    def getAxis_avg_D4Sigma(self, axis: CameraAxes, numsamples: int = 20, *args, **kwargs):
+    def getAxis_avg_D4Sigma(self, axis: CameraAxes, numsamples: int = 20, returnRaw: bool = False, *args, **kwargs):
         raise NotImplementedError
 
     def wait_stable(self):

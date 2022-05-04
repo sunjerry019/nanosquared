@@ -117,11 +117,13 @@ class Controller(abc.ABC, h.LoggerMixIn):
         """
 
         print("^C Detected: Emergency stop and closing port.")
-        print("Shutter will be closed as part of the aborting process.")
+        # print("Shutter will be closed as part of the aborting process.")
         self.abort()
         self.closeDevice()
-        print("Exiting")
-        sys.exit(1)
+        raise KeyboardInterrupt
+        
+        # print("Exiting")
+        # sys.exit(1)
         # use os._exit(1) to avoid raising any SystemExit exception
 
 class SerialController(Controller, abc.ABC):
