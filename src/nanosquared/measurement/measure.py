@@ -90,11 +90,17 @@ class Measurement(h.LoggerMixIn):
         self.removeOutliers = 0
         self.threshold      = 0.2     
 
+        self.openedFile = None
+
     def __enter__(self):
         return self
 
     def __exit__(self, e_type, e_val, traceback):
-        pass
+        if isinstance(self.openedFile, TextIOWrapper):
+            try:
+                self.openedFile.close()
+            except (OSError, IOError) as e:
+                pass
 
     def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2, saveRaw: bool = False):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
@@ -169,6 +175,7 @@ class Measurement(h.LoggerMixIn):
 
         if saveRaw:
             saveRaw = self.get_raw_file(metadata = metadata)
+            self.openedFile = saveRaw
             
         # initialization
         self.data = { self.camera.AXES.X : None, self.camera.AXES.Y : None }
@@ -260,6 +267,7 @@ class Measurement(h.LoggerMixIn):
 
         if isinstance(saveRaw, TextIOWrapper):
             saveRaw.close()
+            self.openedFile = None
 
         default_meta = {
             "Rayleigh Length": f"{self.controller.pulse_to_um(pps = rayleighLength) / 1000} mm"

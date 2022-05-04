@@ -117,7 +117,7 @@ class Controller(abc.ABC, h.LoggerMixIn):
         """
 
         print("^C Detected: Emergency stop and closing port.")
-        print("Shutter will be closed as part of the aborting process.")
+        # print("Shutter will be closed as part of the aborting process.")
         self.abort()
         self.closeDevice()
         print("Exiting")
