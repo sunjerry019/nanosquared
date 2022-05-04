@@ -124,7 +124,7 @@ class Measurement(h.LoggerMixIn):
             try:
                 self.openedFile.close()
                 self.openedFile = None
-            except (OSError, IOError) as e:
+            except OSError as e:
                 pass
 
     def __enter__(self):

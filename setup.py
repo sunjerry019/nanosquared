@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="nanosquared",
-    version="0.4.1",
+    version="0.4.2",
     author="Yudong Sun",
     author_email="yudong.sun@mpq.mpg.de",
     description="Automated M-Squared Measurement",
