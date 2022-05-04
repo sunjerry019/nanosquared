@@ -8,6 +8,7 @@
 from io import TextIOWrapper
 import numbers
 import os,sys
+import signal
 from typing import Optional, Tuple, Union, TextIO
 import numpy as np
 import scipy
@@ -91,16 +92,45 @@ class Measurement(h.LoggerMixIn):
         self.threshold      = 0.2     
 
         self.openedFile = None
+        
+        self.startSignalHandlers()
 
-    def __enter__(self):
-        return self
+    def startSignalHandlers(self):
+        """ Starts appropriate signal handlers to handle e.g. keyboard interrupts. 
+        Ensures safe exit and disconnecting of controller.
+        """
+        # https://stackoverflow.com/a/4205386/3211506
+        signal.signal(signal.SIGINT, self.KeyboardInterruptHandler)
 
-    def __exit__(self, e_type, e_val, traceback):
+    def KeyboardInterruptHandler(self, signal, frame):
+        """Ensures that any open file is closed on keyboard interrupt
+        Handles a SIGINT according to https://docs.python.org/3/library/signal.html#signal.signal.
+
+        Parameters
+        ----------
+        signal : int
+            signal number
+        frame : signal Frame object
+            Frame objects represent execution frames. They may occur in traceback objects (see below), and are also passed to registered trace functions.
+        """
+
+        print("^C Detected: Closing any open file")
+        self.closeAnyOpenFile()
+        raise KeyboardInterrupt
+        # use os._exit(1) to avoid raising any SystemExit exception
+
+    def closeAnyOpenFile(self):
         if isinstance(self.openedFile, TextIOWrapper):
             try:
                 self.openedFile.close()
             except (OSError, IOError) as e:
                 pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, e_type, e_val, traceback):
+        return self.closeAnyOpenFile()
 
     def take_measurements(self, axis: Camera.AXES = None, center: int = None, rayleighLength: float = None, precision: int = 100, numsamples: int = 50, writeToFile: Optional[str] = None, metadata: dict = dict(), removeOutliers: int = 0, threshold: float = 0.2, saveRaw: bool = False):
         """Function that takes the necessary measurements for M^2, automatically selects the range based
