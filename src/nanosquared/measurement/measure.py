@@ -334,7 +334,7 @@ class Measurement(h.LoggerMixIn):
         elif pfad is None:
             # We create a file in the M2 directory to save the data.
 
-            tempdir = os.path.join(root_dir, ".." ,"data", "M2")
+            tempdir = os.path.join(root_dir, ".." ,"nanosquared-data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
             fd, pfad = tempfile.mkstemp(suffix = ".raw.log" if not self.devMode else ".dev.raw.log", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
@@ -395,7 +395,7 @@ class Measurement(h.LoggerMixIn):
         elif pfad is None:
             # We create a file in the M2 directory to save the data.
 
-            tempdir = os.path.join(root_dir, ".." ,"data", "M2")
+            tempdir = os.path.join(root_dir, ".." ,"nanosquared-data", "M2")
             Path(tempdir).mkdir(parents=True, exist_ok=True)
             fd, pfad = tempfile.mkstemp(suffix = ".dat" if not self.devMode else ".dev.dat", prefix = now.strftime("%Y-%m-%d_%H%M%S_"), dir = tempdir, text = True)
             # Returns a file descriptor instead of the file
