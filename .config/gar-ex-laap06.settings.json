@@ -1,8 +1,9 @@
 {
     "terminal.integrated.profiles.windows": {
         "PowerShell-Conda": {
-          "source": "PowerShell",
-          "args": ["-NoExit", "-File C:\\ProgramData\\Anaconda3\\shell\\condabin\\conda-hook.ps1"]
+          "source":"PowerShell",
+          "path": "pwsh.exe",
+          "args": ["-NoExit", "-File", "C:\\ProgramData\\Anaconda3\\shell\\condabin\\conda-hook.ps1"]
         }
     },
     "python.pythonPath": "C:\\Users\\Yudong.Sun\\.conda\\envs\\nanosquared\\python.exe",
