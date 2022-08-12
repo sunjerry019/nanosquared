@@ -4,7 +4,7 @@
 # yudong.sun [at] mpq.mpg.de / yudong [at] outlook.de
 
 import sys, os
-from typing import Tuple
+from typing import Iterable, Tuple
 from matplotlib.figure import Figure
 base_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(base_dir, ".."))
@@ -24,6 +24,8 @@ import matplotlib.pyplot as pyplot
 from collections import namedtuple
 
 import common.helpers as h
+
+from uncertainties import ufloat
 
 # TODO: allow-variation:
 # When the fit does not converge, or if the M^2 value does not make sense, automatically vary the
@@ -384,6 +386,12 @@ class MsqFitter():
             fit_functions.iso_omega_z
         ]
 
+        self.umath_funcs = [
+            fit_functions.umath_omega_z, 
+            fit_functions.umath_omega_z_lambda(wavelength = wavelength),
+            fit_functions.umath_iso_omega_z
+        ]
+
         self.i_params = [
             # w_0, z_0, M_sq_lmbda
             [1  , 1  , wavelength],
@@ -522,6 +530,34 @@ class MsqFitter():
             self._m_squared_calculated = True
         
         return self._m_squared
+
+    def conf_interval(self, z: float | np.ndarray) -> float | np.ndarray:
+        """Rudimentary implementation of getting confidence interval using error propagation
+
+        Parameters
+        ----------
+        z : float | np.ndarray
+            The z-positions to calculate the confidence interval
+        
+        Returns
+        -------
+        errors : float | np.ndarray
+            The corresponding errors for each point
+        """
+        if self.output is None:
+            raise RuntimeWarning(".fit() has not been run. Please run .fit() before running conf_interval()")
+        
+        # Make the ufloats
+        ubetas = [ufloat(*tup) for tup in zip(self.output.beta, self.output.sd_beta)]
+
+        assert isinstance(self.mode, int)
+
+        if isinstance(z, Iterable):
+            errors = np.array([ self.umath_funcs[self.mode](ubetas, element).std_dev for element in z ])
+        else:
+            errors = self.umath_funcs[self.mode](ubetas, z)
+
+        return errors
 
 class MsqODRFitter(ODRFitter, MsqFitter):
     """Class to fit for an M_Squared using fit_functions.omega_z (Guassian Beam Profile function) using ODR,
